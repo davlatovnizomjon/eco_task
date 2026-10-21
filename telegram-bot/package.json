@@ -1,0 +1,16 @@
+{
+  "name": "eco-tasks-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for Eco Tasks clients: service requests, chat with the team, notifications.",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "dependencies": {
+    "grammy": "^1.30.0"
+  }
+}

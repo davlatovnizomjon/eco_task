@@ -1,0 +1,22 @@
+@font-face{font-family:Onest;src:url(file:///Users/macshop/Developer/projects/eco/eco-task/assets/fonts/Onest.ttf);font-weight:100 900}
+@font-face{font-family:Unbounded;src:url(file:///Users/macshop/Developer/projects/eco/eco-task/assets/fonts/Unbounded.ttf);font-weight:200 900}
+*{box-sizing:border-box;margin:0}
+body{width:1080px;height:1920px;font-family:Onest;background:linear-gradient(165deg,#0B3D2A 0%,#0E7A52 100%);color:#15201A;position:relative;overflow:hidden}
+.blob{position:absolute;width:900px;height:900px;border-radius:50%;background:rgba(255,255,255,.06);right:-300px;top:-200px}
+.cap{position:absolute;left:80px;right:80px;top:120px;color:#fff}
+.cap small{font:600 34px Onest;letter-spacing:4px;color:#6AD9A8;text-transform:uppercase}
+.cap h1{font:700 82px/1.1 Unbounded;margin-top:24px}
+.cap p{font:400 40px/1.4 Onest;margin-top:28px;color:#d6efe3}
+.phone{position:absolute;left:150px;right:150px;top:640px;bottom:-120px;background:#F3F5F2;border-radius:90px 90px 0 0;border:14px solid #05261A;border-bottom:0;padding:48px 36px;box-shadow:0 40px 120px rgba(0,0,0,.45)}
+.hd{font:700 46px Unbounded;margin-bottom:28px}
+.card{background:#fff;border-radius:32px;padding:30px;margin-bottom:22px;border:2px solid #DCE2DA}
+.row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.t{font:600 36px Onest}.s{font:400 28px Onest;color:#5F6B63;margin-top:8px}
+.chip{font:600 26px Onest;padding:10px 22px;border-radius:99px;white-space:nowrap}
+.g{background:#E2F1E8;color:#095C3D}.b{background:#E5EDFA;color:#2059C0}.w{background:#FCEFD9;color:#965500}.r{background:#F8E3E0;color:#B8352A}
+.bar{height:16px;border-radius:9px;background:#EDF1EC;margin-top:18px;overflow:hidden}.bar i{display:block;height:100%;background:#0E7A52;border-radius:9px}
+.big{font:700 72px Unbounded;color:#0E7A52}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.grid .card{margin:0}
+.logo{position:absolute;left:80px;bottom:60px}
+.tab{position:absolute;left:0;right:0;bottom:120px;height:130px;background:#fff;border-top:2px solid #DCE2DA;display:flex;justify-content:space-around;align-items:center;font:600 26px Onest;color:#5F6B63}
+.tab b{color:#0E7A52}

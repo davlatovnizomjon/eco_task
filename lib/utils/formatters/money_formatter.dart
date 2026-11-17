@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
 
+import 'package:eco_task/constants/constants.dart';
+
 /// Formats amounts for display and for typing, and parses them back to a plain
 /// integer before they reach the API. A bare `num` is never shown.
 class MoneyFormatter {
@@ -20,6 +22,10 @@ class MoneyFormatter {
 
   /// Amount with the currency sign: `1 000 $`.
   static String display(num value) => '${number(value)} \$';
+
+  /// Amount in the task's own currency: `1 200 000 so‘m` for `uzs`, `1 000 $` otherwise.
+  static String amount(num value, String currency) =>
+      currency == 'uzs' ? TrWords.tdSum.tr(args: [number(value)]) : display(value);
 
   /// The integer typed into a money field; 0 when it holds no digits.
   static int parse(String? text) => int.tryParse((text ?? '').replaceAll(RegExp(r'\D'), '')) ?? 0;

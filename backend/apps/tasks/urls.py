@@ -9,4 +9,5 @@ urlpatterns = [
     path("<uuid:pk>/assignees/", views.TaskAssignees.as_view()),
     path("<uuid:pk>/history/", views.TaskHistoryList.as_view()),
     path("<uuid:pk>/comments/", views.TaskComments.as_view()),
+    path("<uuid:pk>/comments/<int:comment_id>/", views.TaskCommentDetail.as_view()),
 ]

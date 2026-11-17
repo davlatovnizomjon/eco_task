@@ -1,5 +1,4 @@
-/// Public surface of the notifications inbox: a tab for workers and clients and
-/// a pushed screen for bosses (opened from the dashboard bell).
+/// Public surface of the admin notifications inbox: a pushed screen opened from the dashboard bell.
 library;
 
 export 'bloc/bloc.dart';

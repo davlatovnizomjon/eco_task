@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:eco_task/domain/common/enums/screen_status.dart';
 import 'package:eco_task/helpers/response_helper.dart';
+import 'package:eco_task/infrastructure/dto/models/app_user.dart';
 import 'package:eco_task/infrastructure/dto/models/task_query.dart';
 import 'package:eco_task/infrastructure/repository/tasks_repository.dart';
+import 'package:eco_task/infrastructure/repository/team_repository.dart';
 import 'package:eco_task/infrastructure/dto/models/task_model.dart';
 
 part 'event.dart';
@@ -16,8 +18,13 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   /// Data source of every task request; owned by the app root.
   final TasksRepository repository;
 
-  /// Wires the handlers of the list.
-  TasksBloc({required this.repository}) : super(const TasksState()) {
+  /// Source of the staff offered by the assignee filter; null for lists that have no such filter.
+  final TeamRepository? team;
+
+  /// Wires the handlers of a task list that starts from [initial].
+  TasksBloc({required this.repository, this.team, TaskQuery initial = const TaskQuery()})
+    : super(TasksState(query: initial)) {
+    on<TasksStaffRequested>(_onStaff);
     on<TasksStarted>((event, emit) => _fetch(emit, state.query, refreshing: false));
     on<TasksRefreshed>((event, emit) => _fetch(emit, state.query, refreshing: true));
     on<TasksQueryChanged>((event, emit) => _fetch(emit, event.query, refreshing: false));
@@ -65,6 +72,17 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   }
 
   /// Appends the next page; ignored while a fetch runs or on the last page.
+  /// Loads the staff for the assignee filter once; later requests reuse the loaded list.
+  Future<void> _onStaff(TasksStaffRequested event, Emitter<TasksState> emit) async {
+    if (team == null || state.staff.isNotEmpty || state.staffLoading) return;
+    emit(state.copyWith(staffLoading: true));
+    try {
+      emit(state.copyWith(staff: (await team!.getUsers(clients: false)).items, staffLoading: false));
+    } catch (e) {
+      emit(state.copyWith(staffLoading: false, response: e is ScreenResponse ? e : const UnExpectedErrorResponse()));
+    }
+  }
+
   Future<void> _onMore(TasksMoreRequested event, Emitter<TasksState> emit) async {
     if (state.isLoadingMore || state.status.isLoading || state.page >= state.lastPage) return;
     final query = state.query;

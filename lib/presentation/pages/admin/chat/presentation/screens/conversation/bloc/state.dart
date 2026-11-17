@@ -36,6 +36,12 @@ class ConversationState extends Equatable {
   /// True once access was withdrawn; the screen closes.
   final bool revoked;
 
+  /// The message the next send answers; null when none.
+  final ChatMessage? replyingTo;
+
+  /// True while a picked file is uploading.
+  final bool uploading;
+
   /// Builds the initial state.
   const ConversationState({
     this.status = ScreenStatus.initial,
@@ -48,6 +54,8 @@ class ConversationState extends Equatable {
     this.online = const {},
     this.peerRead = 0,
     this.revoked = false,
+    this.replyingTo,
+    this.uploading = false,
   });
 
   /// Copies the state, resetting [response] unless a new one is passed so the
@@ -63,6 +71,8 @@ class ConversationState extends Equatable {
     Set<String>? online,
     int? peerRead,
     bool? revoked,
+    Object? replyingTo = _absent,
+    bool? uploading,
   }) => ConversationState(
     status: status ?? this.status,
     response: identical(response, _absent) ? null : response as ScreenResponse?,
@@ -74,6 +84,8 @@ class ConversationState extends Equatable {
     online: online ?? this.online,
     peerRead: peerRead ?? this.peerRead,
     revoked: revoked ?? this.revoked,
+    replyingTo: identical(replyingTo, _absent) ? this.replyingTo : replyingTo as ChatMessage?,
+    uploading: uploading ?? this.uploading,
   );
 
   @override
@@ -88,5 +100,7 @@ class ConversationState extends Equatable {
     online,
     peerRead,
     revoked,
+    replyingTo,
+    uploading,
   ];
 }

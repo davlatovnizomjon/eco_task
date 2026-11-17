@@ -18,13 +18,13 @@ class _AppTheme {
   // ─── Brand ────────────────────────────────────────────────────────────────
 
   /// Brand green: primary buttons, active states, links.
-  Color get primary => _pick(0xFF0E7A52, 0xFF3BC189);
+  Color get primary => _pick(0xFF15803D, 0xFF3BC189);
 
   /// Pressed/darker brand shade, used for text on [primaryTint].
-  Color get primaryDark => _pick(0xFF095C3D, 0xFF6AD9A8);
+  Color get primaryDark => _pick(0xFF116632, 0xFF6AD9A8);
 
   /// Soft brand tint behind selected items and success blocks.
-  Color get primaryTint => _pick(0xFFE2F1E8, 0xFF163527);
+  Color get primaryTint => _pick(0xFFE3F3E8, 0xFF163527);
 
   /// Foreground drawn on top of [primary].
   Color get onPrimary => _pick(0xFFFFFFFF, 0xFF05261A);
@@ -35,7 +35,7 @@ class _AppTheme {
   // ─── Surfaces ─────────────────────────────────────────────────────────────
 
   /// Screen background behind every scaffold.
-  Color get background => _pick(0xFFF3F5F2, 0xFF0F1411);
+  Color get background => _pick(0xFFF2F5F3, 0xFF0F1411);
 
   /// Default card/panel surface sitting on [background].
   Color get cardColor => _pick(0xFFFFFFFF, 0xFF171E1A);
@@ -92,6 +92,104 @@ class _AppTheme {
   /// Tinted background behind [neutral].
   Color get neutralBg => _pick(0xFFE7ECE7, 0xFF252E29);
 
+  /// Green presence dot of an online person.
+  Color get online => const Color(0xFF22A055);
+
+  /// Top of the call screens' dark green backdrop (the same in light and dark mode).
+  Color get callTop => const Color(0xFF2E6B4A);
+
+  /// Middle of the call backdrop.
+  Color get callMid => const Color(0xFF173826);
+
+  /// Bottom of the call backdrop.
+  Color get callBottom => const Color(0xFF0D2016);
+
+  /// Round buttons of the call control bar and tiles on the call backdrop (white veil).
+  Color get callVeil => const Color(0x1FFFFFFF);
+
+  /// Glass panel behind the call controls.
+  Color get callGlass => const Color(0x38000000);
+
+  /// Foreground of the call screens (text, glyphs on the backdrop).
+  Color get callInk => const Color(0xFFFFFFFF);
+
+  /// Softer text on the call backdrop (status line, timer).
+  Color get callInkSoft => const Color(0xBFFFFFFF);
+
+  /// Dark glyph on a white (active) call button.
+  Color get callInkDark => const Color(0xFF14231B);
+
+  /// Hang up / decline.
+  Color get callRed => const Color(0xFFE5383B);
+
+  /// Answer / redial.
+  Color get callGreen => const Color(0xFF2BB463);
+
+  /// Amber status line on the call backdrop ("no answer").
+  Color get callWarn => const Color(0xFFFFC46B);
+
+  /// Soft red status line and muted-microphone glyph on the call backdrop.
+  Color get callRedSoft => const Color(0xFFFF7A7A);
+
+  /// Ring around a participant who is speaking.
+  Color get callSpeaking => const Color(0xFF34C759);
+
+  /// Placeholder gradients of photo thumbnails (top-left to bottom-right), cycled by index.
+  List<List<Color>> get photoTones => const [
+    [Color(0xFF5E8F5A), Color(0xFF2E5B3A)],
+    [Color(0xFF9AB86B), Color(0xFF4D7A3C)],
+    [Color(0xFFB9A27A), Color(0xFF6E5A3E)],
+  ];
+
+  /// Dim layer behind a dialog.
+  Color get scrim => const Color(0x6B08120C);
+
+  /// Gold of the "best employee" star badge.
+  Color get gold => const Color(0xFFE9A23B);
+
+  // ─── Platform dialogs (iOS alert / Android Material 3 dialog) ───────────────
+
+  /// Frosted surface of the iOS-style alert.
+  Color get iosAlertBackground => _pick(0xF0F2F2F2, 0xEB252525);
+
+  /// Title colour of the iOS-style alert.
+  Color get iosAlertText => _pick(0xFF000000, 0xFFFFFFFF);
+
+  /// Message colour of the iOS-style alert.
+  Color get iosAlertSubtext => _pick(0xBF3C3C43, 0xB3EBEBF5);
+
+  /// Hairlines between the iOS-style alert's text and buttons.
+  Color get iosAlertDivider => _pick(0x4A3C3C43, 0xA6545458);
+
+  /// Button label colour of the iOS-style alert.
+  Color get iosAlertAction => _pick(0xFF1F8A4C, 0xFF30D158);
+
+  /// Drop shadow of the iOS-style alert.
+  Color get iosAlertShadow => _pick(0x2E000000, 0x80000000);
+
+  /// Shadow of a top toast: one soft drop in light, a deeper two-layer drop in dark.
+  List<BoxShadow> get toastShadow => dark
+      ? const [
+          BoxShadow(offset: Offset(0, 14), blurRadius: 36, color: Color(0x99000000)),
+          BoxShadow(offset: Offset(0, 2), blurRadius: 8, color: Color(0x66000000)),
+        ]
+      : const [BoxShadow(offset: Offset(0, 12), blurRadius: 32, color: Color(0x290F1914))];
+
+  /// Surface of the Material 3 style dialog.
+  Color get m3DialogBackground => _pick(0xFFF2F6F2, 0xFF1D2420);
+
+  /// Title colour of the Material 3 style dialog.
+  Color get m3DialogTitle => _pick(0xFF191C1A, 0xFFE1E4E0);
+
+  /// Body colour of the Material 3 style dialog.
+  Color get m3DialogBody => _pick(0xFF414942, 0xFFC0C9C1);
+
+  /// Icon and button label colour of the Material 3 style dialog.
+  Color get m3DialogAction => _pick(0xFF1F8A4C, 0xFF7FDA9E);
+
+  /// Drop shadow of the Material 3 style dialog.
+  Color get m3DialogShadow => _pick(0x29000000, 0x80000000);
+
   // ─── Decorations ──────────────────────────────────────────────────────────
 
   /// Default card surface — used by `CardWidget` and every panel.
@@ -99,6 +197,35 @@ class _AppTheme {
     color: cardColor,
     borderRadius: BorderRadius.circular(14.r),
     border: Border.all(color: line),
+  );
+
+  /// Soft elevation of a panel card (light theme only; the dark theme uses borders).
+  List<BoxShadow> get panelShadow => dark
+      ? const []
+      : [
+          BoxShadow(offset: const Offset(0, 1), blurRadius: 2, color: const Color(0xFF14281C).withValues(alpha: 0.05)),
+          BoxShadow(offset: const Offset(0, 4), blurRadius: 14, color: const Color(0xFF14281C).withValues(alpha: 0.05)),
+        ];
+
+  /// Translucent surface of the "⋯" popup menu (the screen shows through, blurred).
+  Color get menuSurface => _pick(0xEBFAFAFA, 0xEB252B27);
+
+  /// Drop shadow of the "⋯" popup menu.
+  List<BoxShadow> get menuShadow => [
+    BoxShadow(offset: const Offset(0, 10), blurRadius: 38, color: const Color(0xFF000000).withValues(alpha: 0.18)),
+  ];
+
+  /// Lift of the front card of the dashboard task stack; none in the dark palette.
+  List<BoxShadow> get stackShadow => dark
+      ? const []
+      : [BoxShadow(offset: const Offset(0, 8), blurRadius: 22, color: const Color(0xFF0F1914).withValues(alpha: 0.08))];
+
+  /// Panel card of the redesigned screens: 18 px corners, hairline border and soft shadow.
+  BoxDecoration get panelDecor => BoxDecoration(
+    color: cardColor,
+    borderRadius: BorderRadius.circular(18.r),
+    border: Border.all(color: line),
+    boxShadow: panelShadow,
   );
 
   /// Shadow of the pinned bottom bar, separating it from scrolled content.
@@ -136,10 +263,6 @@ class _AppTheme {
   /// Large marketing-style headline (login).
   TextStyle get headline =>
       textStyle.copyWith(fontSize: 28.sp, fontWeight: FontWeight.w700, height: 1.2, letterSpacing: -0.3);
-
-  /// Wordmark style (Unbounded) for `eco.tasks`.
-  TextStyle get logoStyle =>
-      TextStyle(fontFamily: 'Unbounded', fontWeight: FontWeight.w700, letterSpacing: -1, color: dark ? text : forest);
 
   /// Material 3 [ThemeData] for the active palette, handed to `MaterialApp`.
   ThemeData get data => ThemeData(

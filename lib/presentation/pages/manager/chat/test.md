@@ -1,4 +1,4 @@
-# Chat (conversation list) — Test Plan
+# Chat (manager list) — Test Plan
 
 A plan for an AI to execute against; nothing here is run unless the user asks.
 
@@ -15,19 +15,17 @@ A plan for an AI to execute against; nothing here is run unless the user asks.
 
 ## 2. Mobile/Web Integration Test
 
-- [ ] As each role open the Chat tab, open a conversation, send a message, go back: the row shows the new last message with “You: …” and the unread badge is cleared.
-- [ ] Two devices/accounts: a message sent on one appears on the other's open conversation within a second and raises the other's list badge after a refresh.
-- [ ] Run on a real or emulated Android/iOS device with `AppConfig.useMockData = true` and again against the live backend (`--dart-define=API_HOST=...`).
+- [ ] Open the tab, pull to refresh, tap “new group” and “new chat” actions, switch Hammasi / Guruhlar / Xodimlar / Mijozlar, open a conversation and return (the list refreshes).
+- [ ] Run on a real or emulated Android/iOS device with `AppConfig.useMockData = true` and again against the live API.
 
 ## 3. UI Test
 
 - [ ] No overflow or clipping at a small phone width (320 px) and a tablet width (768 px); long names and translated strings truncate with an ellipsis.
-- [ ] Light and dark themes both read correctly; switching the theme in Settings repaints this screen without losing its state.
+- [ ] Light and dark themes both read correctly; switching the theme in the profile repaints this screen without losing its state.
 - [ ] Uzbek Latin, Uzbek Cyrillic and Russian all render without missing keys or layout breaks.
-- [ ] Rows: avatar (person) or round tile (group/task), name, last message preview (bold while unread), relative time, unread badge; “+” in the app bar opens the new-chat screen.
-- [ ] Shimmer while the first load runs; an empty list shows the empty view; a first-load failure shows the retry view; pull-to-refresh works on a full, a short and an empty list.
+- [ ] The design matches the `Eco Tasks — mobile app` board of this screen 1:1 (sizes, colors, radii, icons) in light and dark themes.
+- [ ] Groups and task chats appear under “Guruhlar”, direct chats under “Shaxsiy”; a direct chat with a client carries a “Mijoz” chip; unread chats show a bold name, a green time and a green counter; own last messages show a check.
 
 ## 4. Logical/Business Test
 
-- [ ] A client sees only conversations with staff and the task chats of their own tasks, never another client's.
-- [ ] The tab badge equals the sum of `unread_count` and never goes negative after marking read.
+- [ ] The Xodimlar / Mijozlar switch filters direct chats by the other member's role; the unread total on the tab bar matches the sum of the counters.

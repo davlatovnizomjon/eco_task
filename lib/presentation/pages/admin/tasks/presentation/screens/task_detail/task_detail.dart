@@ -1,5 +1,5 @@
-/// Public surface of the task details sub-feature: one task for every role
-/// (boss reviews and edits, worker updates progress and submits).
+/// Public surface of the task details sub-feature of the admin: one task with its assignees, money, comments and
+/// activity, plus the approve / return / cancel / edit actions.
 library;
 
 export 'bloc/bloc.dart';

@@ -5,12 +5,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:eco_task/constants/constants.dart';
 import 'package:eco_task/domain/common/enums/screen_status.dart';
+import 'package:eco_task/helpers/media_picker.dart';
 import 'package:eco_task/helpers/response_helper.dart';
 import 'package:eco_task/infrastructure/dto/models/app_user.dart';
 import 'package:eco_task/infrastructure/dto/models/chat_message.dart';
 import 'package:eco_task/infrastructure/dto/models/conversation_model.dart';
+import 'package:eco_task/infrastructure/dto/models/file_attachment.dart';
 import 'package:eco_task/infrastructure/dto/models/user_ref.dart';
 import 'package:eco_task/infrastructure/repository/chat_repository.dart';
+import 'package:eco_task/infrastructure/repository/files_repository.dart';
 import 'package:eco_task/infrastructure/services/chat_connection.dart';
 
 part 'event.dart';
@@ -25,6 +28,9 @@ part 'state.dart';
 class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   /// Data source of chats; owned by the app root.
   final ChatRepository repository;
+
+  /// Uploads of the files that travel with messages.
+  final FilesRepository files;
 
   /// The signed-in user, who authors every send.
   final AppUser me;
@@ -50,14 +56,22 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   bool _linkedOnce = false;
 
   /// Wires the handlers of the conversation.
-  ConversationBloc({required this.repository, required this.me, this.conversationId, this.taskId})
+  ConversationBloc({required this.repository, required this.files, required this.me, this.conversationId, this.taskId})
     : super(const ConversationState()) {
     on<ConversationStarted>(_onStarted);
     on<ConversationOlderRequested>(_onOlder);
     on<ConversationMessageSent>(_onSent);
+    on<ConversationFileSent>(_onFileSent);
+    on<ConversationReplyChanged>((event, emit) => emit(state.copyWith(replyingTo: event.message)));
     on<ConversationMessageRetried>(_onRetried);
     on<ConversationSocketEvent>(_onSocket);
     on<ConversationSendTimedOut>(_onTimedOut);
+    on<ConversationMessageEdited>(
+      (event, emit) => _change(emit, () => repository.editMessage(_id, event.id, event.text)),
+    );
+    on<ConversationMessageDeleted>((event, emit) => _change(emit, () => repository.deleteMessage(_id, event.id)));
+    on<ConversationReacted>((event, emit) => _change(emit, () => repository.react(_id, event.id, event.emoji)));
+    on<ConversationPinned>(_onPinned);
   }
 
   /// Presents a failure of [e].
@@ -105,24 +119,56 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   Future<void> _onSent(ConversationMessageSent event, Emitter<ConversationState> emit) async {
     final text = event.text.trim();
     if (text.isEmpty || state.conversation == null) return;
-    final clientId = '${me.id}-${DateTime.now().microsecondsSinceEpoch}-${_sent++}';
+    await _compose(text, null, emit);
+  }
+
+  /// Uploads the file, then sends it as a message of its own.
+  Future<void> _onFileSent(ConversationFileSent event, Emitter<ConversationState> emit) async {
+    if (state.conversation == null || state.uploading) return;
+    emit(state.copyWith(uploading: true));
+    try {
+      final stored = await files.uploadPicked(event.file);
+      emit(state.copyWith(uploading: false));
+      await _compose('', stored, emit);
+    } catch (e) {
+      emit(state.copyWith(uploading: false, response: _failure(e)));
+    }
+  }
+
+  /// Adds an optimistic message (answering the reply bar's message, if any) and sends it.
+  Future<void> _compose(String text, FileAttachment? attachment, Emitter<ConversationState> emit) async {
+    final parent = state.replyingTo;
     final pending = ChatMessage(
       id: 0,
       conversationId: _id,
       sender: me.ref,
       body: text,
-      clientMsgId: clientId,
+      clientMsgId: '${me.id}-${DateTime.now().microsecondsSinceEpoch}-${_sent++}',
       at: DateTime.now(),
       delivery: ChatDelivery.sending,
+      attachment: attachment,
+      replyTo: parent == null
+          ? null
+          : ChatReply(
+              id: parent.id,
+              senderName: parent.sender.name,
+              body: parent.body.length > 120 ? parent.body.substring(0, 120) : parent.body,
+              attachmentKind: parent.attachment?.kind,
+            ),
     );
-    emit(state.copyWith(messages: [...state.messages, pending]));
+    emit(state.copyWith(messages: [...state.messages, pending], replyingTo: null));
     await _deliver(pending, emit);
   }
 
   /// Sends a pending message over the socket (with a REST fallback timer) or straight over REST.
   Future<void> _deliver(ChatMessage pending, Emitter<ConversationState> emit) async {
     if (state.connected && _connection != null) {
-      _connection!.send(pending.body, pending.clientMsgId);
+      _connection!.send(
+        pending.body,
+        pending.clientMsgId,
+        replyTo: pending.replyTo?.id,
+        attachmentId: pending.attachment?.id,
+      );
       _ackTimers[pending.clientMsgId] = Timer(_ackTimeout, () => add(ConversationSendTimedOut(pending.clientMsgId)));
       return;
     }
@@ -132,7 +178,13 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   /// Stores [pending] over REST; idempotent on the server by its client id.
   Future<void> _viaRest(ChatMessage pending, Emitter<ConversationState> emit) async {
     try {
-      final stored = await repository.sendMessage(_id, pending.body, pending.clientMsgId);
+      final stored = await repository.sendMessage(
+        _id,
+        pending.body,
+        pending.clientMsgId,
+        replyTo: pending.replyTo?.id,
+        attachmentId: pending.attachment?.id,
+      );
       emit(state.copyWith(messages: _merge(state.messages, [stored])));
     } catch (e) {
       emit(state.copyWith(messages: _setDelivery(pending.clientMsgId, ChatDelivery.failed), response: _failure(e)));
@@ -165,6 +217,10 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
         if (connected) _linkedOnce = true;
       case ChatMessageArrived(:final message):
         await _onArrived(message, emit);
+      case ChatMessageUpdated(:final message):
+        _applyUpdate(message, emit);
+      case ChatPinChanged(:final message):
+        _applyPin(message, emit);
       case ChatMessageAcked(:final clientMsgId, :final id):
         _ackTimers.remove(clientMsgId)?.cancel();
         emit(
@@ -191,6 +247,59 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState> {
   }
 
   /// A server `error` frame: say so, and stop waiting for sends the server refused.
+  /// Runs one change of an existing message and shows the stored result; a failure goes to the dialog.
+  Future<void> _change(Emitter<ConversationState> emit, Future<ChatMessage> Function() action) async {
+    try {
+      _applyUpdate(await action(), emit);
+    } catch (e) {
+      emit(state.copyWith(response: _failure(e)));
+    }
+  }
+
+  /// Replaces the message with the same id by [message] (keeping the known sender); also refreshes the pin banner.
+  void _applyUpdate(ChatMessage message, Emitter<ConversationState> emit) {
+    final sender = _senderOf(message.sender.id) ?? message.sender;
+    final fresh = message.copyWith(sender: sender);
+    final pinned = state.conversation?.pinned;
+    emit(
+      state.copyWith(
+        messages: [for (final m in state.messages) m.id == fresh.id ? fresh : m],
+        conversation: pinned != null && pinned.id == fresh.id
+            ? (fresh.deleted
+                  ? state.conversation!.copyWith(clearPinned: true)
+                  : state.conversation!.copyWith(pinned: fresh))
+            : null,
+      ),
+    );
+  }
+
+  /// Pins or unpins through the API and shows the stored conversation.
+  Future<void> _onPinned(ConversationPinned event, Emitter<ConversationState> emit) async {
+    try {
+      final stored = await repository.pin(_id, event.id);
+      emit(
+        state.copyWith(
+          conversation: state.conversation?.copyWith(pinned: stored.pinned, clearPinned: stored.pinned == null),
+        ),
+      );
+    } catch (e) {
+      emit(state.copyWith(response: _failure(e)));
+    }
+  }
+
+  /// A live pin change from another member.
+  void _applyPin(ChatMessage? message, Emitter<ConversationState> emit) {
+    final sender = message == null ? null : _senderOf(message.sender.id);
+    emit(
+      state.copyWith(
+        conversation: state.conversation?.copyWith(
+          pinned: message == null ? null : message.copyWith(sender: sender ?? message.sender),
+          clearPinned: message == null,
+        ),
+      ),
+    );
+  }
+
   void _onSocketError(String code, Emitter<ConversationState> emit) {
     final text = code == 'rate_limited' ? TrWords.chatRateLimited.tr() : TrWords.cLoadFailedDesc.tr();
     emit(

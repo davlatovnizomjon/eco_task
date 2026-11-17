@@ -6,7 +6,10 @@ import 'package:eco_task/domain/common/enums/screen_status.dart';
 import 'package:eco_task/helpers/response_helper.dart';
 import 'package:eco_task/infrastructure/dto/models/task_assignee.dart';
 import 'package:eco_task/infrastructure/dto/models/task_draft.dart';
+import 'package:eco_task/infrastructure/dto/models/file_attachment.dart';
+import 'package:eco_task/infrastructure/repository/files_repository.dart';
 import 'package:eco_task/infrastructure/repository/tasks_repository.dart';
+import 'package:eco_task/helpers/media_picker.dart';
 import 'package:eco_task/infrastructure/repository/team_repository.dart';
 import 'package:eco_task/utils/formatters/money_formatter.dart';
 import 'package:eco_task/domain/common/enums/task_priority.dart';
@@ -29,8 +32,12 @@ class TaskFormBloc extends Bloc<TaskFormEvent, TaskFormState> {
   /// Id of the task being edited, or null when creating a new one.
   final String? editId;
 
+  /// Uploads of the task's photos and documents.
+  final FilesRepository files;
+
   /// Wires the handlers of the form.
-  TaskFormBloc({required this.tasks, required this.team, this.editId}) : super(TaskFormState(due: _defaultDue())) {
+  TaskFormBloc({required this.tasks, required this.team, required this.files, this.editId})
+    : super(TaskFormState(due: _defaultDue())) {
     on<TaskFormStarted>(_onStarted);
     on<TaskFormTitleChanged>((event, emit) => emit(state.copyWith(title: event.value)));
     on<TaskFormAssigneesChanged>(_onAssignees);
@@ -43,6 +50,21 @@ class TaskFormBloc extends Bloc<TaskFormEvent, TaskFormState> {
     on<TaskFormRewardChanged>((event, emit) => emit(state.copyWith(reward: event.value)));
     on<TaskFormDescriptionChanged>((event, emit) => emit(state.copyWith(description: event.value)));
     on<TaskFormExpectedChanged>((event, emit) => emit(state.copyWith(expected: event.value)));
+    on<TaskFormStepChanged>(_onStep);
+    on<TaskFormFilePicked>(_onFilePicked);
+    on<TaskFormFileRemoved>(
+      (event, emit) => emit(
+        state.copyWith(
+          attachments: [
+            for (final a in state.attachments)
+              if (a.id != event.id) a,
+          ],
+        ),
+      ),
+    );
+    on<TaskFormClientChanged>((event, emit) => emit(state.copyWith(clientIsOrg: event.isOrg, client: event.name)));
+    on<TaskFormAddressChanged>((event, emit) => emit(state.copyWith(address: event.value)));
+    on<TaskFormCurrencyChanged>((event, emit) => emit(state.copyWith(currency: event.value)));
     on<TaskFormSubmitted>(_onSubmitted);
   }
 
@@ -75,6 +97,11 @@ class TaskFormBloc extends Bloc<TaskFormEvent, TaskFormState> {
           reward: task.reward == 0 ? '' : MoneyFormatter.number(task.reward),
           description: task.description,
           expected: task.expected,
+          clientIsOrg: task.clientIsOrg,
+          client: task.client,
+          address: task.address,
+          currency: task.currency,
+          attachments: task.attachments,
         ),
       );
     } catch (e) {
@@ -85,6 +112,37 @@ class TaskFormBloc extends Bloc<TaskFormEvent, TaskFormState> {
   }
 
   /// Replaces the assignee list with the picked ids, keeping typed quotas.
+  /// Moves the wizard; going forward past an invalid step turns its fields red and shows the first reason instead.
+  void _onStep(TaskFormStepChanged event, Emitter<TaskFormState> emit) {
+    if (event.step > state.step && state.stepError != null) {
+      emit(state.copyWith(showErrors: true, response: MessageErrorResponse(state.stepError!)));
+      return;
+    }
+    emit(state.copyWith(step: event.step.clamp(0, 4)));
+  }
+
+  /// Uploads a picked file and appends it; the limits mirror the server's (10 photos, 5 documents).
+  Future<void> _onFilePicked(TaskFormFilePicked event, Emitter<TaskFormState> emit) async {
+    final isImage = event.file.contentType.startsWith('image/');
+    final count = state.attachments.where((a) => (a.kind == FileKind.image) == isImage).length;
+    if (count >= (isImage ? 10 : 5)) {
+      emit(state.copyWith(response: MessageErrorResponse(TrWords.flLimit.tr())));
+      return;
+    }
+    emit(state.copyWith(uploading: true));
+    try {
+      final stored = await files.uploadPicked(event.file);
+      emit(state.copyWith(attachments: [...state.attachments, stored], uploading: false));
+    } catch (e) {
+      emit(
+        state.copyWith(
+          uploading: false,
+          response: e is ScreenResponse ? e : MessageErrorResponse(TrWords.flFailed.tr()),
+        ),
+      );
+    }
+  }
+
   void _onAssignees(TaskFormAssigneesChanged event, Emitter<TaskFormState> emit) {
     emit(state.copyWith(assignees: event.people));
   }
@@ -105,6 +163,11 @@ class TaskFormBloc extends Bloc<TaskFormEvent, TaskFormState> {
       reward: MoneyFormatter.parse(state.reward),
       description: state.description.trim(),
       expected: state.expected.trim(),
+      client: state.client.trim(),
+      clientIsOrg: state.clientIsOrg,
+      address: state.address.trim(),
+      currency: state.currency,
+      attachmentIds: [for (final a in state.attachments) a.id],
       assignees: [
         for (final p in state.assignees)
           TaskAssignee(user: p, share: state.split ? int.tryParse(state.shares[p.id] ?? '') ?? 0 : 0),

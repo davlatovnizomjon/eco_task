@@ -1,4 +1,4 @@
-# Jamoa katalogi (boss) — Test rejasi
+# Jamoa: xodimlar, mijozlar, reyting (admin) — Test rejasi
 
 AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga tushirilmaydi.
 
@@ -16,19 +16,18 @@ AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga
 
 ## 2. Mobil/Web integratsiya testi
 
-- [ ] Xodimlar/mijozlarni almashtiring, qidiring, xodimni oching, yuqoridagi tugmadan hisob shaklini oching.
-- [ ] `AppConfig.useMockData = true` bilan haqiqiy yoki emulyator Android/iOS qurilmada, so‘ng jonli API bilan yana ishga tushiring.
+- [ ] Xodimlar (dashboard kartasidan): qidiruv, rol oynasi (Hammasi / Rahbar / Menejer / Oddiy ishchi), Hammasi / Vazifali / Vazifasiz almashtirgichi, «+» taklif formasini ochadi, qatorni bosish profilni ochadi. Mijozlar: qidiruv, Hammasi / Faol so‘rov / So‘rovsiz almashtirgichi, «+» mijoz formasini ochadi. Reyting: davr almashtirgichi, qatorni bosish profilni ochadi.
+- [ ] Haqiqiy yoki emulyatsiya qilingan Android/iOS qurilmada `AppConfig.useMockData = true` bilan va yana jonli API bilan ishga tushiring.
 
 ## 3. UI test
 
-- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida overflow yoki kesilish yo‘q; uzun ismlar va tarjima matnlari ko‘p nuqta bilan qisqaradi.
-- [ ] Yorug‘ va qorong‘i mavzular ikkalasi ham to‘g‘ri ko‘rinadi; Sozlamalarda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
+- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida toshib ketish yoki kesilish yo‘q; uzun nomlar va tarjima qilingan matnlar ko‘p nuqta bilan qisqartiriladi.
+- [ ] Yorug‘ va qorong‘i mavzular to‘g‘ri o‘qiladi; profilda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
 - [ ] O‘zbek lotin, o‘zbek kirill va rus tillari yetishmayotgan kalitlarsiz va maket buzilishisiz ko‘rinadi.
-- [ ] Yuklanish shimmer kartalarini ko‘rsatadi (spinner yo‘q); bo‘sh natija bo‘sh ko‘rinishni ko‘rsatadi; birinchi yuklash xatosi qayta urinish ko‘rinishini ko‘rsatadi va tugma qayta yuklaydi.
-- [ ] Pull-to-refresh to‘la ro‘yxatda, qisqa ro‘yxatda va bo‘sh/xato ko‘rinishda ishlaydi (doim scroll qilinadi); indikator keshli emit’da emas, tarmoq chaqiruvi tugaganda yakunlanadi.
-- [ ] Oxirgi qator tizim imo-ishora panelidan tepada qoladi (pastki inset scroll padding’ga kiradi).
-- [ ] Xodimlar jamoa bo‘yicha rahbar nomi bilan guruhlanadi; menejerlarda rol chipi bor; mijozlarda tuman va so‘rovlar soni ko‘rinadi; mijozlar yordam qatori ko‘rinadi.
+- [ ] Dizayn bu ekranning `Eco Tasks — mobile app` taxtasiga yorug‘ va qorong‘i mavzuda 1:1 mos keladi (o‘lchamlar, ranglar, radiuslar, ikonkalar).
+- [ ] Xodim qatorlarida avatar, ism, rol (menejerlar binafsha) va «N vazifa» / «Bo‘sh»; mijoz qatorlarida manzil va «N so‘rov» / «So‘rov yo‘q» ko‘rinadi; rol tanlanganda filtr tugmasi yashil bo‘ladi.
+- [ ] 1.21–1.21f va 1.24–1.24e taxtalar: jamoa ro‘yxatida qidiruv maydoni va uchta tab (Hammasi / Xodimlar / Menejerlar) bor; har bir qator avatar, ism, telefon va ostida “vazifa” yozuvi bilan vazifalar sonini ko‘rsatadi; mijozlar ro‘yxatida Hammasi / Jismoniy shaxs / Tashkilot tablari va telefon hamda “N so‘rov” (yoki “So‘rov yo‘q”) li qatorlar bor; har bir tabning o‘z bo‘sh holati (plitka, sarlavha, izoh) bor.
 
 ## 4. Mantiqiy/biznes test
 
-- [ ] Hisob yaratish uni qaytganda katalogda ko‘rsatadi (kesh bekor qilingan).
+- [ ] Rol va almashtirgich filtrlari yuklangan sahifaga mahalliy qo‘llanadi; qidiruv serverga ketadi (kechiktirilgan); hisob ochilgandan keyin qaytganda ro‘yxat yangilanadi.

@@ -102,6 +102,12 @@ class TaskDetail(APIView):
         services.update_task(request.user, pk, changes, version)
         return Response(TaskSerializer(get_task(request, pk), context={"request": request}).data)
 
+    @extend_schema(tags=["tasks"], responses={204: None})
+    def delete(self, request, pk):
+        get_task(request, pk)  # 404 for foreign ids before the capability check (IDOR)
+        services.delete_task(request.user, pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class TaskTransition(APIView):
     """Move a task along its status machine (see `apps/tasks/transitions.py`)."""
@@ -137,6 +143,14 @@ class TaskHistoryList(APIView):
         task = get_task(request, pk)
         rows = task.history.select_related("actor")
         return Response(HistorySerializer(rows, many=True).data)
+
+
+class TaskCommentDetail(APIView):
+    @extend_schema(tags=["tasks"], responses={204: None})
+    def delete(self, request, pk, comment_id):
+        task = get_task(request, pk)
+        services.delete_comment(request.user, task, comment_id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TaskComments(APIView):

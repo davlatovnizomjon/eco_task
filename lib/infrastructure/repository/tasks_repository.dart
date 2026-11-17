@@ -61,6 +61,20 @@ class TasksRepository {
   /// Cancels task [id].
   Future<TaskModel> cancelTask(String id) async => _changed((await dioClient.post(ApiLinks.taskCancel(id))).data);
 
+  /// Removes the comment at position [index] of task [id].
+  Future<TaskModel> deleteComment(String id, int index) async =>
+      _changed((await dioClient.delete(ApiLinks.taskComment(id, index))).data);
+
+  /// Closes task [id] as failed with the [reason] the performer gives.
+  Future<TaskModel> failTask(String id, String reason) async =>
+      _changed((await dioClient.post(ApiLinks.taskFail(id), data: {'reason': reason})).data);
+
+  /// Deletes task [id] for good and drops every cached list.
+  Future<void> deleteTask(String id) async {
+    await dioClient.delete(ApiLinks.task(id));
+    ApiCache.invalidate();
+  }
+
   /// Reports the signed-in worker's progress; [cant] marks the task as impossible.
   Future<TaskModel> reportProgress(String id, {required int done, required bool cant, String note = ''}) async =>
       _changed(

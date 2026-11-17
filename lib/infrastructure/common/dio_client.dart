@@ -17,8 +17,8 @@ late DioClient dioClient;
 /// attaches the bearer token, and converts every transport/HTTP failure into
 /// a typed [ScreenResponse] that the bloc catches and the UI presents.
 ///
-/// The Django backend answers every error as `{"error": {"code", "detail"}}`
-/// (`detail` is a sentence, or a field-to-messages map for validation errors).
+/// The Django backend answers every error as `{"error": {"code", "message"}}`
+/// (`message` is a sentence in the `Accept-Language` language, or a field-to-messages map for validation errors).
 /// The older RFC 7807 shape (`{title, status, detail}`) is still understood, as
 /// the mock backend emits it. The wording is written for humans, so it is
 /// surfaced verbatim rather than replaced with text invented here.
@@ -62,6 +62,22 @@ class DioClient {
   /// Issues a `POST`; pass a `FormData` [data] for multipart uploads.
   Future<Response<dynamic>> post(String path, {Object? data}) => request(path, method: 'POST', data: data);
 
+  /// Issues a `PATCH`.
+  Future<Response<dynamic>> patch(String path, {Object? data}) => request(path, method: 'PATCH', data: data);
+
+  /// Downloads a file as bytes (authorized like every other call); used for photos and documents.
+  Future<List<int>> bytes(String path) async {
+    try {
+      final response = await dio.get<List<int>>(
+        path,
+        options: Options(responseType: ResponseType.bytes, headers: authHeaders()),
+      );
+      return response.data ?? const [];
+    } on DioException catch (e) {
+      throw await mapError(e);
+    }
+  }
+
   /// Issues a `PUT`.
   Future<Response<dynamic>> put(String path, {Object? data}) => request(path, method: 'PUT', data: data);
 
@@ -77,8 +93,26 @@ class DioClient {
     Object? data,
     Map<String, dynamic>? queryParameters,
   }) async {
+    final sentToken = session.token;
     try {
-      return await dio.request(
+      return await _send(path, method, data, queryParameters);
+    } on DioException catch (e) {
+      if (e.response?.statusCode != 401 || !session.canRefresh || _authPaths.contains(e.requestOptions.path)) {
+        throw await mapError(e);
+      }
+      // The access token expired: renew the pair once (unless another request already did) and replay the call.
+      if (session.token == sentToken) await session.refreshTokens();
+      try {
+        return await _send(path, method, data, queryParameters);
+      } on DioException catch (retry) {
+        throw await mapError(retry);
+      }
+    }
+  }
+
+  /// One raw Dio round trip carrying the session's current token.
+  Future<Response<dynamic>> _send(String path, String method, Object? data, Map<String, dynamic>? queryParameters) =>
+      dio.request(
         path,
         data: data,
         queryParameters: queryParameters,
@@ -88,16 +122,15 @@ class DioClient {
           contentType: data is FormData ? 'multipart/form-data' : null,
         ),
       );
-    } on DioException catch (e) {
-      throw await mapError(e);
-    }
-  }
+
+  /// UI language tag (`uz`, `uz-Cyrl`, `ru`) sent as `Accept-Language`; the app root keeps it in step with the locale.
+  static String language = 'uz';
 
   /// Headers sent with every request: the bearer token once signed in, plus
   /// the UI language so the backend localizes its `detail` text.
   @protected
   Map<String, String> authHeaders() {
-    final headers = <String, String>{HttpHeaders.acceptHeader: 'application/json', 'Accept-Language': 'uz'};
+    final headers = <String, String>{HttpHeaders.acceptHeader: 'application/json', 'Accept-Language': language};
     final token = session.token;
     if (token.isNotEmpty) {
       headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
@@ -109,6 +142,9 @@ class DioClient {
   /// expired session — there is nothing to clear and the router must stay on
   /// the form.
   static const _loginPaths = {ApiLinks.authLogin, '${ApiLinks.authLogin}/'};
+
+  /// Sign-in and refresh calls: a 401 from them never triggers another refresh.
+  static const _authPaths = {..._loginPaths, ApiLinks.authRefresh, '${ApiLinks.authRefresh}/'};
 
   /// Turns a [DioException] into the typed failure the UI knows how to show.
   /// A 401 clears the session here — except on a sign-in call, where it
@@ -139,7 +175,7 @@ class DioClient {
       return detail == null ? const UnExpectedErrorResponse() : MessageErrorResponse(detail, statusCode: status);
     }
     if (status == 401) {
-      await session.clearSession();
+      await session.clearSession(revokeRemotely: false);
       return const UnAuthorizedResponse();
     }
     if (status == 403) return const ForbiddenResponse();
@@ -156,7 +192,7 @@ class DioClient {
   String? problemDetail(Object? body) {
     if (body is! Map) return null;
     final envelope = body['error'];
-    if (envelope is Map) return _envelopeDetail(envelope['detail']);
+    if (envelope is Map) return _envelopeDetail(envelope['message']);
     for (final key in const ['detail', 'message']) {
       final value = body[key];
       if (value is String && value.trim().isNotEmpty) return value.trim();
@@ -170,7 +206,7 @@ class DioClient {
     return title is String && title.trim().isNotEmpty ? title.trim() : null;
   }
 
-  /// Text of a Django `error.detail`: a sentence, a list of sentences or a
+  /// Text of a Django `error.message`: a sentence, a list of sentences or a
   /// `{field: [messages]}` map (the first message wins).
   String? _envelopeDetail(Object? detail) {
     if (detail is String) return detail.trim().isEmpty ? null : detail.trim();

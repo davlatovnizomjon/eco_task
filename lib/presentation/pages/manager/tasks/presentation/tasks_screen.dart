@@ -5,227 +5,212 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:eco_task/constants/constants.dart';
+import 'package:eco_task/domain/common/enums/screen_status.dart';
+import 'package:eco_task/domain/common/enums/status_tone.dart';
+import 'package:eco_task/domain/common/enums/task_due_filter.dart';
 import 'package:eco_task/domain/common/enums/task_status.dart';
-import 'package:eco_task/domain/common/enums/user_role.dart';
-import 'package:eco_task/helpers/dialog_helpers.dart';
 import 'package:eco_task/helpers/response_helper.dart';
-import 'package:eco_task/infrastructure/dto/models/user_ref.dart';
-import 'package:eco_task/infrastructure/repository/session_repository.dart';
+import 'package:eco_task/infrastructure/dto/models/task_query.dart';
 import 'package:eco_task/infrastructure/repository/tasks_repository.dart';
-import 'package:eco_task/presentation/public/widgets/app_icon.dart';
-import 'package:eco_task/presentation/public/widgets/btn.dart';
+import 'package:eco_task/infrastructure/repository/team_repository.dart';
 import 'package:eco_task/presentation/public/widgets/empty_view.dart';
-import 'package:eco_task/presentation/public/widgets/filter_pill.dart';
-import 'package:eco_task/presentation/public/widgets/input_box.dart';
+import 'package:eco_task/presentation/public/widgets/floating_tab_bar.dart';
+import 'package:eco_task/presentation/public/widgets/header_action.dart';
+import 'package:eco_task/presentation/public/widgets/large_title_header.dart';
 import 'package:eco_task/presentation/public/widgets/refresh_list.dart';
-import 'package:eco_task/presentation/public/widgets/screen_shell.dart';
+import 'package:eco_task/presentation/public/widgets/search_field.dart';
+import 'package:eco_task/presentation/public/widgets/underline_tabs.dart';
 import 'package:eco_task/presentation/public/widgets/smart_loading.dart';
-import 'package:eco_task/presentation/public/widgets/task_card.dart';
 import 'package:eco_task/presentation/routes/entity/routes.dart';
 
 import '../bloc/bloc.dart';
 import 'dialogs/tasks_filter_dialog.dart';
+import 'widgets/task_list_row.dart';
 
-import 'package:eco_task/domain/common/enums/screen_status.dart';
-
-/// All tasks of the boss's scope with search, quick filters, a filter sheet and
-/// a "create task" button. A tab root screen. Provides [TasksBloc] over the
-/// app-wide [TasksRepository].
+/// Manager tasks tab: large title with the "new" action, search + filter, six status tabs and the flat task list. Provides [TasksBloc] over the app-wide [TasksRepository].
 class TasksScreen extends StatelessWidget {
-  /// Builds the task list screen.
+  /// Builds the tab.
   const TasksScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (ctx) => TasksBloc(repository: RepositoryProvider.of<TasksRepository>(ctx))..add(const TasksStarted()),
+      create: (ctx) => TasksBloc(
+        repository: RepositoryProvider.of<TasksRepository>(ctx),
+        team: RepositoryProvider.of<TeamRepository>(ctx),
+      )..add(const TasksStarted()),
       child: const _TasksView(),
     );
   }
 }
 
-/// Renders the search row, filter chips and the paged list.
+/// Renders the header, the quick switch and the grouped list.
 class _TasksView extends StatefulWidget {
-  /// Builds the list body.
+  /// Builds the view.
   const _TasksView();
 
   @override
   State<_TasksView> createState() => _TasksViewState();
 }
 
-/// Owns the search debounce timer.
+/// Owns the search debounce.
 class _TasksViewState extends State<_TasksView> {
-  /// Delays the search request until the user stops typing.
+  /// Delays the search request until typing pauses.
   Timer? _debounce;
+
+  /// Search text controller.
+  final _search = TextEditingController();
 
   @override
   void dispose() {
     _debounce?.cancel();
+    _search.dispose();
     super.dispose();
   }
 
+  /// Index of the status tab that matches [query]: all, new, in progress, overdue, done, failed.
+  static int _tabOf(TaskQuery query) {
+    if (query.overdueOnly) return 3;
+    if (query.statuses.length != 1) return 0;
+    return switch (query.statuses.first) {
+      TaskStatus.fresh => 1,
+      TaskStatus.prog => 2,
+      TaskStatus.done => 4,
+      TaskStatus.fail => 5,
+      _ => 0,
+    };
+  }
+
+  /// Empty state of status tab [tab]: its glyph, tone, title and hint.
+  static EmptyView _empty(int tab) => switch (tab) {
+    1 => EmptyView.tile(
+      icon: AppIcons.newIcon,
+      tone: StatusTone.neutral,
+      title: TrWords.tlENewT.tr(),
+      message: TrWords.tlENewD.tr(),
+    ),
+    2 => EmptyView.tile(
+      icon: AppIcons.prog,
+      tone: StatusTone.info,
+      title: TrWords.tlEProgT.tr(),
+      message: TrWords.tlEProgD.tr(),
+    ),
+    3 => EmptyView.tile(
+      icon: AppIcons.alarm,
+      tone: StatusTone.warn,
+      title: TrWords.tlEOverT.tr(),
+      message: TrWords.tlEOverD.tr(),
+    ),
+    4 => EmptyView.tile(icon: AppIcons.checkc, title: TrWords.tlEDoneT.tr(), message: TrWords.tlEDoneD.tr()),
+    5 => EmptyView.tile(
+      icon: AppIcons.xc,
+      tone: StatusTone.error,
+      title: TrWords.tlEFailT.tr(),
+      message: TrWords.tlEFailD.tr(),
+    ),
+    _ => EmptyView.tile(icon: AppIcons.tasks, title: TrWords.tlEAllT.tr(), message: TrWords.tlEAllD.tr()),
+  };
+
   @override
   Widget build(BuildContext context) {
-    final team = RepositoryProvider.of<SessionRepository>(context).user.value?.user;
     return BlocConsumer<TasksBloc, TasksState>(
       listenWhen: (prev, cur) => cur.response != null,
       listener: (context, state) => showScreenResponse(context, state.response!),
       builder: (context, state) {
         final bloc = context.read<TasksBloc>();
         final query = state.query;
-        // People who appear on the loaded tasks, offered as assignee filters.
-        final people = <String, UserRef>{
-          for (final t in state.items)
-            for (final a in t.assignees) a.userId: a.user,
-        }.values.toList();
-        // Quick chips: label, statuses to keep, overdue flag.
-        final chips = [
-          (TrWords.cAll.tr(), <TaskStatus>{}, false, null),
-          (TrWords.stProg.tr(), {TaskStatus.prog}, false, null),
-          (TrWords.stRev.tr(), {TaskStatus.rev}, false, null),
-          (TrWords.stOver.tr(), <TaskStatus>{}, true, AppIcons.alarm),
-          (TrWords.stNew.tr(), {TaskStatus.fresh}, false, null),
-        ];
-        return ScreenShell(
-          title: TrWords.tasksTitle.tr(),
-          subtitle: team?.role == UserRole.assistant ? team?.team : null,
-          big: true,
-          showBack: false,
-          padding: EdgeInsets.zero,
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => context.push(Routes.taskNew.path),
-            backgroundColor: theme.primary,
-            foregroundColor: theme.onPrimary,
-            icon: AppIcon(AppIcons.plus, color: theme.onPrimary),
-            label: Text(
-              TrWords.tasksNewBtn.tr(),
-              style: theme.textStyle.copyWith(fontWeight: FontWeight.w700, color: theme.onPrimary),
-            ),
-          ),
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 10.h),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: InputBox(
-                        hint: TrWords.cSearchName.tr(),
-                        leftIcon: AppIcons.search,
-                        onChanged: (v) {
-                          _debounce?.cancel();
-                          _debounce = Timer(
-                            const Duration(milliseconds: 400),
-                            () => bloc.add(TasksQueryChanged(query.copyWith(search: v))),
-                          );
-                        },
-                      ),
-                    ),
-                    10.w.width,
-                    GestureDetector(
-                      onTap: () => showBottomDialog(
-                        BlocProvider.value(
-                          value: bloc,
-                          child: TasksFilterDialog(people: people),
-                        ),
-                        context,
-                        title: TrWords.tasksFilter.tr(),
-                      ),
-                      child: Badge(
-                        isLabelVisible: query.activeCount > 0,
-                        label: Text('${query.activeCount}'),
-                        child: Container(
-                          width: 48.w,
-                          height: 48.w,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: theme.cardColor,
-                            borderRadius: 12.circular,
-                            border: Border.all(color: theme.line),
-                          ),
-                          child: AppIcon(AppIcons.filter, color: theme.text),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 36.h,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  children: [
-                    for (final (label, statuses, overdue, icon) in chips)
-                      Padding(
-                        padding: 8.w.right,
-                        child: FilterPill(
-                          label: label,
-                          icon: icon,
-                          selected:
-                              query.overdueOnly == overdue &&
-                              query.statuses.length == statuses.length &&
-                              query.statuses.containsAll(statuses),
-                          onTap: () =>
-                              bloc.add(TasksQueryChanged(query.copyWith(statuses: statuses, overdueOnly: overdue))),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 6.h, 8.w, 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        query.who == null
-                            ? TrWords.tasksAssigneeAll.tr()
-                            : '${TrWords.tasksAssignee.tr()}: ${people.where((p) => p.id == query.who).firstOrNull?.firstName ?? ''}',
-                        style: theme.cardSubtitle,
-                      ),
-                    ),
-                    Btn.ghost(
-                      text: query.sort.shortTitle,
-                      icon: AppIcons.sort,
-                      onPressed: () => bloc.add(TasksQueryChanged(query.copyWith(sort: query.sort.next))),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: state.status.isLoading
-                      ? const SmartLoading()
-                      : RefreshList(
-                          onRefresh: () async {
-                            bloc.add(const TasksRefreshed());
-                            await bloc.stream.firstWhere((s) => !s.refreshing);
+        return Column(
+          children: [
+            LargeTitleHeader(
+              title: TrWords.tasksTitle.tr(),
+              actions: [HeaderAction(icon: AppIcons.plus, onTap: () => context.push(Routes.taskNew.path))],
+              bottom: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SearchField(
+                          hint: TrWords.tlSearch.tr(),
+                          controller: _search,
+                          onChanged: (v) {
+                            _debounce?.cancel();
+                            _debounce = Timer(
+                              const Duration(milliseconds: 400),
+                              () => bloc.add(TasksQueryChanged(query.copyWith(search: v))),
+                            );
                           },
-                          onLoadMore: () => bloc.add(const TasksMoreRequested()),
-                          isLoadingMore: state.isLoadingMore,
-                          placeholder: state.status.isError
-                              ? EmptyView(
-                                  title: TrWords.cLoadFailed.tr(),
-                                  message: TrWords.cLoadFailedDesc.tr(),
-                                  icon: AppIcons.alert,
-                                  onRetry: () => bloc.add(const TasksStarted()),
-                                )
-                              : EmptyView(
-                                  title: TrWords.tasksEmpty.tr(),
-                                  message: TrWords.tasksEmptyDesc.tr(),
-                                  icon: AppIcons.search,
-                                ),
-                          children: [
-                            for (final task in state.items)
-                              TaskCard(task: task, onTap: () => context.push(Routes.taskDetail.of(task.id))),
-                          ],
                         ),
-                ),
+                      ),
+                      8.w.width,
+                      SquareIconButton(
+                        icon: AppIcons.filter,
+                        active: query.people.isNotEmpty || query.due != TaskDueFilter.any,
+                        onTap: () => TasksFilterDialog.show(context, bloc),
+                      ),
+                    ],
+                  ),
+                  4.h.height,
+                  UnderlineTabs(
+                    scrollable: true,
+                    divider: false,
+                    labels: [
+                      TrWords.cAll.tr(),
+                      TrWords.stNew.tr(),
+                      TrWords.stProg.tr(),
+                      TrWords.dashOverdue.tr(),
+                      TrWords.tlDoneTab.tr(),
+                      TrWords.tlFailTab.tr(),
+                    ],
+                    selected: _tabOf(query),
+                    onChanged: (i) => bloc.add(
+                      TasksQueryChanged(
+                        query.copyWith(
+                          statuses: switch (i) {
+                            1 => {TaskStatus.fresh},
+                            2 => {TaskStatus.prog},
+                            4 => {TaskStatus.done},
+                            5 => {TaskStatus.fail},
+                            _ => <TaskStatus>{},
+                          },
+                          overdueOnly: i == 3,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            Expanded(
+              child: state.status.isLoading
+                  ? const Padding(padding: EdgeInsets.all(16), child: SmartLoading())
+                  : RefreshList(
+                      padding: EdgeInsets.fromLTRB(16.w, 2.h, 16.w, FloatingTabBar.inset(context)),
+                      gap: 0,
+                      onRefresh: () async {
+                        bloc.add(const TasksRefreshed());
+                        await bloc.stream.firstWhere((s) => !s.refreshing);
+                      },
+                      onLoadMore: () => bloc.add(const TasksMoreRequested()),
+                      isLoadingMore: state.isLoadingMore,
+                      placeholder: state.status.isError
+                          ? EmptyView(
+                              title: TrWords.cLoadFailed.tr(),
+                              message: TrWords.cLoadFailedDesc.tr(),
+                              icon: AppIcons.alert,
+                              onRetry: () => bloc.add(const TasksStarted()),
+                            )
+                          : _empty(_tabOf(query)),
+                      children: [
+                        for (final (i, task) in state.items.indexed)
+                          TaskListRow(
+                            task: task,
+                            first: i == 0,
+                            onTap: () => context.push(Routes.taskDetail.of(task.id)),
+                          ),
+                      ],
+                    ),
+            ),
+          ],
         );
       },
     );

@@ -16,7 +16,7 @@ Design handoff: HTML boards with tokens in light/dark; the Flutter theme maps 1:
 ## Where things live
 
 - UI per role: `lib/presentation/pages/` holds ONLY `auth/` (shared) and `{admin,manager,worker,client}/`. Each role folder
-  has `main/` (left-drawer shell via `SideMenuShell`), its own route table `<role>_routes.dart` and its own COPY of every
+  has `main/` (left-drawer shell via `SideMenuShell`; the admin uses the floating bottom `FloatingTabBar` instead), its own route table `<role>_routes.dart` and its own COPY of every
   feature it uses (chat, tasks, profile, ...). A change for one role is made in that role's folder only; do not import
   one role's folder from another.
 
@@ -27,8 +27,9 @@ Design handoff: HTML boards with tokens in light/dark; the Flutter theme maps 1:
 - Backend: Django API in `backend/` (Swagger UI at `/api/docs/`, schema at `/api/schema/`). The app talks to it through
   `lib/infrastructure/common/backend_dio_client.dart` (`flutter run --dart-define=API_HOST=http://localhost:8000`;
   Android emulator: `http://10.0.2.2:8000`).
-- Clients: served ONLY by the Node.js Telegram bot in `telegram-bot/` (`npm test`, see its README); the Flutter app shows
-  `ClientScreen` (left menu around `ClientBotScreen`) for the client role. Backend requests API: `backend/apps/client_requests/`.
+- Clients: use the app's own client UI (`pages/client/`: orders, notifications, chat with the dispatcher, 3-step order wizard,
+  profile; `ClientShell`) and may also use the Node.js Telegram bot in `telegram-bot/` (`npm test`, see its README) against the same
+  REST API. Backend requests API: `backend/apps/client_requests/`.
 - Mock backend: `lib/infrastructure/common/mock_dio_client.dart` + `mock_json_data/` (switch: `AppConfig.useMockData`,
   `--dart-define=USE_MOCK_DATA=true`).
 - Demo accounts (password `1234`): `jamshid` (admin), `malika` (manager), `boris` (worker), `gulnora` (client).

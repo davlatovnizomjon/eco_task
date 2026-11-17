@@ -26,3 +26,9 @@ final class EmployeeTabChanged extends EmployeeEvent {
   /// Carries the selected tab.
   const EmployeeTabChanged(this.tab);
 }
+
+/// The boss confirmed deleting the account.
+final class EmployeeDeleted extends EmployeeEvent {
+  /// Fires the deletion.
+  const EmployeeDeleted();
+}

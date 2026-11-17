@@ -1,4 +1,4 @@
-/// Public surface of the manager shell: the left-menu entry point of the manager UI.
+/// Public surface of the manager shell: the bottom-tab shell, the entry point of the manager UI.
 library;
 
 export 'bloc/bloc.dart';

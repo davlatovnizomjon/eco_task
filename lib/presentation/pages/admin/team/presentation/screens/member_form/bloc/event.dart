@@ -48,7 +48,17 @@ final class MemberFormRoleChanged extends MemberFormEvent {
   const MemberFormRoleChanged(this.value);
 }
 
+/// The client type switch was tapped.
+final class MemberFormOrgChanged extends MemberFormEvent {
+  /// True for an organization, false for a private person.
+  final bool isOrg;
+
+  /// Carries the picked type.
+  const MemberFormOrgChanged({required this.isOrg});
+}
+
 /// The user typed in the optional address field (clients).
+
 final class MemberFormAddressChanged extends MemberFormEvent {
   /// Raw field text.
   final String value;
@@ -61,4 +71,28 @@ final class MemberFormAddressChanged extends MemberFormEvent {
 final class MemberFormSubmitted extends MemberFormEvent {
   /// Triggers validation and, if it passes, the create request.
   const MemberFormSubmitted();
+}
+
+/// The user typed in the contact-person field (organization clients).
+final class MemberFormContactChanged extends MemberFormEvent {
+  /// New text.
+  final String value;
+
+  /// Carries the text.
+  const MemberFormContactChanged(this.value);
+}
+
+/// The user typed in the note field (clients).
+final class MemberFormNoteChanged extends MemberFormEvent {
+  /// New text.
+  final String value;
+
+  /// Carries the text.
+  const MemberFormNoteChanged(this.value);
+}
+
+/// Edit mode opened: load the account and fill the form with it.
+final class MemberFormStarted extends MemberFormEvent {
+  /// Fires the load.
+  const MemberFormStarted();
 }

@@ -14,6 +14,11 @@ class Status(models.TextChoices):
     CANCELED = "CANCELED"
 
 
+class Currency(models.TextChoices):
+    UZS = "UZS"
+    USD = "USD"
+
+
 class Priority(models.TextChoices):
     LOW = "LOW"
     MEDIUM = "MEDIUM"
@@ -41,7 +46,13 @@ class Task(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
     # Financial: what was agreed with the client. NOT revenue; payments live in apps.finance.
     agreed_value = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.UZS)
     failure_reason = models.TextField(blank=True)
+    # Who the work is for when there is no client account (typed in the task wizard), and where it happens.
+    client_name = models.CharField(max_length=200, blank=True)
+    client_is_org = models.BooleanField(default=False)
+    address = models.CharField(max_length=300, blank=True)
+    remind_at = models.DateTimeField(null=True, blank=True)
     approved_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
@@ -66,6 +77,7 @@ class Task(models.Model):
                 name="task_due_after_start",
             ),
             models.CheckConstraint(condition=Q(status__in=[s.value for s in Status]), name="task_status_valid"),
+            models.CheckConstraint(condition=Q(currency__in=[c.value for c in Currency]), name="task_currency_valid"),
             models.CheckConstraint(
                 condition=~Q(status="FAILED") | ~Q(failure_reason=""), name="task_failed_needs_reason"
             ),

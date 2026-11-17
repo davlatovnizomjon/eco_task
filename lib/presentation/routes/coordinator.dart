@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:eco_task/domain/common/enums/user_role.dart';
 import 'package:eco_task/infrastructure/repository/session_repository.dart';
 import 'package:eco_task/presentation/pages/admin/admin.dart' as admin;
-import 'package:eco_task/presentation/pages/auth/auth.dart';
+import 'package:eco_task/presentation/pages/_auth/auth.dart';
 import 'package:eco_task/presentation/pages/client/client.dart' as client;
 import 'package:eco_task/presentation/pages/manager/manager.dart' as manager;
 import 'package:eco_task/presentation/pages/worker/worker.dart' as worker;
@@ -58,11 +58,6 @@ GoRouter buildRouter(SessionRepository session) {
     redirect: (context, state) {
       final location = state.matchedLocation;
       if (session.isGuest) return _guestPaths.contains(location) ? null : Routes.signIn.path;
-      // Clients are served by the Telegram bot; the only screens they may see are the notice and settings.
-      if (session.role == UserRole.client) {
-        final here = Routes.values.where((r) => r.path == location);
-        return here.isNotEmpty && client.clientRoutes.contains(here.first) ? null : Routes.clientBot.path;
-      }
       if (location == Routes.signIn.path) return Routes.home.path;
       return null;
     },
@@ -74,7 +69,7 @@ GoRouter buildRouter(SessionRepository session) {
           UserRole.owner => const admin.AdminShell(),
           UserRole.assistant => const manager.ManagerShell(),
           UserRole.worker => const worker.WorkerShell(),
-          UserRole.client => const client.ClientScreen(),
+          UserRole.client => const client.ClientShell(),
         },
       ),
       for (final r in Routes.values)

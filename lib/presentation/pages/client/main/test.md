@@ -1,29 +1,26 @@
-# Client (left menu + Telegram-bot notice) — Test Plan
+# Client UI (bottom tab bar) — Test Plan
 
 A plan for an AI to execute against; nothing here is run unless the user asks.
 
 ## 1. API Test
 
-### `SessionRepository.login` — POST `auth/login/` as a client
-
-- [ ] Success: a CLIENT account signs in (200 with token and `role: CLIENT`); the session is stored and the router moves the app to `/telegram`.
-- [ ] Auth error: wrong password → 401, the sign-in form shows the backend message (no redirect).
-- [ ] Mock/live parity: `gulnora` on the mock backend and a CLIENT account on the live API behave the same.
+- [ ] No endpoints of its own: the sections reuse the repositories of their features; see their plans.
+- [ ] Auth error: an expired token on any section → 401 → the session is cleared and the router returns to sign-in.
 
 ## 2. Mobile/Web Integration Test
 
-- [ ] Sign in as a client: the bot notice opens; every attempt to open `/home`, `/tasks/...`, `/chat/...` (deep link or Back) lands on `/telegram` again.
-- [ ] Restart the app with a stored client session: it opens on the notice, not on the home.
-- [ ] Sign out returns to the sign-in screen; signing in as staff afterwards shows the normal home.
+- [ ] Sign in as `jamshid` (client): the floating bottom bar shows Asosiy, Vazifa, Chat (round green slot), Hisobot and Profil.
 - [ ] Run on a real or emulated Android/iOS device with `AppConfig.useMockData = true` and again against the live API.
 
 ## 3. UI Test
 
-- [ ] No overflow or clipping at a small phone width (320 px) and a tablet width (768 px).
-- [ ] The left menu opens from the menu button and lists the Telegram-bot notice, Language and Appearance; the header shows the account; Language and Appearance open their settings screens.
+- [ ] The bar floats 12 px from the sides and above the system gesture area; the selected tab has a tinted pill (the chat slot a larger tinted circle).
+- [ ] The chat slot shows the unread counter as a red badge; the other tabs show their label.
+- [ ] No overflow or clipping at a small phone width (320 px) and a tablet width (768 px); the five items stay equally wide.
 - [ ] Light and dark themes both read correctly; Uzbek Latin, Uzbek Cyrillic and Russian render without missing keys.
-- [ ] The text names the bot given by `--dart-define=TELEGRAM_BOT=@name`; “Copy” puts exactly that handle on the clipboard and shows the “copied” snackbar.
 
 ## 4. Logical/Business Test
 
-- [ ] A client can never reach staff data through the app: no tab, no deep link and no pushed route is reachable while the role is client.
+- [ ] Section state is kept when switching tabs (`IndexedStack`); every other screen opens above the shell with a Back chevron.
+- [ ] Any screen can switch the selected tab through `homeTab` (0 home, 1 tasks, 2 chat, 3 reports, 4 profile).
+- [ ] Signing out from the profile asks for confirmation, clears the session and resets the selected tab to home.

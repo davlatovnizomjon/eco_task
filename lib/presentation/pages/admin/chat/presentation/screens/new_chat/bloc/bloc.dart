@@ -21,6 +21,7 @@ class NewChatBloc extends Bloc<NewChatEvent, NewChatState> {
     on<NewChatSearched>((event, emit) => _load(emit, event.query.trim()));
     on<NewChatTabChanged>((event, emit) => emit(state.copyWith(group: event.group)));
     on<NewChatMemberToggled>(_onToggled);
+    on<NewChatAllToggled>(_onAll);
     on<NewChatPersonPicked>(_onPicked);
     on<NewChatGroupSubmitted>(_onGroup);
   }
@@ -50,6 +51,12 @@ class NewChatBloc extends Bloc<NewChatEvent, NewChatState> {
     final next = {...state.selected};
     if (!next.remove(event.userId)) next.add(event.userId);
     emit(state.copyWith(selected: next));
+  }
+
+  /// Selects every listed contact, or clears the selection when all are already selected.
+  void _onAll(NewChatAllToggled event, Emitter<NewChatState> emit) {
+    final all = {for (final c in state.contacts) c.id};
+    emit(state.copyWith(selected: state.selected.containsAll(all) ? <String>{} : all));
   }
 
   /// Opens (or reuses) the direct chat with the picked person.

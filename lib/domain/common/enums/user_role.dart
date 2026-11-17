@@ -1,4 +1,5 @@
 import '../../../constants/constants.dart';
+import 'status_tone.dart';
 
 /// Which of the four account kinds is signed in; fixes the home tabs and what
 /// each screen offers. The backend returns it on `auth/login`.
@@ -19,6 +20,14 @@ enum UserRole {
   /// fall back to [worker].
   factory UserRole.fromJson(Object? name) =>
       values.firstWhere((role) => role.name == '$name'.toLowerCase(), orElse: () => UserRole.worker);
+
+  /// Color family of the role pill: amber admin, blue manager, green worker, gray client.
+  StatusTone get tone => switch (this) {
+    UserRole.owner => StatusTone.warn,
+    UserRole.assistant => StatusTone.info,
+    UserRole.worker => StatusTone.primary,
+    UserRole.client => StatusTone.neutral,
+  };
 
   /// Name the backend uses for this role.
   String get apiName => name.toUpperCase();

@@ -28,7 +28,18 @@ class EmployeeBloc extends Bloc<EmployeeEvent, EmployeeState> {
   EmployeeBloc({required this.team, required this.tasks, required this.userId}) : super(const EmployeeState()) {
     on<EmployeeStarted>((event, emit) => _load(emit, refreshing: false));
     on<EmployeeRefreshed>((event, emit) => _load(emit, refreshing: true));
+    on<EmployeeDeleted>(_onDeleted);
     on<EmployeeTabChanged>((event, emit) => emit(state.copyWith(tab: event.tab)));
+  }
+
+  /// Deletes the account; the screen closes on [EmployeeState.removed].
+  Future<void> _onDeleted(EmployeeDeleted event, Emitter<EmployeeState> emit) async {
+    emit(state.copyWith(busy: true));
+    try {
+      emit(state.copyWith(busy: false, removed: await team.deleteUser(userId)));
+    } catch (e) {
+      emit(state.copyWith(busy: false, response: e is ScreenResponse ? e : const UnExpectedErrorResponse()));
+    }
   }
 
   /// Loads the account and the employee's tasks together. Cached tasks are

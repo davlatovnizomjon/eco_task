@@ -10,6 +10,6 @@ The app talks to the Django backend in `backend/` (API docs: `http://localhost:8
 In mock mode the demo accounts (password `1234`) are:
 `jamshid` (admin), `malika` (manager), `boris` (worker), `gulnora` (client).
 
-Clients do not use the app: they use the Telegram bot in `telegram-bot/` (see its README).
+Clients use the app (orders, chat, calls) and may also use the Telegram bot in `telegram-bot/` (see its README).
 
 See `CLAUDE.md`, `.rules/` and `lib/presentation/routes/NAVIGATION_MAP.md`.

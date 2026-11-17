@@ -28,8 +28,12 @@ INSTALLED_APPS = [
     "apps.client_requests",
     "apps.notifications",
     "apps.chat",
+    "apps.files",
     "apps.finance",
     "apps.reports",
+    "apps.releases",
+    "apps.legal",
+    "apps.support",
 ]
 
 MIDDLEWARE = [
@@ -100,6 +104,8 @@ else:  # development / tests only; production settings refuse to start without R
     CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
 # --- Authentication -----------------------------------------------------------------------
+LOGIN_MAX_ATTEMPTS = env.integer("LOGIN_MAX_ATTEMPTS", 5)  # wrong passwords in a row before the lock
+LOGIN_LOCK_SECONDS = env.integer("LOGIN_LOCK_SECONDS", 5 * 60)  # how long the lock lasts
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
@@ -110,7 +116,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
-API_TOKEN_LIFETIME_HOURS = env.integer("API_TOKEN_LIFETIME_HOURS", 24 * 14)
+API_ACCESS_TOKEN_MINUTES = env.integer("API_ACCESS_TOKEN_MINUTES", 60)
+API_REFRESH_TOKEN_DAYS = env.integer("API_REFRESH_TOKEN_DAYS", 14)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["apps.accounts.authentication.BearerTokenAuthentication"],
@@ -119,7 +126,7 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.UserRateThrottle"],
-    "DEFAULT_THROTTLE_RATES": {"user": "600/min", "login": "10/min", "upload": "30/min"},
+    "DEFAULT_THROTTLE_RATES": {"user": "600/min", "login": "10/min", "refresh": "30/min", "upload": "30/min"},
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
     "EXCEPTION_HANDLER": "apps.core.errors.exception_handler",
@@ -168,9 +175,12 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024
 CURRENCY = env.get("CURRENCY", "UZS")  # single-currency policy; amounts are Decimal(14, 2)
 TASK_COMPLETION_REQUIRES_APPROVAL = env.boolean("TASK_COMPLETION_REQUIRES_APPROVAL", True)
 CHAT_MAX_MESSAGE_CHARS = 4000
+CALL_RING_SECONDS = env.integer("CALL_RING_SECONDS", 45)  # an unanswered call becomes MISSED after this long
 CHAT_MESSAGES_PER_MINUTE = env.integer("CHAT_MESSAGES_PER_MINUTE", 60)
 WS_MAX_CONNECTIONS_PER_USER = env.integer("WS_MAX_CONNECTIONS_PER_USER", 5)
 WS_ALLOWED_ORIGINS = env.csv("WS_ALLOWED_ORIGINS")
+# Firebase service-account JSON used to send push notifications; empty = push disabled.
+FIREBASE_CREDENTIALS_FILE = env.get("FIREBASE_CREDENTIALS_FILE", "")
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"

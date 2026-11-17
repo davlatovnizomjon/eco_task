@@ -1,4 +1,4 @@
-# Suhbat — Test rejasi
+# Suhbat (menejer) — Test rejasi
 
 AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga tushirilmaydi.
 
@@ -39,21 +39,26 @@ AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga
 
 ## 2. Mobil/Web integratsiya testi
 
-- [ ] Ro‘yxatdan, vazifadan (vazifa sarlavhasidagi chat belgisi) va yangi suhbat yaratilgandan so‘ng oching; yuboring, qabul qiling, orqaga qayting.
-- [ ] Ekran ochiqligida tarmoqni o‘chiring: «qayta ulanmoqda» banneri chiqadi, shu orada yuborilgan xabar REST orqali ketadi, tarmoq qaytgach socket qayta ulanadi va o‘tkazib yuborilgan xabarlar dublikatsiz paydo bo‘ladi.
-- [ ] `AppConfig.useMockData = true` bilan (skriptli «Qabul qilindi 👍» javobi) haqiqiy yoki emulyator Android/iOS qurilmada, so‘ng jonli backend bilan ishga tushiring.
+- [ ] Ro‘yxatdan, vazifa chat amalidan yoki yangi suhbatdan oching; yuboring, jonli qabul qiling, muvaffaqiyatsiz xabarni qayta yuboring, eski xabarlarni yuklang, soket qayta ulanayotganda chiqing.
+- [ ] Haqiqiy yoki emulyatsiya qilingan Android/iOS qurilmada `AppConfig.useMockData = true` bilan va yana jonli API bilan ishga tushiring.
 
 ## 3. UI test
 
-- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida overflow yoki kesilish yo‘q; uzun ismlar va tarjima matnlari ko‘p nuqta bilan qisqaradi.
-- [ ] Yorug‘ va qorong‘i mavzular ikkalasi ham to‘g‘ri ko‘rinadi; Sozlamalarda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
+- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida toshib ketish yoki kesilish yo‘q; uzun nomlar va tarjima qilingan matnlar ko‘p nuqta bilan qisqartiriladi.
+- [ ] Yorug‘ va qorong‘i mavzular to‘g‘ri o‘qiladi; profilda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
 - [ ] O‘zbek lotin, o‘zbek kirill va rus tillari yetishmayotgan kalitlarsiz va maket buzilishisiz ko‘rinadi.
-- [ ] Xabarlar ro‘yxati pastdan boshlanadi, eng yangisi pastda; o‘z pufakchalari o‘ngda brend rangida, boshqalarniki chapda; guruh va vazifa suhbatlarida muallif avatari va ismi ko‘rinadi; uzun so‘zlar o‘raladi va overflow bermaydi.
-- [ ] Yetkazish belgilari: yuborilayotganda soat, saqlanganda bitta belgi, o‘qilganda ikkita belgi; yuborilmagan xabarda qizil ogohlantirish va «qayta urinish uchun bosing».
-- [ ] Klaviatura kiritish maydonini yopmaydi; klaviatura ochilganda eng yangi xabar ko‘rinib turadi.
+- [ ] Dizayn bu ekranning `Eco Tasks — mobile app` taxtasiga yorug‘ va qorong‘i mavzuda 1:1 mos keladi (o‘lchamlar, ranglar, radiuslar, ikonkalar).
+- [ ] Panel suhbat nomini yashil «onlayn» / «N a’zo» qatori bilan markazga qo‘yadi; xabarlar sahifa fonida turadi, o‘z pufakchalari yashil va vaqt hamda yetkazish belgilarini (soat, belgi, o‘qilganda qo‘sh belgi) ko‘rsatadi; kun sarlavhalari (Bugun, Kecha, sana) kunlarni ajratadi.
+- [ ] Kiritish panelida yumaloq ko‘p qatorli maydon va imo-ishora zonasi ustida yumaloq yashil yuborish tugmasi bor; soket uzilganda oflayn izoh uning tepasida chiqadi.
+- [ ] Xabarni bosib turish (kutilayotgan yoki o‘chirilgan emas) amallar oynasini ochadi: 11 ta tezkor emoji (tanlangani ajratilgan; yana bossangiz olib tashlanadi), nusxa olish (toast), tahrirlash (faqat o‘zinikini), pin / pinni olib tashlash, o‘chirish (o‘zinikini, yoki xodim uchun istalganini, tasdiqlash dialogidan keyin).
+- [ ] Tahrirlangan xabarlarda vaqt yonida “tahrirlandi” va yangi matn ko‘rinadi; o‘chirilganlarda kursiv “Xabar o‘chirildi” chiqadi va munosabatlari yo‘qoladi; pufak ostidagi munosabat chiplari emoji va sonni ko‘rsatadi, o‘zinikisi ajratilgan, bosish uni almashtiradi.
+- [ ] Pin qilingan xabar panel ostidagi bannerda ko‘rinadi (yashil sarlavha, bir qator, «x» tozalaydi); pin qilingan xabarni o‘chirish pinni tozalaydi; boshqa a’zo o‘zgartirgan pin jonli keladi (`conversation.pinned`), tahrir va munosabatlar `message.updated` sifatida keladi.
+- [ ] Tahrirlash rejimi: kiritish maydoni “Xabarni tahrirlash” va «x» ni ko‘rsatadi; yuborish tahrirni saqlaydi (matn o‘zgarmasa hech narsa yuborilmaydi).
+- [ ] Sarlavhani bosish shaxsiy yoki guruh suhbatining ma’lumot sahifasini ochadi (vazifa suhbatlari uchun emas).
+- [ ] Uzoq bosish → “Javob berish”: kiritish maydoni ustida iqtibos muallifi va matni bilan javob paneli chiqadi (“x” yopadi); yuborilgan pufakchada iqtibos kartasi ko‘rinadi; `reply_to` socket va REST orqali ketadi; o‘chirilgan xabar iqtibosida “Xabar o‘chirildi” yoziladi.
+- [ ] Skrepka tugmasi: kamera / galereya / hujjat varag‘i; fayl yuklanadi (`POST files/`, ingichka progress chizig‘i) va `attachment_id` bilan alohida xabar bo‘lib yuboriladi; rasmlar `PhotoViewer`da, hujjatlar `DocumentViewer`da ochiladi.
+- [ ] Bo‘sh maydonda mikrofon: bosib turish ovozli xabar yozadi (taymer, chapga surish bekor qiladi, 1 soniyadan qisqasi tashlanadi), qo‘yib yuborish yuboradi; mikrofonni bosish kameraga (video-krujok) almashtiradi, uni uzoq bosish old kamerani ochadi (eng ko‘pi 60 s); pufakchalarda ovozli xabar uchun to‘lqinli play tugmasi, krujok uchun 180 px dumaloq pleer ko‘rinadi. Qurilma kerak: mikrofon/kamera ruxsatlari, ijro.
 
-## 4. Mantiq/biznes testi
+## 4. Mantiqiy/biznes test
 
-- [ ] Bir xil matnni ikki marta tez yuborish ikkita xabar yaratadi (turli client id); BITTA yuborishning tarmoq takrori hech qachon ikkita yaratmaydi.
-- [ ] Socket orqali kelgan va REST bilan ham yuklangan xabar bir marta ko‘rinadi.
-- [ ] Suhbatni ochish boshqalarning xabarlarini bir marta o‘qilgan deb belgilaydi va qaytgach ro‘yxat belgisi kamayadi.
+- [ ] Yuborish optimistik va `client_msg_id` bo‘yicha takrorlanishdan tozalanadi; muvaffaqiyatsiz xabarni bosib qayta yuborish mumkin.

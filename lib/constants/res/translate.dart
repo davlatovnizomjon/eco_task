@@ -1728,4 +1728,1453 @@ abstract final class TrWords {
 
   /// UI text slot `bot.copied`, shown as "Nusxalandi" in Uzbek.
   static const botCopied = 'bot.copied';
+
+  /// UI text slot `dash.greet`, shown as "Xayrli kun," in Uzbek.
+  static const dashGreet = 'dash.greet';
+
+  /// UI text slot `dash.my_tasks`, shown as "Mening vazifalarim" in Uzbek.
+  static const dashMyTasks = 'dash.my_tasks';
+
+  /// UI text slot `dash.personal`, shown as "Shaxsiy vazifa" in Uzbek.
+  static const dashPersonal = 'dash.personal';
+
+  /// UI text slot `dash.employees`, shown as "Xodimlar" in Uzbek.
+  static const dashEmployees = 'dash.employees';
+
+  /// UI text slot `dash.clients`, shown as "Mijozlar" in Uzbek.
+  static const dashClients = 'dash.clients';
+
+  /// UI text slot `dash.weekly`, shown as "Haftalik ish · {}" in Uzbek.
+  static const dashWeekly = 'dash.weekly';
+
+  /// UI text slot `dash.top_week`, shown as "Eng faol xodim · shu hafta" in Uzbek.
+  static const dashTopWeek = 'dash.top_week';
+
+  /// UI text slot `dash.rating`, shown as "Reyting" in Uzbek.
+  static const dashRating = 'dash.rating';
+
+  /// UI text slot `dash.place_n`, shown as "{}-o‘rin" in Uzbek.
+  static const dashPlaceN = 'dash.place_n';
+
+  /// UI text slot `dash.of_tasks`, shown as "{} / {} vazifa" in Uzbek.
+  static const dashOfTasks = 'dash.of_tasks';
+
+  /// UI text slot `dash.today_tasks`, shown as "Bugungi vazifalar" in Uzbek.
+  static const dashTodayTasks = 'dash.today_tasks';
+
+  /// UI text slot `ms.1`, shown as "yan" in Uzbek.
+  static const ms1 = 'ms.1';
+
+  /// UI text slot `ms.2`, shown as "fev" in Uzbek.
+  static const ms2 = 'ms.2';
+
+  /// UI text slot `ms.3`, shown as "mar" in Uzbek.
+  static const ms3 = 'ms.3';
+
+  /// UI text slot `ms.4`, shown as "apr" in Uzbek.
+  static const ms4 = 'ms.4';
+
+  /// UI text slot `ms.5`, shown as "may" in Uzbek.
+  static const ms5 = 'ms.5';
+
+  /// UI text slot `ms.6`, shown as "iyn" in Uzbek.
+  static const ms6 = 'ms.6';
+
+  /// UI text slot `ms.7`, shown as "iyl" in Uzbek.
+  static const ms7 = 'ms.7';
+
+  /// UI text slot `ms.8`, shown as "avg" in Uzbek.
+  static const ms8 = 'ms.8';
+
+  /// UI text slot `ms.9`, shown as "sen" in Uzbek.
+  static const ms9 = 'ms.9';
+
+  /// UI text slot `ms.10`, shown as "okt" in Uzbek.
+  static const ms10 = 'ms.10';
+
+  /// UI text slot `ms.11`, shown as "noy" in Uzbek.
+  static const ms11 = 'ms.11';
+
+  /// UI text slot `ms.12`, shown as "dek" in Uzbek.
+  static const ms12 = 'ms.12';
+
+  /// UI text slot `dash.tasks_short`, shown as "Vazifa" in Uzbek.
+  static const dashTasksShort = 'dash.tasks_short';
+
+  /// UI text slot `dash.report_short`, shown as "Hisobot" in Uzbek.
+  static const dashReportShort = 'dash.report_short';
+
+  /// UI text slot `tasks.later`, shown as "Keyinroq" in Uzbek.
+  static const tasksLater = 'tasks.later';
+
+  /// UI text slot `tasks.search_hint`, shown as "Nomi, ID yoki xodim" in Uzbek.
+  static const tasksSearchHint = 'tasks.search_hint';
+
+  /// UI text slot `tasks.days_short`, shown as "{} kun" in Uzbek.
+  static const tasksDaysShort = 'tasks.days_short';
+
+  /// UI text slot `today.done_of`, shown as "{} / {} bajarildi" in Uzbek.
+  static const todayDoneOf = 'today.done_of';
+
+  /// UI text slot `archive.title`, shown as "Vazifalar arxivi" in Uzbek.
+  static const archiveTitle = 'archive.title';
+
+  /// UI text slot `archive.done`, shown as "Bajarilgan" in Uzbek.
+  static const archiveDone = 'archive.done';
+
+  /// UI text slot `archive.failed`, shown as "Bajarilmagan" in Uzbek.
+  static const archiveFailed = 'archive.failed';
+
+  /// UI text slot `archive.canceled`, shown as "Bekor qilingan" in Uzbek.
+  static const archiveCanceled = 'archive.canceled';
+
+  /// UI text slot `chat.groups`, shown as "Guruhlar" in Uzbek.
+  static const chatGroups = 'chat.groups';
+
+  /// UI text slot `chat.new_group`, shown as "Yangi guruh" in Uzbek.
+  static const chatNewGroup = 'chat.new_group';
+
+  /// UI text slot `chat.add_member`, shown as "A’zo qo‘shish" in Uzbek.
+  static const chatAddMember = 'chat.add_member';
+
+  /// UI text slot `chat.selected_n`, shown as "Xodimlar · {} ta tanlandi" in Uzbek.
+  static const chatSelectedN = 'chat.selected_n';
+
+  /// UI text slot `chat.select_all`, shown as "Hammasini tanlash" in Uzbek.
+  static const chatSelectAll = 'chat.select_all';
+
+  /// UI text slot `chat.clients_title`, shown as "Mijozlar" in Uzbek.
+  static const chatClientsTitle = 'chat.clients_title';
+
+  /// UI text slot `rep.last_weeks`, shown as "So‘nggi {} hafta" in Uzbek.
+  static const repLastWeeks = 'rep.last_weeks';
+
+  /// UI text slot `team.plain_worker`, shown as "Oddiy ishchi" in Uzbek.
+  static const teamPlainWorker = 'team.plain_worker';
+
+  /// UI text slot `team.by_role`, shown as "Rol bo‘yicha" in Uzbek.
+  static const teamByRole = 'team.by_role';
+
+  /// UI text slot `team.seg_busy`, shown as "Vazifali" in Uzbek.
+  static const teamSegBusy = 'team.seg_busy';
+
+  /// UI text slot `team.seg_free`, shown as "Vazifasiz" in Uzbek.
+  static const teamSegFree = 'team.seg_free';
+
+  /// UI text slot `team.seg_active_req`, shown as "Faol so‘rov" in Uzbek.
+  static const teamSegActiveReq = 'team.seg_active_req';
+
+  /// UI text slot `team.seg_no_req`, shown as "So‘rovsiz" in Uzbek.
+  static const teamSegNoReq = 'team.seg_no_req';
+
+  /// UI text slot `team.free`, shown as "Bo‘sh" in Uzbek.
+  static const teamFree = 'team.free';
+
+  /// UI text slot `team.task_count`, shown as "{} vazifa" in Uzbek.
+  static const teamTaskCount = 'team.task_count';
+
+  /// UI text slot `team.req_count`, shown as "{} so‘rov" in Uzbek.
+  static const teamReqCount = 'team.req_count';
+
+  /// UI text slot `team.staff_sub`, shown as "Xodim · {}" in Uzbek.
+  static const teamStaffSub = 'team.staff_sub';
+
+  /// UI text slot `rating.title`, shown as "Xodimlar reytingi" in Uzbek.
+  static const ratingTitle = 'rating.title';
+
+  /// UI text slot `rating.month`, shown as "Shu oy" in Uzbek.
+  static const ratingMonth = 'rating.month';
+
+  /// UI text slot `team.invite_title`, shown as "Xodim qo‘shish" in Uzbek.
+  static const teamInviteTitle = 'team.invite_title';
+
+  /// UI text slot `team.employees_title`, shown as "Xodimlar" in Uzbek.
+  static const teamEmployeesTitle = 'team.employees_title';
+
+  /// UI text slot `ntf.unread_label`, shown as "O‘qilmagan" in Uzbek.
+  static const ntfUnreadLabel = 'ntf.unread_label';
+
+  /// UI text slot `acc.edit_title`, shown as "Profilni tahrirlash" in Uzbek.
+  static const accEditTitle = 'acc.edit_title';
+
+  /// UI text slot `acc.first_name`, shown as "Ism" in Uzbek.
+  static const accFirstName = 'acc.first_name';
+
+  /// UI text slot `acc.last_name`, shown as "Familiya" in Uzbek.
+  static const accLastName = 'acc.last_name';
+
+  /// UI text slot `acc.login_pwd`, shown as "Login va parolni o‘zgartirish" in Uzbek.
+  static const accLoginPwd = 'acc.login_pwd';
+
+  /// UI text slot `acc.login_title`, shown as "Login va parol" in Uzbek.
+  static const accLoginTitle = 'acc.login_title';
+
+  /// UI text slot `acc.login_help`, shown as "Faqat lotin harflari, raqam va nuqta" in Uzbek.
+  static const accLoginHelp = 'acc.login_help';
+
+  /// UI text slot `acc.change_pwd`, shown as "Parolni o‘zgartirish" in Uzbek.
+  static const accChangePwd = 'acc.change_pwd';
+
+  /// UI text slot `acc.current`, shown as "Joriy parol" in Uzbek.
+  static const accCurrent = 'acc.current';
+
+  /// UI text slot `acc.new_pwd`, shown as "Yangi parol" in Uzbek.
+  static const accNewPwd = 'acc.new_pwd';
+
+  /// UI text slot `acc.repeat`, shown as "Yangi parolni takrorlang" in Uzbek.
+  static const accRepeat = 'acc.repeat';
+
+  /// UI text slot `acc.min8`, shown as "Kamida 8 ta belgi" in Uzbek.
+  static const accMin8 = 'acc.min8';
+
+  /// UI text slot `acc.mismatch`, shown as "Parollar mos kelmadi" in Uzbek.
+  static const accMismatch = 'acc.mismatch';
+
+  /// UI text slot `acc.too_short`, shown as "Parol kamida 8 ta belgidan iborat bo‘lsin" in Uzbek.
+  static const accTooShort = 'acc.too_short';
+
+  /// UI text slot `acc.need_current`, shown as "Joriy parolni kiriting" in Uzbek.
+  static const accNeedCurrent = 'acc.need_current';
+
+  /// UI text slot `login.login_hint`, shown as "Loginni kiriting" in Uzbek.
+  static const loginLoginHint = 'login.login_hint';
+
+  /// UI text slot `login.password_hint`, shown as "Parolni kiriting" in Uzbek.
+  static const loginPasswordHint = 'login.password_hint';
+
+  /// UI text slot `login.loading`, shown as "Kirilmoqda…" in Uzbek.
+  static const loginLoading = 'login.loading';
+
+  /// UI text slot `login.wrong_t`, shown as "Login yoki parol noto‘g‘ri" in Uzbek.
+  static const loginWrongT = 'login.wrong_t';
+
+  /// UI text slot `login.wrong_b`, shown as "Yana {} ta urinish qoldi. {}-xatodan keyin hisob 1 soatga bloklanadi." in Uzbek.
+  static const loginWrongB = 'login.wrong_b';
+
+  /// UI text slot `login.empty_t`, shown as "Login va parolni kiriting" in Uzbek.
+  static const loginEmptyT = 'login.empty_t';
+
+  /// UI text slot `login.empty_b`, shown as "Kirish uchun ikkala maydonni to‘ldiring." in Uzbek.
+  static const loginEmptyB = 'login.empty_b';
+
+  /// UI text slot `login.locked_b`, shown as "Siz vaqtincha bloklangansiz. {} dan keyin qayta urinib ko‘ring." in Uzbek.
+  static const loginLockedB = 'login.locked_b';
+
+  /// UI text slot `login.agree_pre`, shown as "Kirish orqali siz " in Uzbek.
+  static const loginAgreePre = 'login.agree_pre';
+
+  /// UI text slot `login.terms`, shown as "Foydalanish shartlari" in Uzbek.
+  static const loginTerms = 'login.terms';
+
+  /// UI text slot `login.agree_mid`, shown as " va " in Uzbek.
+  static const loginAgreeMid = 'login.agree_mid';
+
+  /// UI text slot `login.privacy`, shown as "Maxfiylik siyosati" in Uzbek.
+  static const loginPrivacy = 'login.privacy';
+
+  /// UI text slot `login.agree_post`, shown as "ga rozilik bildirasiz" in Uzbek.
+  static const loginAgreePost = 'login.agree_post';
+
+  /// UI text slot `legal.updated`, shown as "Oxirgi yangilanish: {}" in Uzbek.
+  static const legalUpdated = 'legal.updated';
+
+  /// UI text slot `legal.empty`, shown as "Hujjat hali e’lon qilinmagan" in Uzbek.
+  static const legalEmpty = 'legal.empty';
+
+  /// UI text slot `legal.empty_desc`, shown as "Matn keyinroq shu yerda paydo bo‘ladi." in Uzbek.
+  static const legalEmptyDesc = 'legal.empty_desc';
+
+  /// UI text slot `support.title`, shown as "Dispetcher bilan bog‘lanish" in Uzbek.
+  static const supportTitle = 'support.title';
+
+  /// UI text slot `support.call`, shown as "Qo‘ng‘iroq qilish" in Uzbek.
+  static const supportCall = 'support.call';
+
+  /// UI text slot `support.telegram`, shown as "Telegram orqali yozish" in Uzbek.
+  static const supportTelegram = 'support.telegram';
+
+  /// UI text slot `support.hint`, shown as "Hisobingizni ochish uchun dispetcherga murojaat qiling. Har kuni 08:00 dan 20:00 gacha ishlaymiz." in Uzbek.
+  static const supportHint = 'support.hint';
+
+  /// UI text slot `support.empty`, shown as "Aloqa ma’lumotlari yo‘q" in Uzbek.
+  static const supportEmpty = 'support.empty';
+
+  /// UI text slot `support.empty_desc`, shown as "Dispetcher kontaktlari hali kiritilmagan." in Uzbek.
+  static const supportEmptyDesc = 'support.empty_desc';
+
+  /// UI text slot `update.title`, shown as "Yangi versiya mavjud" in Uzbek.
+  static const updateTitle = 'update.title';
+
+  /// UI text slot `update.body`, shown as "Ilovaning {} versiyasi chiqdi, sizda {} o‘rnatilgan. Yangilab oling." in Uzbek.
+  static const updateBody = 'update.body';
+
+  /// UI text slot `update.later`, shown as "Keyinroq" in Uzbek.
+  static const updateLater = 'update.later';
+
+  /// UI text slot `update.required_title`, shown as "Ilovani yangilash kerak" in Uzbek.
+  static const updateRequiredTitle = 'update.required_title';
+
+  /// UI text slot `update.required_body`, shown as "Davom etish uchun ilovaning yangi versiyasini o‘rnating." in Uzbek.
+  static const updateRequiredBody = 'update.required_body';
+
+  /// UI text slot `maint.title`, shown as "Texnik ishlar olib borilmoqda" in Uzbek.
+  static const maintTitle = 'maint.title';
+
+  /// UI text slot `maint.body`, shown as "Ilovani yanada yaxshi qilish ustida ishlayapmiz. Tez orada hammasi odatdagidek ishlaydi." in Uzbek.
+  static const maintBody = 'maint.body';
+
+  /// UI text slot `dash.welcome`, shown as "Xush kelibsiz," in Uzbek.
+  static const dashWelcome = 'dash.welcome';
+
+  /// UI text slot `dash.team`, shown as "Jamoa" in Uzbek.
+  static const dashTeam = 'dash.team';
+
+  /// UI text slot `dash.team_mine`, shown as "Jamoam" in Uzbek (the manager's own team shortcut).
+  static const dashTeamMine = 'dash.team_mine';
+
+  /// UI text slot `dash.weekly_title`, shown as "Haftalik ish" in Uzbek.
+  static const dashWeeklyTitle = 'dash.weekly_title';
+
+  /// UI text slot `dash.tasks_word`, shown as "vazifa" in Uzbek.
+  static const dashTasksWord = 'dash.tasks_word';
+
+  /// UI text slot `dash.week_empty`, shown as "Bu hafta hali vazifa berilmagan" in Uzbek.
+  static const dashWeekEmpty = 'dash.week_empty';
+
+  /// UI text slot `dash.top_title`, shown as "Eng faol xodim" in Uzbek.
+  static const dashTopTitle = 'dash.top_title';
+
+  /// UI text slot `dash.this_week`, shown as "· shu hafta" in Uzbek.
+  static const dashThisWeek = 'dash.this_week';
+
+  /// UI text slot `dash.done_of`, shown as "{} tadan {} ta vazifa bajarildi" in Uzbek.
+  static const dashDoneOf = 'dash.done_of';
+
+  /// UI text slot `dash.no_rating_t`, shown as "Hali reyting yo‘q" in Uzbek.
+  static const dashNoRatingT = 'dash.no_rating_t';
+
+  /// UI text slot `dash.no_rating_d`, shown as "Vazifalar bajarilgach shu yerda chiqadi" in Uzbek.
+  static const dashNoRatingD = 'dash.no_rating_d';
+
+  /// UI text slot `dash.pending`, shown as "Tasdiq kutmoqda" in Uzbek.
+  static const dashPending = 'dash.pending';
+
+  /// UI text slot `dash.pending_new`, shown as "Yangi vazifalar" in Uzbek.
+  static const dashPendingNew = 'dash.pending_new';
+
+  /// UI text slot `dash.pending_new_d`, shown as "Tasdiqlansa ish boshlanadi" in Uzbek.
+  static const dashPendingNewD = 'dash.pending_new_d';
+
+  /// UI text slot `dash.pending_client`, shown as "Mijoz vazifalari" in Uzbek.
+  static const dashPendingClient = 'dash.pending_client';
+
+  /// UI text slot `dash.pending_client_d`, shown as "Mijozlar yaratgan vazifalar" in Uzbek.
+  static const dashPendingClientD = 'dash.pending_client_d';
+
+  /// UI text slot `dash.no_mine_t`, shown as "Sizda vazifa yo‘q" in Uzbek.
+  static const dashNoMineT = 'dash.no_mine_t';
+
+  /// UI text slot `dash.no_mine_d`, shown as "O‘zingizga vazifa qo‘shing" in Uzbek.
+  static const dashNoMineD = 'dash.no_mine_d';
+
+  /// UI text slot `dash.no_today_t`, shown as "Bugunga vazifa yo‘q" in Uzbek.
+  static const dashNoTodayT = 'dash.no_today_t';
+
+  /// UI text slot `dash.no_today_d`, shown as "Xodimlarga vazifa berib qo‘ying" in Uzbek.
+  static const dashNoTodayD = 'dash.no_today_d';
+
+  /// UI text slot `dash.days_late_short`, shown as "{} kun kech" in Uzbek.
+  static const dashDaysLateShort = 'dash.days_late_short';
+
+  /// UI text slot `dash.blank_t`, shown as "Hali hech narsa yo‘q" in Uzbek.
+  static const dashBlankT = 'dash.blank_t';
+
+  /// UI text slot `dash.blank_d`, shown as "Jamoangizni qo‘shing va birinchi vazifani yarating" in Uzbek.
+  static const dashBlankD = 'dash.blank_d';
+
+  /// UI text slot `dash.start`, shown as "Ishni boshlang" in Uzbek.
+  static const dashStart = 'dash.start';
+
+  /// UI text slot `dash.add_staff`, shown as "Xodim qo‘shish" in Uzbek.
+  static const dashAddStaff = 'dash.add_staff';
+
+  /// UI text slot `dash.add_staff_d`, shown as "Jamoangizni taklif qiling" in Uzbek.
+  static const dashAddStaffD = 'dash.add_staff_d';
+
+  /// UI text slot `dash.add_client`, shown as "Mijoz qo‘shish" in Uzbek.
+  static const dashAddClient = 'dash.add_client';
+
+  /// UI text slot `dash.add_client_d`, shown as "Mijozlar ro‘yxatini to‘ldiring" in Uzbek.
+  static const dashAddClientD = 'dash.add_client_d';
+
+  /// UI text slot `dash.add_task`, shown as "Vazifa yaratish" in Uzbek.
+  static const dashAddTask = 'dash.add_task';
+
+  /// UI text slot `dash.add_task_d`, shown as "Birinchi vazifani bering" in Uzbek.
+  static const dashAddTaskD = 'dash.add_task_d';
+
+  /// UI text slot `mt.title`, shown as "Mening vazifam" in Uzbek.
+  static const mtTitle = 'mt.title';
+
+  /// UI text slot `mt.more`, shown as "Ko‘proq" in Uzbek.
+  static const mtMore = 'mt.more';
+
+  /// UI text slot `mt.less`, shown as "Kamroq" in Uzbek.
+  static const mtLess = 'mt.less';
+
+  /// UI text slot `mt.info`, shown as "Ma’lumotlar" in Uzbek.
+  static const mtInfo = 'mt.info';
+
+  /// UI text slot `mt.due`, shown as "Muddat" in Uzbek.
+  static const mtDue = 'mt.due';
+
+  /// UI text slot `mt.remind`, shown as "Eslatma" in Uzbek.
+  static const mtRemind = 'mt.remind';
+
+  /// UI text slot `mt.remind_at`, shown as "{} da" in Uzbek.
+  static const mtRemindAt = 'mt.remind_at';
+
+  /// UI text slot `mt.created`, shown as "Yaratilgan" in Uzbek.
+  static const mtCreated = 'mt.created';
+
+  /// UI text slot `mt.address`, shown as "Manzil" in Uzbek.
+  static const mtAddress = 'mt.address';
+
+  /// UI text slot `mt.photos`, shown as "Rasmlar" in Uzbek.
+  static const mtPhotos = 'mt.photos';
+
+  /// UI text slot `mt.n_pcs`, shown as "{} ta" in Uzbek.
+  static const mtNPcs = 'mt.n_pcs';
+
+  /// UI text slot `mt.doc`, shown as "Hujjat" in Uzbek.
+  static const mtDoc = 'mt.doc';
+
+  /// UI text slot `mt.notes`, shown as "Eslatmalarim" in Uzbek.
+  static const mtNotes = 'mt.notes';
+
+  /// UI text slot `mt.failed`, shown as "Bajarilmadi" in Uzbek.
+  static const mtFailed = 'mt.failed';
+
+  /// UI text slot `mt.done`, shown as "Bajarildi" in Uzbek.
+  static const mtDone = 'mt.done';
+
+  /// UI text slot `mt.share`, shown as "Ulashish" in Uzbek.
+  static const mtShare = 'mt.share';
+
+  /// UI text slot `mt.delete`, shown as "O‘chirish" in Uzbek.
+  static const mtDelete = 'mt.delete';
+
+  /// UI text slot `mt.del_t`, shown as "Vazifani o‘chirasizmi?" in Uzbek.
+  static const mtDelT = 'mt.del_t';
+
+  /// UI text slot `mt.del_d`, shown as "Vazifa butunlay o‘chiriladi. Bu amalni ortga qaytarib bo‘lmaydi." in Uzbek.
+  static const mtDelD = 'mt.del_d';
+
+  /// UI text slot `mt.fail_t`, shown as "Nega bajarilmadi?" in Uzbek.
+  static const mtFailT = 'mt.fail_t';
+
+  /// UI text slot `mt.fail_d`, shown as "Sababini qisqacha yozing" in Uzbek.
+  static const mtFailD = 'mt.fail_d';
+
+  /// UI text slot `mt.fail_hint`, shown as "Masalan: yetkazib beruvchi javob bermadi" in Uzbek.
+  static const mtFailHint = 'mt.fail_hint';
+
+  /// UI text slot `mt.fail_required`, shown as "Sababini yozing" in Uzbek.
+  static const mtFailRequired = 'mt.fail_required';
+
+  /// UI text slot `mt.map_yandex`, shown as "Yandex Map orqali ochish" in Uzbek.
+  static const mtMapYandex = 'mt.map_yandex';
+
+  /// UI text slot `mt.map_google`, shown as "Google Map orqali ochish" in Uzbek.
+  static const mtMapGoogle = 'mt.map_google';
+
+  /// UI text slot `mt.note_hint`, shown as "Eslatma yozing…" in Uzbek.
+  static const mtNoteHint = 'mt.note_hint';
+
+  /// UI text slot `mt.last`, shown as "Oxirgi" in Uzbek.
+  static const mtLast = 'mt.last';
+
+  /// UI text slot `mt.hours_left`, shown as "· {} soat" in Uzbek.
+  static const mtHoursLeft = 'mt.hours_left';
+
+  /// UI text slot `mt.no_notes`, shown as "Hali eslatma yo‘q" in Uzbek.
+  static const mtNoNotes = 'mt.no_notes';
+
+  /// UI text slot `mt.pages`, shown as "{} / {}" in Uzbek.
+  static const mtPages = 'mt.pages';
+
+  /// UI text slot `tl.search`, shown as "Vazifalarni qidirish" in Uzbek.
+  static const tlSearch = 'tl.search';
+
+  /// UI text slot `tl.done_tab`, shown as "Bajarilgan" in Uzbek.
+  static const tlDoneTab = 'tl.done_tab';
+
+  /// UI text slot `tl.fail_tab`, shown as "Bajarilmagan" in Uzbek.
+  static const tlFailTab = 'tl.fail_tab';
+
+  /// UI text slot `tl.e_all_t`, shown as "Hali vazifalar yo‘q" in Uzbek.
+  static const tlEAllT = 'tl.e_all_t';
+
+  /// UI text slot `tl.e_all_d`, shown as "Yangi vazifa qo‘shing — u shu yerda ro‘yxat bo‘lib ko‘rinadi" in Uzbek.
+  static const tlEAllD = 'tl.e_all_d';
+
+  /// UI text slot `tl.e_new_t`, shown as "Yangi vazifalar yo‘q" in Uzbek.
+  static const tlENewT = 'tl.e_new_t';
+
+  /// UI text slot `tl.e_new_d`, shown as "Yaqinda qo‘shilgan, hali boshlanmagan vazifalar shu yerda ko‘rinadi" in Uzbek.
+  static const tlENewD = 'tl.e_new_d';
+
+  /// UI text slot `tl.e_prog_t`, shown as "Jarayondagi vazifalar yo‘q" in Uzbek.
+  static const tlEProgT = 'tl.e_prog_t';
+
+  /// UI text slot `tl.e_prog_d`, shown as "Xodimlar hozir bajarayotgan vazifalar shu yerda ko‘rinadi" in Uzbek.
+  static const tlEProgD = 'tl.e_prog_d';
+
+  /// UI text slot `tl.e_over_t`, shown as "Kechikkan vazifalar yo‘q" in Uzbek.
+  static const tlEOverT = 'tl.e_over_t';
+
+  /// UI text slot `tl.e_over_d`, shown as "Barcha vazifalar o‘z vaqtida bajarilmoqda — ajoyib natija!" in Uzbek.
+  static const tlEOverD = 'tl.e_over_d';
+
+  /// UI text slot `tl.e_done_t`, shown as "Bajarilgan vazifalar yo‘q" in Uzbek.
+  static const tlEDoneT = 'tl.e_done_t';
+
+  /// UI text slot `tl.e_done_d`, shown as "Xodimlar tugatgan vazifalar shu yerda ko‘rinadi" in Uzbek.
+  static const tlEDoneD = 'tl.e_done_d';
+
+  /// UI text slot `tl.e_fail_t`, shown as "Bajarilmagan vazifalar yo‘q" in Uzbek.
+  static const tlEFailT = 'tl.e_fail_t';
+
+  /// UI text slot `tl.e_fail_d`, shown as "Bajarilmay qolgan vazifalar sababi bilan shu yerda ko‘rinadi" in Uzbek.
+  static const tlEFailD = 'tl.e_fail_d';
+
+  /// UI text slot `flt.title`, shown as "Filtr" in Uzbek.
+  static const fltTitle = 'flt.title';
+
+  /// UI text slot `flt.month`, shown as "Shu oy" in Uzbek.
+  static const fltMonth = 'flt.month';
+
+  /// UI text slot `flt.pick_date`, shown as "Sanani tanlash" in Uzbek.
+  static const fltPickDate = 'flt.pick_date';
+
+  /// UI text slot `flt.all_people`, shown as "Barcha ijrochilar" in Uzbek.
+  static const fltAllPeople = 'flt.all_people';
+
+  /// UI text slot `flt.show`, shown as "Natijani ko‘rsatish" in Uzbek.
+  static const fltShow = 'flt.show';
+
+  /// UI text slot `flt.range`, shown as "Sana oralig‘i" in Uzbek.
+  static const fltRange = 'flt.range';
+
+  /// UI text slot `flt.range_sel`, shown as "Tanlangan oraliq" in Uzbek.
+  static const fltRangeSel = 'flt.range_sel';
+
+  /// UI text slot `flt.range_none`, shown as "Boshlanish va tugash sanasini tanlang" in Uzbek.
+  static const fltRangeNone = 'flt.range_none';
+
+  /// UI text slot `flt.select`, shown as "Tanlash" in Uzbek.
+  static const fltSelect = 'flt.select';
+
+  /// UI text slot `flt.people`, shown as "Ijrochilar" in Uzbek.
+  static const fltPeople = 'flt.people';
+
+  /// UI text slot `flt.n_selected`, shown as "{} ta tanlandi" in Uzbek.
+  static const fltNSelected = 'flt.n_selected';
+
+  /// UI text slot `flt.search_staff`, shown as "Xodimni qidirish" in Uzbek.
+  static const fltSearchStaff = 'flt.search_staff';
+
+  /// UI text slot `flt.staff_empty`, shown as "Xodim topilmadi" in Uzbek.
+  static const fltStaffEmpty = 'flt.staff_empty';
+
+  /// UI text slot `td.title`, shown as "Vazifa tafsiloti" in Uzbek.
+  static const tdTitle = 'td.title';
+
+  /// UI text slot `td.status`, shown as "Holat" in Uzbek.
+  static const tdStatus = 'td.status';
+
+  /// UI text slot `td.org`, shown as "Tashkilot nomi" in Uzbek.
+  static const tdOrg = 'td.org';
+
+  /// UI text slot `td.client`, shown as "Mijoz" in Uzbek.
+  static const tdClient = 'td.client';
+
+  /// UI text slot `td.price`, shown as "Narx" in Uzbek.
+  static const tdPrice = 'td.price';
+
+  /// UI text slot `td.creator`, shown as "Yaratgan" in Uzbek.
+  static const tdCreator = 'td.creator';
+
+  /// UI text slot `td.created_at`, shown as "Yaratilgan sana" in Uzbek.
+  static const tdCreatedAt = 'td.created_at';
+
+  /// UI text slot `td.assignees`, shown as "Ijrochilar" in Uzbek.
+  static const tdAssignees = 'td.assignees';
+
+  /// UI text slot `td.more_people`, shown as "Yana {} kishi" in Uzbek.
+  static const tdMorePeople = 'td.more_people';
+
+  /// UI text slot `td.sum`, shown as "{} so‘m" in Uzbek.
+  static const tdSum = 'td.sum';
+
+  /// UI text slot `td.no_assignees`, shown as "Ijrochi biriktirilmagan" in Uzbek.
+  static const tdNoAssignees = 'td.no_assignees';
+
+  /// UI text slot `pf.help`, shown as "Yordam va dispetcher" in Uzbek.
+  static const pfHelp = 'pf.help';
+
+  /// UI text slot `pf.help_d`, shown as "Savol yoki muammo bo‘lsa" in Uzbek.
+  static const pfHelpD = 'pf.help_d';
+
+  /// UI text slot `pf.hours`, shown as "Har kuni 08:00 – 20:00" in Uzbek.
+  static const pfHours = 'pf.hours';
+
+  /// UI text slot `pf.signout_q`, shown as "Hisobdan chiqasizmi?" in Uzbek.
+  static const pfSignoutQ = 'pf.signout_q';
+
+  /// UI text slot `pf.signout_d`, shown as "Qayta kirish uchun login va parolingizni kiritishingiz kerak bo‘ladi." in Uzbek.
+  static const pfSignoutD = 'pf.signout_d';
+
+  /// UI text slot `sx.root`, shown as "Hisobot" in Uzbek.
+  static const sxRoot = 'sx.root';
+
+  /// UI text slot `sx.fin`, shown as "Moliya" in Uzbek.
+  static const sxFin = 'sx.fin';
+
+  /// UI text slot `sx.fin_d`, shown as "Daromad, reja va natija" in Uzbek.
+  static const sxFinD = 'sx.fin_d';
+
+  /// UI text slot `sx.tasks`, shown as "Vazifalar statistikasi" in Uzbek.
+  static const sxTasks = 'sx.tasks';
+
+  /// UI text slot `sx.tasks_d`, shown as "Holatlar va bajarilish" in Uzbek.
+  static const sxTasksD = 'sx.tasks_d';
+
+  /// UI text slot `sx.mine`, shown as "Mening statistikam" in Uzbek.
+  static const sxMine = 'sx.mine';
+
+  /// UI text slot `sx.mine_d`, shown as "Shaxsiy natijalaringiz" in Uzbek.
+  static const sxMineD = 'sx.mine_d';
+
+  /// UI text slot `sx.clients`, shown as "Mijozlar" in Uzbek.
+  static const sxClients = 'sx.clients';
+
+  /// UI text slot `sx.clients_d`, shown as "Yangi mijozlar va ro‘yxat" in Uzbek.
+  static const sxClientsD = 'sx.clients_d';
+
+  /// UI text slot `sx.staff`, shown as "Xodimlar" in Uzbek.
+  static const sxStaff = 'sx.staff';
+
+  /// UI text slot `sx.mgr`, shown as "Menejerlar" in Uzbek.
+  static const sxMgr = 'sx.mgr';
+
+  /// UI text slot `sx.list_d`, shown as "Ro‘yxati va statistikasi" in Uzbek.
+  static const sxListD = 'sx.list_d';
+
+  /// UI text slot `sx.week`, shown as "Hafta" in Uzbek.
+  static const sxWeek = 'sx.week';
+
+  /// UI text slot `sx.month`, shown as "Oy" in Uzbek.
+  static const sxMonth = 'sx.month';
+
+  /// UI text slot `sx.year`, shown as "Yil" in Uzbek.
+  static const sxYear = 'sx.year';
+
+  /// UI text slot `sx.vs_week`, shown as "O‘tgan haftaga nisbatan" in Uzbek.
+  static const sxVsWeek = 'sx.vs_week';
+
+  /// UI text slot `sx.vs_month`, shown as "O‘tgan oyga nisbatan" in Uzbek.
+  static const sxVsMonth = 'sx.vs_month';
+
+  /// UI text slot `sx.vs_year`, shown as "O‘tgan yilga nisbatan" in Uzbek.
+  static const sxVsYear = 'sx.vs_year';
+
+  /// UI text slot `sx.week_n`, shown as "{}-hafta" in Uzbek.
+  static const sxWeekN = 'sx.week_n';
+
+  /// UI text slot `sx.income`, shown as "Daromad" in Uzbek.
+  static const sxIncome = 'sx.income';
+
+  /// UI text slot `sx.done_tasks`, shown as "Bajarilgan vazifalar" in Uzbek.
+  static const sxDoneTasks = 'sx.done_tasks';
+
+  /// UI text slot `sx.avg_price`, shown as "O‘rtacha narx" in Uzbek.
+  static const sxAvgPrice = 'sx.avg_price';
+
+  /// UI text slot `sx.plan`, shown as "Reja va natija" in Uzbek.
+  static const sxPlan = 'sx.plan';
+
+  /// UI text slot `sx.result`, shown as "Natija" in Uzbek.
+  static const sxResult = 'sx.result';
+
+  /// UI text slot `sx.plan_word`, shown as "Reja" in Uzbek.
+  static const sxPlanWord = 'sx.plan_word';
+
+  /// UI text slot `sx.paid`, shown as "To‘langan vazifalar" in Uzbek.
+  static const sxPaid = 'sx.paid';
+
+  /// UI text slot `sx.pending`, shown as "Kutilayotgan to‘lovlar" in Uzbek.
+  static const sxPending = 'sx.pending';
+
+  /// UI text slot `sx.canceled`, shown as "Bekor qilingan vazifalar" in Uzbek.
+  static const sxCanceled = 'sx.canceled';
+
+  /// UI text slot `sx.n_tasks`, shown as "{} ta vazifa" in Uzbek.
+  static const sxNTasks = 'sx.n_tasks';
+
+  /// UI text slot `sx.n_pcs`, shown as "{} ta" in Uzbek.
+  static const sxNPcs = 'sx.n_pcs';
+
+  /// UI text slot `sx.n_people`, shown as "{} kishi" in Uzbek.
+  static const sxNPeople = 'sx.n_people';
+
+  /// UI text slot `sx.total_tasks`, shown as "Jami vazifalar" in Uzbek.
+  static const sxTotalTasks = 'sx.total_tasks';
+
+  /// UI text slot `sx.canc_short`, shown as "Bekor qilingan" in Uzbek.
+  static const sxCancShort = 'sx.canc_short';
+
+  /// UI text slot `sx.on_time`, shown as "O‘z vaqtida bajarilgan" in Uzbek.
+  static const sxOnTime = 'sx.on_time';
+
+  /// UI text slot `sx.on_time_d`, shown as "Muddatigacha yopilgan" in Uzbek.
+  static const sxOnTimeD = 'sx.on_time_d';
+
+  /// UI text slot `sx.overdue`, shown as "Muddati o‘tgan" in Uzbek.
+  static const sxOverdue = 'sx.overdue';
+
+  /// UI text slot `sx.overdue_d`, shown as "Muddatidan kechikkan" in Uzbek.
+  static const sxOverdueD = 'sx.overdue_d';
+
+  /// UI text slot `sx.overdue_none`, shown as "Kechikkan vazifa yo‘q" in Uzbek.
+  static const sxOverdueNone = 'sx.overdue_none';
+
+  /// UI text slot `sx.avg_time`, shown as "O‘rtacha bajarish vaqti" in Uzbek.
+  static const sxAvgTime = 'sx.avg_time';
+
+  /// UI text slot `sx.avg_time_d`, shown as "Yaratilgandan yopilgunga" in Uzbek.
+  static const sxAvgTimeD = 'sx.avg_time_d';
+
+  /// UI text slot `sx.n_days`, shown as "{} kun" in Uzbek.
+  static const sxNDays = 'sx.n_days';
+
+  /// UI text slot `sx.my_created`, shown as "Yaratgan vazifalarim" in Uzbek.
+  static const sxMyCreated = 'sx.my_created';
+
+  /// UI text slot `sx.done_short`, shown as "Bajarilgan" in Uzbek.
+  static const sxDoneShort = 'sx.done_short';
+
+  /// UI text slot `sx.created_tasks`, shown as "Yaratilgan vazifalar" in Uzbek.
+  static const sxCreatedTasks = 'sx.created_tasks';
+
+  /// UI text slot `sx.my_clients`, shown as "Qo‘shgan mijozlarim" in Uzbek.
+  static const sxMyClients = 'sx.my_clients';
+
+  /// UI text slot `sx.my_clients_d`, shown as "Siz kiritgan yangi mijozlar" in Uzbek.
+  static const sxMyClientsD = 'sx.my_clients_d';
+
+  /// UI text slot `sx.new_clients`, shown as "Yangi mijozlar" in Uzbek.
+  static const sxNewClients = 'sx.new_clients';
+
+  /// UI text slot `sx.all_clients`, shown as "Jami mijozlar" in Uzbek.
+  static const sxAllClients = 'sx.all_clients';
+
+  /// UI text slot `sx.orgs`, shown as "Tashkilotlar" in Uzbek.
+  static const sxOrgs = 'sx.orgs';
+
+  /// UI text slot `sx.tab_new`, shown as "Yangi" in Uzbek.
+  static const sxTabNew = 'sx.tab_new';
+
+  /// UI text slot `sx.org`, shown as "Tashkilot" in Uzbek.
+  static const sxOrg = 'sx.org';
+
+  /// UI text slot `sx.person`, shown as "Jismoniy shaxs" in Uzbek.
+  static const sxPerson = 'sx.person';
+
+  /// UI text slot `sx.n_task_short`, shown as "{} vazifa" in Uzbek.
+  static const sxNTaskShort = 'sx.n_task_short';
+
+  /// UI text slot `sx.no_new_caption`, shown as "Bu davrda yangi mijoz qo‘shilmadi" in Uzbek.
+  static const sxNoNewCaption = 'sx.no_new_caption';
+
+  /// UI text slot `sx.no_new_t`, shown as "Yangi mijoz yo‘q" in Uzbek.
+  static const sxNoNewT = 'sx.no_new_t';
+
+  /// UI text slot `sx.no_new_d`, shown as "Bu davrda mijoz qo‘shilmagan. Barcha mijozlarni “Hammasi”da ko‘ring" in Uzbek.
+  static const sxNoNewD = 'sx.no_new_d';
+
+  /// UI text slot `sx.all_staff`, shown as "Jami xodimlar" in Uzbek.
+  static const sxAllStaff = 'sx.all_staff';
+
+  /// UI text slot `sx.on_time_short`, shown as "O‘z vaqtida" in Uzbek.
+  static const sxOnTimeShort = 'sx.on_time_short';
+
+  /// UI text slot `sx.top_staff`, shown as "Eng faol xodimlar" in Uzbek.
+  static const sxTopStaff = 'sx.top_staff';
+
+  /// UI text slot `sx.pct_on_time`, shown as "{}% o‘z vaqtida" in Uzbek.
+  static const sxPctOnTime = 'sx.pct_on_time';
+
+  /// UI text slot `sx.did`, shown as "bajardi" in Uzbek.
+  static const sxDid = 'sx.did';
+
+  /// UI text slot `sx.all_mgr`, shown as "Jami menejerlar" in Uzbek.
+  static const sxAllMgr = 'sx.all_mgr';
+
+  /// UI text slot `sx.prev_same`, shown as "Oldingi davrda {} kishi" in Uzbek.
+  static const sxPrevSame = 'sx.prev_same';
+
+  /// UI text slot `sx.mgr_result`, shown as "Menejerlar natijasi" in Uzbek.
+  static const sxMgrResult = 'sx.mgr_result';
+
+  /// UI text slot `sx.n_created`, shown as "{} ta vazifa yaratdi" in Uzbek.
+  static const sxNCreated = 'sx.n_created';
+
+  /// UI text slot `sx.income_low`, shown as "daromad" in Uzbek.
+  static const sxIncomeLow = 'sx.income_low';
+
+  /// UI text slot `sx.e_fin_t`, shown as "Bu davrda daromad yo‘q" in Uzbek.
+  static const sxEFinT = 'sx.e_fin_t';
+
+  /// UI text slot `sx.e_fin_d`, shown as "Vazifalar bajarilib, to‘lov qilinganda daromad shu yerda ko‘rinadi" in Uzbek.
+  static const sxEFinD = 'sx.e_fin_d';
+
+  /// UI text slot `sx.e_tasks_t`, shown as "Bu davrda vazifalar yo‘q" in Uzbek.
+  static const sxETasksT = 'sx.e_tasks_t';
+
+  /// UI text slot `sx.e_tasks_d`, shown as "Vazifa yaratilganda uning holati va bajarilishi shu yerda ko‘rinadi" in Uzbek.
+  static const sxETasksD = 'sx.e_tasks_d';
+
+  /// UI text slot `sx.e_mine_t`, shown as "Bu davrda faollik yo‘q" in Uzbek.
+  static const sxEMineT = 'sx.e_mine_t';
+
+  /// UI text slot `sx.e_mine_d`, shown as "Vazifa yaratganingizda natijalaringiz shu yerda ko‘rinadi" in Uzbek.
+  static const sxEMineD = 'sx.e_mine_d';
+
+  /// UI text slot `sx.e_clients_t`, shown as "Hali mijozlar yo‘q" in Uzbek.
+  static const sxEClientsT = 'sx.e_clients_t';
+
+  /// UI text slot `sx.e_clients_d`, shown as "Mijoz qo‘shilganda u shu yerda ro‘yxat bo‘lib ko‘rinadi" in Uzbek.
+  static const sxEClientsD = 'sx.e_clients_d';
+
+  /// UI text slot `sx.e_staff_t`, shown as "Hali xodimlar yo‘q" in Uzbek.
+  static const sxEStaffT = 'sx.e_staff_t';
+
+  /// UI text slot `sx.e_staff_d`, shown as "Xodim qo‘shilganda uning natijalari shu yerda ko‘rinadi" in Uzbek.
+  static const sxEStaffD = 'sx.e_staff_d';
+
+  /// UI text slot `sx.e_mgr_t`, shown as "Hali menejerlar yo‘q" in Uzbek.
+  static const sxEMgrT = 'sx.e_mgr_t';
+
+  /// UI text slot `sx.e_mgr_d`, shown as "Menejer qo‘shilganda uning natijalari shu yerda ko‘rinadi" in Uzbek.
+  static const sxEMgrD = 'sx.e_mgr_d';
+
+  /// UI text slot `sx.err_t`, shown as "Ma’lumotni yuklab bo‘lmadi" in Uzbek.
+  static const sxErrT = 'sx.err_t';
+
+  /// UI text slot `sx.err_d`, shown as "Internet aloqasini tekshirib, qaytadan urinib ko‘ring" in Uzbek.
+  static const sxErrD = 'sx.err_d';
+
+  /// UI text slot `sx.exporting`, shown as "Hisobot tayyorlanmoqda…" in Uzbek.
+  static const sxExporting = 'sx.exporting';
+
+  /// UI text slot `sx.exported`, shown as "Hisobot yuklab olindi" in Uzbek.
+  static const sxExported = 'sx.exported';
+
+  /// UI text slot `ntf.err_t`, shown as "Yuklab bo‘lmadi" in Uzbek.
+  static const ntfErrT = 'ntf.err_t';
+
+  /// UI text slot `ntf.err_d`, shown as "Internet aloqasini tekshirib, qayta urinib ko‘ring" in Uzbek.
+  static const ntfErrD = 'ntf.err_d';
+
+  /// UI text slot `ntf.empty_unread_t`, shown as "Hammasi o‘qilgan" in Uzbek.
+  static const ntfEmptyUnreadT = 'ntf.empty_unread_t';
+
+  /// UI text slot `ntf.empty_unread_d`, shown as "Yangi bildirishnoma kelganda shu yerda ko‘rinadi" in Uzbek.
+  static const ntfEmptyUnreadD = 'ntf.empty_unread_d';
+
+  /// UI text slot `ntf.mark_all_a11y`, shown as "Hammasi o‘qildi" in Uzbek.
+  static const ntfMarkAllA11y = 'ntf.mark_all_a11y';
+
+  /// UI text slot `tm.title`, shown as "Jamoa" in Uzbek.
+  static const tmTitle = 'tm.title';
+
+  /// UI text slot `tm.search`, shown as "Ism yoki telefon" in Uzbek.
+  static const tmSearch = 'tm.search';
+
+  /// UI text slot `tm.tab_staff`, shown as "Xodimlar" in Uzbek.
+  static const tmTabStaff = 'tm.tab_staff';
+
+  /// UI text slot `tm.tab_mgr`, shown as "Menejerlar" in Uzbek.
+  static const tmTabMgr = 'tm.tab_mgr';
+
+  /// UI text slot `tm.tab_person`, shown as "Jismoniy shaxs" in Uzbek.
+  static const tmTabPerson = 'tm.tab_person';
+
+  /// UI text slot `tm.tab_org`, shown as "Tashkilot" in Uzbek.
+  static const tmTabOrg = 'tm.tab_org';
+
+  /// UI text slot `tm.n_tasks`, shown as "vazifa" in Uzbek.
+  static const tmNTasks = 'tm.n_tasks';
+
+  /// UI text slot `tm.n_requests`, shown as "{} so‘rov" in Uzbek.
+  static const tmNRequests = 'tm.n_requests';
+
+  /// UI text slot `tm.no_requests`, shown as "So‘rov yo‘q" in Uzbek.
+  static const tmNoRequests = 'tm.no_requests';
+
+  /// UI text slot `tm.e_all_t`, shown as "Jamoada hali hech kim yo‘q" in Uzbek.
+  static const tmEAllT = 'tm.e_all_t';
+
+  /// UI text slot `tm.e_all_d`, shown as "Xodim yoki menejer qo‘shing — ular shu yerda ko‘rinadi" in Uzbek.
+  static const tmEAllD = 'tm.e_all_d';
+
+  /// UI text slot `tm.e_staff_t`, shown as "Hali xodim yo‘q" in Uzbek.
+  static const tmEStaffT = 'tm.e_staff_t';
+
+  /// UI text slot `tm.e_staff_d`, shown as "Xodimlar sizdan vazifa olib, uni bajaradi va natijasini yuboradi" in Uzbek.
+  static const tmEStaffD = 'tm.e_staff_d';
+
+  /// UI text slot `tm.e_mgr_t`, shown as "Hali menejer yo‘q" in Uzbek.
+  static const tmEMgrT = 'tm.e_mgr_t';
+
+  /// UI text slot `tm.e_mgr_d`, shown as "Menejer xodimlarga vazifa berib, nazorat qiladi" in Uzbek.
+  static const tmEMgrD = 'tm.e_mgr_d';
+
+  /// UI text slot `tm.e_cl_all_t`, shown as "Hali mijozlar yo‘q" in Uzbek.
+  static const tmEClAllT = 'tm.e_cl_all_t';
+
+  /// UI text slot `tm.e_cl_all_d`, shown as "Yangi mijoz qo‘shing — ular shu yerda ro‘yxat bo‘lib ko‘rinadi" in Uzbek.
+  static const tmEClAllD = 'tm.e_cl_all_d';
+
+  /// UI text slot `tm.e_person_t`, shown as "Jismoniy shaxslar yo‘q" in Uzbek.
+  static const tmEPersonT = 'tm.e_person_t';
+
+  /// UI text slot `tm.e_person_d`, shown as "Jismoniy shaxs sifatida qo‘shilgan mijozlar shu yerda ko‘rinadi" in Uzbek.
+  static const tmEPersonD = 'tm.e_person_d';
+
+  /// UI text slot `tm.e_org_t`, shown as "Tashkilotlar yo‘q" in Uzbek.
+  static const tmEOrgT = 'tm.e_org_t';
+
+  /// UI text slot `tm.e_org_d`, shown as "Tashkilot sifatida qo‘shilgan mijozlar shu yerda ko‘rinadi" in Uzbek.
+  static const tmEOrgD = 'tm.e_org_d';
+
+  /// UI text slot `em.title`, shown as "Xodim profili" in Uzbek.
+  static const emTitle = 'em.title';
+
+  /// UI text slot `em.tasks`, shown as "Vazifalar" in Uzbek.
+  static const emTasks = 'em.tasks';
+
+  /// UI text slot `em.all`, shown as "Barchasi" in Uzbek.
+  static const emAll = 'em.all';
+
+  /// UI text slot `em.done`, shown as "Bajarilgan" in Uzbek.
+  static const emDone = 'em.done';
+
+  /// UI text slot `em.failed`, shown as "Bajarilmagan" in Uzbek.
+  static const emFailed = 'em.failed';
+
+  /// UI text slot `em.today`, shown as "Bugungi vazifalar" in Uzbek.
+  static const emToday = 'em.today';
+
+  /// UI text slot `em.no_today_t`, shown as "Bugun vazifa yo‘q" in Uzbek.
+  static const emNoTodayT = 'em.no_today_t';
+
+  /// UI text slot `em.no_today_d`, shown as "Bu xodimga bugunga vazifa berilmagan" in Uzbek.
+  static const emNoTodayD = 'em.no_today_d';
+
+  /// UI text slot `em.tasks_of`, shown as "{} vazifalari" in Uzbek.
+  static const emTasksOf = 'em.tasks_of';
+
+  /// UI text slot `em.e_all_t`, shown as "Hali vazifa yo‘q" in Uzbek.
+  static const emEAllT = 'em.e_all_t';
+
+  /// UI text slot `em.e_all_d`, shown as "Bu xodimga hali birorta ham vazifa berilmagan" in Uzbek.
+  static const emEAllD = 'em.e_all_d';
+
+  /// UI text slot `em.e_done_t`, shown as "Bajarilgan vazifa yo‘q" in Uzbek.
+  static const emEDoneT = 'em.e_done_t';
+
+  /// UI text slot `em.e_done_d`, shown as "Xodim vazifani bajarganda, u shu yerda ko‘rinadi" in Uzbek.
+  static const emEDoneD = 'em.e_done_d';
+
+  /// UI text slot `em.e_fail_t`, shown as "Bajarilmagan vazifa yo‘q" in Uzbek.
+  static const emEFailT = 'em.e_fail_t';
+
+  /// UI text slot `em.e_fail_d`, shown as "Ajoyib! Xodim barcha vazifalarini o‘z vaqtida bajargan" in Uzbek.
+  static const emEFailD = 'em.e_fail_d';
+
+  /// UI text slot `wz.title`, shown as "Yangi vazifa" in Uzbek.
+  static const wzTitle = 'wz.title';
+
+  /// UI text slot `wz.step_n`, shown as "{}-qadam, 5 tadan" in Uzbek.
+  static const wzStepN = 'wz.step_n';
+
+  /// UI text slot `wz.s1`, shown as "Mijoz turi" in Uzbek.
+  static const wzS1 = 'wz.s1';
+
+  /// UI text slot `wz.s2`, shown as "Vazifa haqida" in Uzbek.
+  static const wzS2 = 'wz.s2';
+
+  /// UI text slot `wz.s3`, shown as "Muddat va joy" in Uzbek.
+  static const wzS3 = 'wz.s3';
+
+  /// UI text slot `wz.s4`, shown as "Kimga" in Uzbek.
+  static const wzS4 = 'wz.s4';
+
+  /// UI text slot `wz.s5`, shown as "Tekshirish" in Uzbek.
+  static const wzS5 = 'wz.s5';
+
+  /// UI text slot `wz.person`, shown as "Jismoniy shaxs" in Uzbek.
+  static const wzPerson = 'wz.person';
+
+  /// UI text slot `wz.person_d`, shown as "Alohida inson uchun vazifa" in Uzbek.
+  static const wzPersonD = 'wz.person_d';
+
+  /// UI text slot `wz.org`, shown as "Tashkilot" in Uzbek.
+  static const wzOrg = 'wz.org';
+
+  /// UI text slot `wz.org_d`, shown as "Yuridik shaxs uchun vazifa" in Uzbek.
+  static const wzOrgD = 'wz.org_d';
+
+  /// UI text slot `wz.org_name`, shown as "Tashkilot nomi" in Uzbek.
+  static const wzOrgName = 'wz.org_name';
+
+  /// UI text slot `wz.org_hint`, shown as "Yashil Bog‘ MChJ" in Uzbek.
+  static const wzOrgHint = 'wz.org_hint';
+
+  /// UI text slot `wz.person_name`, shown as "Mijoz ismi" in Uzbek.
+  static const wzPersonName = 'wz.person_name';
+
+  /// UI text slot `wz.next`, shown as "Keyingi" in Uzbek.
+  static const wzNext = 'wz.next';
+
+  /// UI text slot `wz.task_name`, shown as "Vazifa nomi" in Uzbek.
+  static const wzTaskName = 'wz.task_name';
+
+  /// UI text slot `wz.desc`, shown as "Tavsif" in Uzbek.
+  static const wzDesc = 'wz.desc';
+
+  /// UI text slot `wz.price`, shown as "Narx" in Uzbek.
+  static const wzPrice = 'wz.price';
+
+  /// UI text slot `wz.cur_uzs`, shown as "so‘m" in Uzbek.
+  static const wzCurUzs = 'wz.cur_uzs';
+
+  /// UI text slot `wz.cur_usd`, shown as "$" in Uzbek.
+  static const wzCurUsd = 'wz.cur_usd';
+
+  /// UI text slot `wz.due`, shown as "Muddat va vaqt" in Uzbek.
+  static const wzDue = 'wz.due';
+
+  /// UI text slot `wz.address`, shown as "Manzil" in Uzbek.
+  static const wzAddress = 'wz.address';
+
+  /// UI text slot `wz.who_hint`, shown as "Vazifa kimga beriladi?" in Uzbek.
+  static const wzWhoHint = 'wz.who_hint';
+
+  /// UI text slot `wz.n_picked`, shown as "{} ta tanlandi" in Uzbek.
+  static const wzNPicked = 'wz.n_picked';
+
+  /// UI text slot `wz.client_card`, shown as "Mijoz" in Uzbek.
+  static const wzClientCard = 'wz.client_card';
+
+  /// UI text slot `wz.change`, shown as "O‘zgartirish" in Uzbek.
+  static const wzChange = 'wz.change';
+
+  /// UI text slot `wz.create_send`, shown as "Yaratish va yuborish" in Uzbek.
+  static const wzCreateSend = 'wz.create_send';
+
+  /// UI text slot `wz.ok_t`, shown as "Vazifa yaratildi" in Uzbek.
+  static const wzOkT = 'wz.ok_t';
+
+  /// UI text slot `wz.ok_d`, shown as "Vazifa ijrochilarga yuborildi" in Uzbek.
+  static const wzOkD = 'wz.ok_d';
+
+  /// UI text slot `wz.assignees_card`, shown as "Ijrochilar" in Uzbek.
+  static const wzAssigneesCard = 'wz.assignees_card';
+
+  /// UI text slot `wz.when_card`, shown as "Muddat va joy" in Uzbek.
+  static const wzWhenCard = 'wz.when_card';
+
+  /// UI text slot `wz.need_org`, shown as "Tashkilot nomini kiriting" in Uzbek.
+  static const wzNeedOrg = 'wz.need_org';
+
+  /// UI text slot `ch2.deleted`, shown as "Xabar o‘chirildi" in Uzbek.
+  static const ch2Deleted = 'ch2.deleted';
+
+  /// UI text slot `ch2.edited`, shown as "tahrirlandi" in Uzbek.
+  static const ch2Edited = 'ch2.edited';
+
+  /// UI text slot `ch2.pinned`, shown as "Pin qilingan xabar" in Uzbek.
+  static const ch2Pinned = 'ch2.pinned';
+
+  /// UI text slot `ch2.copy`, shown as "Nusxa olish" in Uzbek.
+  static const ch2Copy = 'ch2.copy';
+
+  /// UI text slot `ch2.edit`, shown as "Tahrirlash" in Uzbek.
+  static const ch2Edit = 'ch2.edit';
+
+  /// UI text slot `ch2.pin`, shown as "Pin qilish" in Uzbek.
+  static const ch2Pin = 'ch2.pin';
+
+  /// UI text slot `ch2.unpin`, shown as "Pinni olib tashlash" in Uzbek.
+  static const ch2Unpin = 'ch2.unpin';
+
+  /// UI text slot `ch2.delete`, shown as "O‘chirish" in Uzbek.
+  static const ch2Delete = 'ch2.delete';
+
+  /// UI text slot `ch2.del_t`, shown as "Xabarni o‘chirasizmi?" in Uzbek.
+  static const ch2DelT = 'ch2.del_t';
+
+  /// UI text slot `ch2.del_d`, shown as "Xabar hammaga o‘chiriladi. Bu amalni ortga qaytarib bo‘lmaydi." in Uzbek.
+  static const ch2DelD = 'ch2.del_d';
+
+  /// UI text slot `ch2.editing`, shown as "Xabarni tahrirlash" in Uzbek.
+  static const ch2Editing = 'ch2.editing';
+
+  /// UI text slot `ch2.copied`, shown as "Nusxa olindi" in Uzbek.
+  static const ch2Copied = 'ch2.copied';
+
+  /// UI text slot `ch2.members_online`, shown as "{} a’zo · {} onlayn" in Uzbek.
+  static const ch2MembersOnline = 'ch2.members_online';
+
+  /// UI text slot `ch2.write`, shown as "Xabar" in Uzbek.
+  static const ch2Write = 'ch2.write';
+
+  /// UI text slot `ch2.mute`, shown as "Ovozsiz" in Uzbek.
+  static const ch2Mute = 'ch2.mute';
+
+  /// UI text slot `ch2.unmute`, shown as "Ovozni yoqish" in Uzbek.
+  static const ch2Unmute = 'ch2.unmute';
+
+  /// UI text slot `ch2.members`, shown as "A’zolar" in Uzbek.
+  static const ch2Members = 'ch2.members';
+
+  /// UI text slot `ch2.add_member`, shown as "A’zo qo‘shish" in Uzbek.
+  static const ch2AddMember = 'ch2.add_member';
+
+  /// UI text slot `ch2.leave`, shown as "Guruhdan chiqish" in Uzbek.
+  static const ch2Leave = 'ch2.leave';
+
+  /// UI text slot `ch2.leave_t`, shown as "Guruhdan chiqasizmi?" in Uzbek.
+  static const ch2LeaveT = 'ch2.leave_t';
+
+  /// UI text slot `ch2.leave_d`, shown as "Siz “{}” guruhidan chiqasiz va endi uning xabarlarini ko‘rmaysiz." in Uzbek.
+  static const ch2LeaveD = 'ch2.leave_d';
+
+  /// UI text slot `ch2.phone`, shown as "Telefon raqami" in Uzbek.
+  static const ch2Phone = 'ch2.phone';
+
+  /// UI text slot `ch2.role`, shown as "Rol" in Uzbek.
+  static const ch2Role = 'ch2.role';
+
+  /// UI text slot `ch2.active_tasks`, shown as "Faol vazifalar" in Uzbek.
+  static const ch2ActiveTasks = 'ch2.active_tasks';
+
+  /// UI text slot `ch2.n_tasks`, shown as "{} ta vazifa" in Uzbek.
+  static const ch2NTasks = 'ch2.n_tasks';
+
+  /// UI text slot `ch2.muted_note`, shown as "Bildirishnomalar o‘chirildi" in Uzbek.
+  static const ch2MutedNote = 'ch2.muted_note';
+
+  /// UI text slot `ch2.edit_group`, shown as "Guruhni tahrirlash" in Uzbek.
+  static const ch2EditGroup = 'ch2.edit_group';
+
+  /// UI text slot `ch2.group_name`, shown as "Guruh nomi" in Uzbek.
+  static const ch2GroupName = 'ch2.group_name';
+
+  /// UI text slot `ch2.pick_members`, shown as "Qo‘shish uchun xodimlarni tanlang" in Uzbek.
+  static const ch2PickMembers = 'ch2.pick_members';
+
+  /// UI text slot `ch2.add`, shown as "Qo‘shish" in Uzbek.
+  static const ch2Add = 'ch2.add';
+
+  /// UI text slot `ch2.you`, shown as "Siz" in Uzbek.
+  static const ch2You = 'ch2.you';
+
+  /// UI text slot `chat.create_group`, shown as "Guruh yaratish" in Uzbek.
+  static const chatCreateGroup = 'chat.create_group';
+
+  /// UI text slot `td.n_people`, shown as "{} ta ijrochi" in Uzbek.
+  static const tdNPeople = 'td.n_people';
+
+  /// UI text slot `fl.files`, shown as "Fayllar" in Uzbek.
+  static const flFiles = 'fl.files';
+
+  /// UI text slot `fl.add_photo`, shown as "Rasm qo‘shish" in Uzbek.
+  static const flAddPhoto = 'fl.add_photo';
+
+  /// UI text slot `fl.add_doc`, shown as "Hujjat qo‘shish" in Uzbek.
+  static const flAddDoc = 'fl.add_doc';
+
+  /// UI text slot `fl.camera`, shown as "Kamera" in Uzbek.
+  static const flCamera = 'fl.camera';
+
+  /// UI text slot `fl.gallery`, shown as "Galereya" in Uzbek.
+  static const flGallery = 'fl.gallery';
+
+  /// UI text slot `fl.document`, shown as "Hujjat" in Uzbek.
+  static const flDocument = 'fl.document';
+
+  /// UI text slot `fl.counts`, shown as "Rasm {} / {} · Hujjat {} / {}" in Uzbek.
+  static const flCounts = 'fl.counts';
+
+  /// UI text slot `fl.uploading`, shown as "Yuklanmoqda…" in Uzbek.
+  static const flUploading = 'fl.uploading';
+
+  /// UI text slot `fl.failed`, shown as "Faylni yuklab bo‘lmadi" in Uzbek.
+  static const flFailed = 'fl.failed';
+
+  /// UI text slot `fl.limit`, shown as "Fayllar chegarasiga yetdingiz" in Uzbek.
+  static const flLimit = 'fl.limit';
+
+  /// UI text slot `fl.voice`, shown as "Ovozli xabar" in Uzbek.
+  static const flVoice = 'fl.voice';
+
+  /// UI text slot `fl.circle`, shown as "Video-krujok" in Uzbek.
+  static const flCircle = 'fl.circle';
+
+  /// UI text slot `fl.hold`, shown as "Bosib turing — ovozli xabar" in Uzbek.
+  static const flHold = 'fl.hold';
+
+  /// UI text slot `fl.tap`, shown as "Bir bosing — video-krujokka o‘tadi" in Uzbek.
+  static const flTap = 'fl.tap';
+
+  /// UI text slot `fl.slide_cancel`, shown as "Bekor qilish uchun suring" in Uzbek.
+  static const flSlideCancel = 'fl.slide_cancel';
+
+  /// UI text slot `fl.mic_denied`, shown as "Mikrofonga ruxsat berilmagan" in Uzbek.
+  static const flMicDenied = 'fl.mic_denied';
+
+  /// UI text slot `ch2.reply`, shown as "Javob berish" in Uzbek.
+  static const ch2Reply = 'ch2.reply';
+
+  /// UI text slot `ch2.replying`, shown as "{} ga javob" in Uzbek.
+  static const ch2Replying = 'ch2.replying';
+
+  /// UI text slot `fl.photo`, shown as "Rasm" in Uzbek.
+  static const flPhoto = 'fl.photo';
+
+  /// UI text slot `fl.recording`, shown as "Yozilmoqda…" in Uzbek.
+  static const flRecording = 'fl.recording';
+
+  /// UI text slot `team.contact`, shown as "Mas‘ul shaxs" in Uzbek.
+  static const teamContact = 'team.contact';
+
+  /// UI text slot `team.edit_emp`, shown as "Xodimni tahrirlash" in Uzbek.
+  static const teamEditEmp = 'team.edit_emp';
+
+  /// UI text slot `team.edit_client`, shown as "Mijozni tahrirlash" in Uzbek.
+  static const teamEditClient = 'team.edit_client';
+
+  /// UI text slot `team.del_t`, shown as "Hisobni o‘chirasizmi?" in Uzbek.
+  static const teamDelT = 'team.del_t';
+
+  /// UI text slot `team.del_d`, shown as "{} hisobi o‘chiriladi. Vazifalari bor bo‘lsa, hisob faqat faolsizlantiriladi." in Uzbek.
+  static const teamDelD = 'team.del_d';
+
+  /// UI text slot `team.deleted`, shown as "Hisob o‘chirildi" in Uzbek.
+  static const teamDeleted = 'team.deleted';
+
+  /// UI text slot `team.deactivated`, shown as "Hisob faolsizlantirildi" in Uzbek.
+  static const teamDeactivated = 'team.deactivated';
+
+  /// UI text slot `call.calling`, shown as "Chaqirilmoqda…" in Uzbek.
+  static const callCalling = 'call.calling';
+
+  /// UI text slot `call.incoming`, shown as "Sizga qo‘ng‘iroq kelyapti…" in Uzbek.
+  static const callIncoming = 'call.incoming';
+
+  /// UI text slot `call.declined`, shown as "Qo‘ng‘iroq rad etildi" in Uzbek.
+  static const callDeclined = 'call.declined';
+
+  /// UI text slot `call.no_answer`, shown as "Javob bermadi" in Uzbek.
+  static const callNoAnswer = 'call.no_answer';
+
+  /// UI text slot `call.redial`, shown as "Qayta qo‘ng‘iroq" in Uzbek.
+  static const callRedial = 'call.redial';
+
+  /// UI text slot `call.close`, shown as "Yopish" in Uzbek.
+  static const callClose = 'call.close';
+
+  /// UI text slot `call.group_invite`, shown as "{} sizni guruh qo‘ng‘irog‘iga taklif qilyapti" in Uzbek.
+  static const callGroupInvite = 'call.group_invite';
+
+  /// UI text slot `call.in_call_n`, shown as "{} kishi suhbatda" in Uzbek.
+  static const callInCallN = 'call.in_call_n';
+
+  /// UI text slot `call.members_n`, shown as "{} ishtirokchi" in Uzbek.
+  static const callMembersN = 'call.members_n';
+
+  /// UI text slot `call.add_title`, shown as "Qo‘ng‘iroqqa qo‘shish" in Uzbek.
+  static const callAddTitle = 'call.add_title';
+
+  /// UI text slot `call.add_hint`, shown as "Guruhning qo‘ng‘iroqda bo‘lmagan a’zolari" in Uzbek.
+  static const callAddHint = 'call.add_hint';
+
+  /// UI text slot `call.invite`, shown as "Taklif qilish" in Uzbek.
+  static const callInvite = 'call.invite';
+
+  /// UI text slot `call.you`, shown as "Siz" in Uzbek.
+  static const callYou = 'call.you';
+
+  /// UI text slot `call.more`, shown as "yana" in Uzbek.
+  static const callMore = 'call.more';
+
+  /// UI text slot `call.back`, shown as "orqaga" in Uzbek.
+  static const callBack = 'call.back';
+
+  /// UI text slot `call.declined_by`, shown as "{} taklifni rad etdi" in Uzbek.
+  static const callDeclinedBy = 'call.declined_by';
+
+  /// UI text slot `call.camera_front`, shown as "Old kamera" in Uzbek.
+  static const callCameraFront = 'call.camera_front';
+
+  /// UI text slot `call.camera_back`, shown as "Orqa kamera" in Uzbek.
+  static const callCameraBack = 'call.camera_back';
+
+  /// UI text slot `call.leave`, shown as "Chiqish" in Uzbek.
+  static const callLeave = 'call.leave';
+
+  /// UI text slot `call.start`, shown as "Qo‘ng‘iroq" in Uzbek.
+  static const callStart = 'call.start';
+
+  /// UI text slot `call.nobody`, shown as "Qo‘ng‘iroq qilinadigan odam yo‘q" in Uzbek.
+  static const callNobody = 'call.nobody';
+
+  /// UI text slot `call.accept`, shown as "Qabul qilish" in Uzbek.
+  static const callAccept = 'call.accept';
+
+  /// UI text slot `wk.week`, shown as "Mening haftam" in Uzbek.
+  static const wkWeek = 'wk.week';
+
+  /// UI text slot `wk.tasks_title`, shown as "Vazifalarim" in Uzbek.
+  static const wkTasksTitle = 'wk.tasks_title';
+
+  /// UI text slot `wk.stats_tab`, shown as "Statistika" in Uzbek.
+  static const wkStatsTab = 'wk.stats_tab';
+
+  /// UI text slot `wk.write_manager`, shown as "Menejerga yozish" in Uzbek.
+  static const wkWriteManager = 'wk.write_manager';
+
+  /// UI text slot `wk.blank_t`, shown as "Hali vazifa yo‘q" in Uzbek.
+  static const wkBlankT = 'wk.blank_t';
+
+  /// UI text slot `wk.blank_d`, shown as "Sizga vazifa berilganda u shu yerda ko‘rinadi" in Uzbek.
+  static const wkBlankD = 'wk.blank_d';
+
+  /// UI text slot `wk.no_mine_d`, shown as "Vazifa berilganda shu yerda ko‘rinadi" in Uzbek.
+  static const wkNoMineD = 'wk.no_mine_d';
+
+  /// UI text slot `wk.no_today_d`, shown as "Bugun uchun vazifa berilmagan" in Uzbek.
+  static const wkNoTodayD = 'wk.no_today_d';
+
+  /// UI text slot `wk.head`, shown as "Menga berilgan vazifalar" in Uzbek.
+  static const wkHead = 'wk.head';
+
+  /// UI text slot `wk.chart`, shown as "Bajarilgan vazifalar" in Uzbek.
+  static const wkChart = 'wk.chart';
+
+  /// UI text slot `wk.not_done`, shown as "Bajarilmagan" in Uzbek.
+  static const wkNotDone = 'wk.not_done';
+
+  /// UI text slot `wk.not_done_d`, shown as "Sababi bilan yopilgan" in Uzbek.
+  static const wkNotDoneD = 'wk.not_done_d';
+
+  /// UI text slot `cl.orders`, shown as "Buyurtmalar" in Uzbek.
+  static const clOrders = 'cl.orders';
+
+  /// UI text slot `cl.tab_notifs`, shown as "Xabarlar" in Uzbek.
+  static const clTabNotifs = 'cl.tab_notifs';
+
+  /// UI text slot `cl.tab_create`, shown as "Buyurtma" in Uzbek.
+  static const clTabCreate = 'cl.tab_create';
+
+  /// UI text slot `cl.search`, shown as "Buyurtmalarni qidirish" in Uzbek.
+  static const clSearch = 'cl.search';
+
+  /// UI text slot `cl.new_title`, shown as "Yangi buyurtma" in Uzbek.
+  static const clNewTitle = 'cl.new_title';
+
+  /// UI text slot `cl.step_n`, shown as "{}-qadam, 3 tadan" in Uzbek.
+  static const clStepN = 'cl.step_n';
+
+  /// UI text slot `cl.step_about`, shown as "Buyurtma haqida" in Uzbek.
+  static const clStepAbout = 'cl.step_about';
+
+  /// UI text slot `cl.name`, shown as "Buyurtma nomi" in Uzbek.
+  static const clName = 'cl.name';
+
+  /// UI text slot `cl.needs_name`, shown as "Buyurtma nomini yozing" in Uzbek.
+  static const clNeedsName = 'cl.needs_name';
+
+  /// UI text slot `cl.send_order`, shown as "Yuborish" in Uzbek.
+  static const clSendOrder = 'cl.send_order';
+
+  /// UI text slot `cl.ok_t`, shown as "Buyurtma yuborildi" in Uzbek.
+  static const clOkT = 'cl.ok_t';
+
+  /// UI text slot `cl.ok_d`, shown as "Buyurtmangiz qabul qilindi. Dispetcher tez orada siz bilan bog‘lanadi." in Uzbek.
+  static const clOkD = 'cl.ok_d';
+
+  /// UI text slot `cl.edit`, shown as "Buyurtmani tahrirlash" in Uzbek.
+  static const clEdit = 'cl.edit';
+
+  /// UI text slot `cl.detail`, shown as "Buyurtma tafsiloti" in Uzbek.
+  static const clDetail = 'cl.detail';
+
+  /// UI text slot `cl.del_t`, shown as "Buyurtmani o‘chirasizmi?" in Uzbek.
+  static const clDelT = 'cl.del_t';
+
+  /// UI text slot `cl.del_d`, shown as "Buyurtma butunlay o‘chiriladi. Bu amalni ortga qaytarib bo‘lmaydi." in Uzbek.
+  static const clDelD = 'cl.del_d';
+
+  /// UI text slot `cl.e_all_t`, shown as "Hali buyurtmalar yo‘q" in Uzbek.
+  static const clEAllT = 'cl.e_all_t';
+
+  /// UI text slot `cl.e_all_d`, shown as "Yangi buyurtma bering — u shu yerda ro‘yxat bo‘lib ko‘rinadi" in Uzbek.
+  static const clEAllD = 'cl.e_all_d';
+
+  /// UI text slot `cl.e_new_t`, shown as "Yangi buyurtmalar yo‘q" in Uzbek.
+  static const clENewT = 'cl.e_new_t';
+
+  /// UI text slot `cl.e_new_d`, shown as "Yaqinda bergan, hali boshlanmagan buyurtmalar shu yerda ko‘rinadi" in Uzbek.
+  static const clENewD = 'cl.e_new_d';
+
+  /// UI text slot `cl.e_prog_t`, shown as "Jarayondagi buyurtmalar yo‘q" in Uzbek.
+  static const clEProgT = 'cl.e_prog_t';
+
+  /// UI text slot `cl.e_prog_d`, shown as "Hozir bajarilayotgan buyurtmalar shu yerda ko‘rinadi" in Uzbek.
+  static const clEProgD = 'cl.e_prog_d';
+
+  /// UI text slot `cl.e_over_t`, shown as "Kechikkan buyurtmalar yo‘q" in Uzbek.
+  static const clEOverT = 'cl.e_over_t';
+
+  /// UI text slot `cl.e_over_d`, shown as "Barcha buyurtmalar o‘z vaqtida bajarilmoqda" in Uzbek.
+  static const clEOverD = 'cl.e_over_d';
+
+  /// UI text slot `cl.e_done_t`, shown as "Bajarilgan buyurtmalar yo‘q" in Uzbek.
+  static const clEDoneT = 'cl.e_done_t';
+
+  /// UI text slot `cl.e_done_d`, shown as "Tugagan buyurtmalar shu yerda ko‘rinadi" in Uzbek.
+  static const clEDoneD = 'cl.e_done_d';
+
+  /// UI text slot `cl.e_fail_t`, shown as "Bajarilmagan buyurtmalar yo‘q" in Uzbek.
+  static const clEFailT = 'cl.e_fail_t';
+
+  /// UI text slot `cl.e_fail_d`, shown as "Bajarilmay qolgan buyurtmalar sababi bilan shu yerda ko‘rinadi" in Uzbek.
+  static const clEFailD = 'cl.e_fail_d';
+
+  /// UI text slot `cl.dispatcher`, shown as "Dispetcher" in Uzbek.
+  static const clDispatcher = 'cl.dispatcher';
+
+  /// UI text slot `cl.master`, shown as "Usta" in Uzbek.
+  static const clMaster = 'cl.master';
+
+  /// UI text slot `cl.chat_empty_t`, shown as "Hali suhbat yo‘q" in Uzbek.
+  static const clChatEmptyT = 'cl.chat_empty_t';
+
+  /// UI text slot `cl.chat_empty_d`, shown as "Dispetcher siz bilan bog‘langanda suhbat shu yerda ochiladi" in Uzbek.
+  static const clChatEmptyD = 'cl.chat_empty_d';
 }

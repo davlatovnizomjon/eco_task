@@ -18,30 +18,6 @@ final class TaskDetailRefreshed extends TaskDetailEvent {
   const TaskDetailRefreshed();
 }
 
-/// A comment was sent.
-final class TaskDetailCommentSent extends TaskDetailEvent {
-  /// Comment text.
-  final String text;
-
-  /// Carries the comment text.
-  const TaskDetailCommentSent(this.text);
-}
-
-/// A worker reported progress.
-final class TaskDetailProgressReported extends TaskDetailEvent {
-  /// Pieces completed so far by the signed-in worker.
-  final int done;
-
-  /// True when the worker reports the task cannot be done.
-  final bool cant;
-
-  /// Optional note posted as a comment.
-  final String note;
-
-  /// Carries the progress report.
-  const TaskDetailProgressReported({required this.done, required this.cant, this.note = ''});
-}
-
 /// The boss approved the submitted result.
 final class TaskDetailApproved extends TaskDetailEvent {
   /// Approves the task; the screen closes afterwards.
@@ -60,8 +36,8 @@ final class TaskDetailReturned extends TaskDetailEvent {
   const TaskDetailReturned({required this.reason, required this.extend});
 }
 
-/// The boss confirmed canceling the task.
-final class TaskDetailCanceled extends TaskDetailEvent {
-  /// Cancels the task; the screen closes afterwards.
-  const TaskDetailCanceled();
+/// The delete confirmation was accepted.
+final class TaskDetailDeleted extends TaskDetailEvent {
+  /// Deletes the task; the screen closes afterwards.
+  const TaskDetailDeleted();
 }

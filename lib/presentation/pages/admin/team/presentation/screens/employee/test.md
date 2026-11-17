@@ -1,33 +1,26 @@
-# Employee profile (boss) — Test Plan
+# Employee profile (admin)
 
 A plan for an AI to execute against; nothing here is run unless the user asks.
 
 ## 1. API Test
 
-### `TeamRepository.getUser` — GET `users/{id}`
+### `TeamRepository.getUser` — GET `users/{id}` and `TasksRepository.getTasks` — GET `tasks?who={id}`
 
-- [ ] Success: a worker id → 200 with the account with `activeCount`; the parsed model matches the payload.
-- [ ] Auth error: missing/expired token → 401 → `UnAuthorizedResponse`; the session is cleared and the router returns to sign-in.
-- [ ] Unknown id → 404 shown in the dialog.
-
-### `TasksRepository.getTasks` — GET `tasks?who={id}`
-
-- [ ] Success: the employee id → 200 with only tasks involving that employee; the parsed model matches the payload.
-- [ ] Values: active + history counts add up to the total; “on time” counts `done` tasks finished no later than their deadline.
-- [ ] Cached-first: reopening the screen shows the cached data immediately (no loading flicker), then the fresh data replaces it; a failed refresh keeps the cache and shows the error dialog.
+- [ ] Success: the account and the member's tasks load; the counters equal the number of returned tasks by status.
+- [ ] Auth error: 401 → `UnAuthorizedResponse`. Unknown id → 404 → the shared error dialog.
+- [ ] Cached-first: reopening shows the cached profile at once, then the fresh one.
 
 ## 2. Mobile/Web Integration Test
 
-- [ ] Open an employee from the directory and from a task's assignee row; switch active/history; admin sees the permissions button.
-- [ ] Run on a real or emulated Android/iOS device with `AppConfig.useMockData = true` and again against the live API.
+- [ ] Open from the team list and from the rating; “Batafsil” opens the full task list; a today's task opens its details; pull to refresh.
+- [ ] Run with `AppConfig.useMockData = true` and against the live API.
 
 ## 3. UI Test
 
-- [ ] No overflow or clipping at a small phone width (320 px) and a tablet width (768 px); long names and translated strings truncate with an ellipsis.
-- [ ] Light and dark themes both read correctly; switching the theme in Settings repaints this screen without losing its state.
-- [ ] Uzbek Latin, Uzbek Cyrillic and Russian all render without missing keys or layout breaks.
-- [ ] The three counters, the money card (rewards, paid, approved expenses, in review) and the task list agree with the task details of the same employee.
+- [ ] Boards 1.22–1.22b: 96 px avatar, name, phone and role pill centred; the “Vazifalar” card with Barchasi / Bajarilgan / Bajarilmagan counters; “Bugungi vazifalar” rows or the “Bugun vazifa yo‘q” card.
+- [ ] The “⋯” menu opens “Tahrirlash” (member form prefilled, saved with `PATCH users/{id}`) and “O‘chirish” (confirm dialog, then `DELETE users/{id}`); the toast says deleted, or deactivated when the account has history, and the screen closes.
+- [ ] No overflow at 320 px and 768 px; light and dark themes; uz, uz-Cyrl and ru without missing keys.
 
 ## 4. Logical/Business Test
 
-- [ ] A manager cannot see employees outside their team (404).
+- [ ] Counters count done and failed tasks of this member only; “today” means the deadline day is today.

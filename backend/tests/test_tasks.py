@@ -49,7 +49,28 @@ def test_client_creates_only_for_self(client_user, client2, worker):
     r = create(client_user, client=client2.pk)
     assert r.status_code == 201 and r.data["client"]["id"] == client_user.pk
     assert create(client_user, worker_ids=[worker.pk]).status_code == 403
-    assert create(client_user, agreed_value="100.00").status_code == 403
+
+
+def test_client_gives_a_budget_for_their_own_order(client_user):
+    r = create(client_user, agreed_value="100.00")
+    assert r.status_code == 201 and r.data["agreed_value"] == "100.00"
+
+
+def test_client_edits_and_deletes_only_their_own_open_order(owner, client_user, client2, worker):
+    mine = create(client_user).data["id"]
+    r = api_as(client_user).patch(f"{URL}{mine}/", {"title": "Renamed", "address": "Yunusobod"}, format="json")
+    assert r.status_code == 200 and r.data["title"] == "Renamed"
+    assert api_as(client_user).patch(f"{URL}{mine}/", {"priority": "HIGH"}, format="json").status_code == 403
+    assert api_as(client2).patch(f"{URL}{mine}/", {"title": "x"}, format="json").status_code == 404
+    theirs = make_task(owner, [worker.pk], client=client_user.pk)  # created by staff for the client
+    assert api_as(client_user).patch(f"{URL}{theirs}/", {"title": "x"}, format="json").status_code == 403
+    assert api_as(client_user).delete(f"{URL}{theirs}/").status_code == 403
+    started = create(client_user).data["id"]
+    Task.objects.filter(pk=started).update(status=Status.IN_PROGRESS)
+    assert api_as(client_user).patch(f"{URL}{started}/", {"title": "x"}, format="json").status_code == 403
+    assert api_as(client_user).delete(f"{URL}{started}/").status_code == 403
+    assert api_as(client_user).delete(f"{URL}{mine}/").status_code == 204
+    assert not Task.objects.filter(pk=mine).exists()
 
 
 def test_client_cannot_use_foreign_project(client_user, client2, owner):
@@ -164,12 +185,24 @@ def test_invalid_transitions_rejected(owner, src, dst):
     assert move(owner, task.pk, dst, reason="r").status_code == 409
 
 
-def test_failed_needs_reason_and_authority(owner, worker):
+def test_failed_needs_reason_and_authority(owner, worker, worker2, client_user):
     t = make_task(owner, [worker.pk])
-    assert move(worker, t, "FAILED", reason="no").status_code == 403
     assert move(owner, t, "FAILED").status_code == 400
+    assert move(worker, t, "FAILED").status_code == 400  # the assigned worker needs a reason too
+    assert move(worker2, t, "FAILED", reason="no").status_code == 404  # not their task
+    assert move(client_user, t, "FAILED", reason="no").status_code == 404
     r = move(owner, t, "FAILED", reason="Client unreachable")
     assert r.data["status"] == "FAILED" and r.data["failure_reason"] == "Client unreachable"
+
+
+def test_assigned_worker_reports_a_task_they_could_not_do(owner, worker):
+    t = make_task(owner, [worker.pk])
+    r = move(worker, t, "FAILED", reason="Gate was locked")
+    assert r.status_code == 200 and r.data["status"] == "FAILED" and r.data["failure_reason"] == "Gate was locked"
+    t2 = make_task(owner, [worker.pk])
+    assert move(worker, t2, "IN_PROGRESS").status_code == 200
+    assert move(worker, t2, "REVIEW").status_code == 200
+    assert move(worker, t2, "FAILED", reason="late").status_code == 403  # in review only a manager decides
 
 
 def test_unassigned_worker_cannot_progress_and_client_cannot_start(owner, worker, worker2, client_user):
@@ -230,3 +263,82 @@ def test_filters_search_pagination_and_no_duplicates(owner, worker, worker2):
 
 def test_task_status_enum_matches_model():
     assert {s.value for s in Status} == {"OPEN", "IN_PROGRESS", "REVIEW", "COMPLETED", "FAILED", "CANCELED"}
+
+
+# --- wizard fields, delete and personal tasks (new design) ---------------------------------
+def test_task_keeps_client_name_address_currency_and_reminder(owner):
+    r = create(
+        owner,
+        client_name="Yashil Bog MChJ",
+        client_is_org=True,
+        address="Yunusobod, Amir Temur 108",
+        currency="USD",
+        agreed_value="1200",
+        remind_at="2026-10-26T13:00:00Z",
+    )
+    assert r.status_code == 201
+    assert r.data["client_name"] == "Yashil Bog MChJ" and r.data["client_is_org"] is True
+    assert r.data["address"] == "Yunusobod, Amir Temur 108" and r.data["currency"] == "USD"
+    assert r.data["remind_at"].startswith("2026-10-26T13:00")
+
+
+def test_unknown_currency_is_rejected(owner):
+    assert create(owner, currency="EUR").status_code == 400
+
+
+def test_staff_can_edit_the_new_fields_but_workers_cannot(owner, worker):
+    task_id = make_task(owner, [worker.pk])
+    r = api_as(owner).patch(f"{URL}{task_id}/", {"address": "Chilonzor", "currency": "USD"}, format="json")
+    assert r.status_code == 200 and r.data["address"] == "Chilonzor" and r.data["currency"] == "USD"
+    assert api_as(worker).patch(f"{URL}{task_id}/", {"address": "x"}, format="json").status_code == 403
+
+
+def test_currency_is_hidden_with_the_price_from_workers(owner, worker):
+    task_id = make_task(owner, [worker.pk], agreed_value="500", currency="USD")
+    data = api_as(worker).get(f"{URL}{task_id}/").data
+    assert "agreed_value" not in data and "currency" not in data
+
+
+def test_owner_and_assistant_delete_any_task_and_it_is_audited(owner, assistant, worker):
+    for actor, creator in ((owner, owner), (assistant, assistant), (assistant, owner), (owner, assistant)):
+        task_id = make_task(creator, [worker.pk])
+        assert api_as(actor).delete(f"{URL}{task_id}/").status_code == 204
+        assert not Task.objects.filter(pk=task_id).exists()
+        assert AuditLog.objects.filter(action="task.deleted", target_id=task_id, actor=actor).exists()
+        assert api_as(actor).get(f"{URL}{task_id}/").status_code == 404
+
+
+def test_worker_and_client_cannot_delete_tasks(owner, worker, client_user):
+    task_id = make_task(owner, [worker.pk])
+    assert api_as(worker).delete(f"{URL}{task_id}/").status_code == 403
+    assert api_as(client_user).delete(f"{URL}{task_id}/").status_code in (403, 404)
+    assert Task.objects.filter(pk=task_id).exists()
+
+
+def test_delete_of_an_invisible_task_is_404_not_403(owner, worker, worker2):
+    task_id = make_task(owner, [worker.pk])
+    assert api_as(worker2).delete(f"{URL}{task_id}/").status_code == 404
+
+
+def test_manager_completes_an_own_open_task_in_two_steps(assistant):
+    task_id = make_task(assistant)
+    assert move(assistant, task_id, "COMPLETED").status_code == 409  # the machine has no OPEN -> COMPLETED move
+    assert move(assistant, task_id, "IN_PROGRESS").status_code == 200
+    r = move(assistant, task_id, "COMPLETED")
+    assert r.status_code == 200 and r.data["status"] == "COMPLETED" and r.data["completed_at"]
+
+
+def test_author_and_staff_delete_comments_others_cannot(owner, assistant, worker, worker2):
+    task_id = make_task(owner, [worker.pk, worker2.pk])
+    mine = api_as(worker).post(f"{URL}{task_id}/comments/", {"body": "note"}, format="json").data["id"]
+    other = api_as(worker2).post(f"{URL}{task_id}/comments/", {"body": "mine too"}, format="json").data["id"]
+    assert api_as(worker).delete(f"{URL}{task_id}/comments/{other}/").status_code == 403
+    assert api_as(worker).delete(f"{URL}{task_id}/comments/{mine}/").status_code == 204
+    assert api_as(assistant).delete(f"{URL}{task_id}/comments/{other}/").status_code == 204
+    assert api_as(owner).delete(f"{URL}{task_id}/comments/999999/").status_code == 404
+
+
+def test_comment_of_a_foreign_task_is_404(owner, worker, worker2):
+    task_id = make_task(owner, [worker.pk])
+    comment = api_as(worker).post(f"{URL}{task_id}/comments/", {"body": "n"}, format="json").data["id"]
+    assert api_as(worker2).delete(f"{URL}{task_id}/comments/{comment}/").status_code == 404

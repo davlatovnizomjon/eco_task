@@ -20,8 +20,18 @@ class StatusChip extends StatelessWidget {
   /// SVG asset (an `AppIcons` constant) drawn before the label.
   final String? icon;
 
+  /// True for the smaller 24 px pill used inside dense rows (12 px text, no glyph).
+  final bool compact;
+
   /// Builds a pill from raw parts (e.g. the "overdue" pill).
-  const StatusChip({super.key, required this.label, required this.tone, this.icon});
+  const StatusChip({super.key, required this.label, required this.tone, this.icon, this.compact = false});
+
+  /// Dense 24 px pill of a task status (dashboard and day-list rows); [icon] hides the glyph when false.
+  factory StatusChip.taskCompact(TaskStatus status, {bool icon = true}) =>
+      StatusChip(label: status.title, tone: status.tone, icon: icon ? status.icon : null, compact: true);
+
+  /// Dense 24 px amber "overdue" pill.
+  factory StatusChip.overdueCompact() => StatusChip(label: TrWords.stOver.tr(), tone: StatusTone.warn, compact: true);
 
   /// Pill of a task status.
   factory StatusChip.task(TaskStatus status) => StatusChip(label: status.title, tone: status.tone, icon: status.icon);
@@ -44,7 +54,7 @@ class StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 26.h,
+      height: (compact ? 24 : 26).h,
       padding: EdgeInsets.fromLTRB(icon == null ? 10.w : 8.w, 0, 10.w, 0),
       decoration: BoxDecoration(color: tone.bgColor, borderRadius: 13.circular),
       child: Row(
@@ -56,7 +66,7 @@ class StatusChip extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: theme.badgeText.copyWith(color: tone.color),
+              style: theme.badgeText.copyWith(fontSize: compact ? 12.sp : null, color: tone.color),
             ),
           ),
         ],

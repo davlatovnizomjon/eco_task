@@ -19,4 +19,10 @@ class AppConfig {
 
   /// Origin of the backend, without a path (`http://localhost:8000` for a local `runserver`).
   static const apiHost = String.fromEnvironment('API_HOST', defaultValue: 'http://localhost:8000');
+
+  /// Dispatcher phone the mock backend answers `support/` with; the live app reads it from the API.
+  static const supportPhone = String.fromEnvironment('SUPPORT_PHONE', defaultValue: '+998 71 200 00 00');
+
+  /// Brand name shown next to the app mark.
+  static const brandName = 'Eco Task';
 }

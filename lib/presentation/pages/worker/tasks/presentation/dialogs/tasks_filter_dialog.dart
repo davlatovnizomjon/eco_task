@@ -3,36 +3,84 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:eco_task/constants/constants.dart';
 import 'package:eco_task/domain/common/enums/task_due_filter.dart';
-import 'package:eco_task/domain/common/enums/task_sort.dart';
 import 'package:eco_task/domain/common/enums/task_status.dart';
+import 'package:eco_task/helpers/dialog_helpers.dart';
 import 'package:eco_task/infrastructure/dto/models/task_query.dart';
-import 'package:eco_task/infrastructure/dto/models/user_ref.dart';
+import 'package:eco_task/presentation/public/dialogs/date_range_dialog.dart';
 import 'package:eco_task/presentation/public/widgets/app_icon.dart';
 import 'package:eco_task/presentation/public/widgets/btn.dart';
 import 'package:eco_task/presentation/public/widgets/card_widget.dart';
 import 'package:eco_task/presentation/public/widgets/filter_pill.dart';
-import 'package:eco_task/presentation/public/widgets/option_tile.dart';
 import 'package:eco_task/presentation/public/widgets/user_avatar.dart';
+import 'package:eco_task/utils/formatters/date_formatter.dart';
 
 import '../../bloc/bloc.dart';
 
-/// Filter and sort sheet of the task list. It edits a local copy of the
-/// opener's query and dispatches it to the opener's [TasksBloc] on apply.
+/// Filter sheet of the tasks tab: one status, one deadline window (or a hand-picked range) and any number of
+/// assignees. Edits a draft [TaskQuery]; nothing is sent until "show result" is pressed. Reads its opener's
+/// [TasksBloc].
 class TasksFilterDialog extends StatefulWidget {
-  /// People that can be filtered on, taken from the loaded tasks.
-  final List<UserRef> people;
-
   /// Builds the sheet.
-  const TasksFilterDialog({super.key, required this.people});
+  const TasksFilterDialog({super.key});
+
+  /// Opens the sheet over the tasks tab, sharing the tab's [bloc].
+  static Future<void> show(BuildContext context, TasksBloc bloc) =>
+      showBottomDialog<void>(BlocProvider.value(value: bloc, child: const TasksFilterDialog()), context);
 
   @override
   State<TasksFilterDialog> createState() => _TasksFilterDialogState();
 }
 
-/// Holds the draft query the user edits before pressing apply.
+/// Holds the draft query.
 class _TasksFilterDialogState extends State<TasksFilterDialog> {
-  /// Draft filters; copied from the bloc's current query on open.
+  /// The query being edited, initialized from the bloc's current one.
   late TaskQuery _draft = context.read<TasksBloc>().state.query;
+
+  /// Status choices in tab order; null stands for "all" and the overdue entry is a flag, not a status.
+  static const List<TaskStatus?> _statuses = [
+    null,
+    TaskStatus.fresh,
+    TaskStatus.prog,
+    null,
+    TaskStatus.done,
+    TaskStatus.fail,
+  ];
+
+  /// Index of the selected status chip: 0 all, 3 overdue, else the matching status.
+  int get _statusIndex {
+    if (_draft.overdueOnly) return 3;
+    if (_draft.statuses.length != 1) return 0;
+
+    /// Position of the single selected status among the chips.
+    final i = _statuses.indexOf(_draft.statuses.first);
+    return i < 0 ? 0 : i;
+  }
+
+  /// Label of status chip [i].
+  String _statusLabel(int i) => switch (i) {
+    0 => TrWords.cAll.tr(),
+    3 => TrWords.dashOverdue.tr(),
+    4 => TrWords.tlDoneTab.tr(),
+    5 => TrWords.tlFailTab.tr(),
+    _ => _statuses[i]!.title,
+  };
+
+  /// Opens the range picker and stores the picked range as the deadline filter.
+  Future<void> _pickRange() async {
+    /// Range picked in the sheet; null when it was dismissed.
+    final range = await DateRangeDialog.show(
+      context,
+      initial: _draft.from == null ? null : DateTimeRange(start: _draft.from!, end: _draft.to ?? _draft.from!),
+    );
+    if (range == null) return;
+    setState(() => _draft = _draft.copyWith(due: TaskDueFilter.range, from: range.start, to: range.end));
+  }
+
+  /// Caption above a block of the sheet.
+  Widget _label(String text) => Padding(
+    padding: 10.h.bottom,
+    child: Text(text, style: theme.fieldLabel),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -40,109 +88,81 @@ class _TasksFilterDialogState extends State<TasksFilterDialog> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(TrWords.tasksState.tr(), style: theme.sectionLabel),
-        8.h.height,
+        Text(
+          TrWords.fltTitle.tr(),
+          style: theme.textStyle.copyWith(fontSize: 20.sp, height: 26 / 20, fontWeight: FontWeight.w700),
+        ),
+        16.h.height,
+        _label(TrWords.tasksState.tr()),
         Wrap(
           spacing: 8.w,
           runSpacing: 8.h,
           children: [
-            for (final status in TaskStatus.values)
+            for (var i = 0; i < _statuses.length; i++)
               FilterPill(
-                label: status.title,
-                icon: status.icon,
-                selected: _draft.statuses.contains(status),
-                onTap: () => setState(() {
-                  final next = {..._draft.statuses};
-                  if (!next.remove(status)) next.add(status);
-                  _draft = _draft.copyWith(statuses: next);
-                }),
+                accent: true,
+                label: _statusLabel(i),
+                selected: _statusIndex == i,
+                onTap: () => setState(
+                  () => _draft = _draft.copyWith(
+                    statuses: _statuses[i] == null ? {} : {_statuses[i]!},
+                    overdueOnly: i == 3,
+                  ),
+                ),
               ),
           ],
         ),
-        16.h.height,
-        Text(TrWords.tasksDeadline.tr(), style: theme.sectionLabel),
-        8.h.height,
+        20.h.height,
+        _label(TrWords.tasksDeadline.tr()),
         Wrap(
           spacing: 8.w,
           runSpacing: 8.h,
           children: [
-            for (final due in const [TaskDueFilter.today, TaskDueFilter.week])
+            for (final due in const [TaskDueFilter.today, TaskDueFilter.week, TaskDueFilter.month])
               FilterPill(
+                accent: true,
                 label: due.title,
                 selected: _draft.due == due,
                 onTap: () => setState(() => _draft = _draft.copyWith(due: _draft.due == due ? TaskDueFilter.any : due)),
               ),
-            FilterPill(
-              label: TrWords.stOver.tr(),
-              icon: AppIcons.alarm,
-              selected: _draft.overdueOnly,
-              onTap: () => setState(() => _draft = _draft.copyWith(overdueOnly: !_draft.overdueOnly)),
-            ),
+            if (_draft.due == TaskDueFilter.range && _draft.from != null)
+              FilterPill(
+                accent: true,
+                selected: true,
+                icon: AppIcons.cal,
+                trailingIcon: AppIcons.x,
+                label: '${DateFormatter.dayShort(_draft.from!)} — ${DateFormatter.dayShort(_draft.to ?? _draft.from!)}',
+                onTap: () => setState(() => _draft = _draft.copyWith(due: TaskDueFilter.any)),
+              )
+            else
+              FilterPill(label: TrWords.fltPickDate.tr(), icon: AppIcons.cal, onTap: _pickRange),
           ],
         ),
-        if (widget.people.isNotEmpty) ...[
-          16.h.height,
-          Text(TrWords.tasksAssignee.tr(), style: theme.sectionLabel),
-          8.h.height,
-          Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
-            children: [
-              for (final person in widget.people)
-                FilterPill(
-                  label: person.firstName,
-                  leading: UserAvatar(person, size: 24.w),
-                  selected: _draft.who == person.id,
-                  onTap: () => setState(
-                    () => _draft = _draft.who == person.id
-                        ? _draft.copyWith(clearWho: true)
-                        : _draft.copyWith(who: person.id),
-                  ),
-                ),
-            ],
-          ),
-        ],
-        16.h.height,
-        Text(TrWords.tasksSort.tr(), style: theme.sectionLabel),
-        8.h.height,
-        CardWidget(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              for (final (i, sort) in TaskSort.values.indexed)
-                OptionTile(
-                  title: sort.title,
-                  first: i == 0,
-                  onTap: () => setState(() => _draft = _draft.copyWith(sort: sort)),
-                  trailing: AppIcon(
-                    _draft.sort == sort ? AppIcons.checkc : AppIcons.eq,
-                    color: _draft.sort == sort ? theme.primary : theme.line,
-                  ),
-                ),
-            ],
-          ),
-        ),
-        20.h.height,
+        24.h.height,
         Row(
           children: [
             Expanded(
+              flex: 10,
               child: Btn.unActive(
                 text: TrWords.cClear.tr(),
-                onPressed: () {
-                  context.read<TasksBloc>().add(
-                    TasksQueryChanged(
-                      _draft.copyWith(statuses: {}, overdueOnly: false, clearWho: true, due: TaskDueFilter.any),
-                    ),
-                  );
-                  Navigator.pop(context);
-                },
+                height: 52.h,
+                onPressed: () => setState(
+                  () => _draft = _draft.copyWith(
+                    statuses: {},
+                    overdueOnly: false,
+                    clearWho: true,
+                    people: {},
+                    due: TaskDueFilter.any,
+                  ),
+                ),
               ),
             ),
             10.w.width,
             Expanded(
-              flex: 2,
+              flex: 16,
               child: Btn(
-                text: TrWords.cApprove.tr(),
+                text: TrWords.fltShow.tr(),
+                height: 52.h,
                 onPressed: () {
                   context.read<TasksBloc>().add(TasksQueryChanged(_draft));
                   Navigator.pop(context);

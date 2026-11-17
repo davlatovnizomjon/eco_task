@@ -1,4 +1,4 @@
-/** Thin client for the Eco Tasks REST API. Errors carry the backend's `{error: {code, detail}}` envelope. */
+/** Thin client for the Eco Tasks REST API. Errors carry the backend's `{error: {code, message}}` envelope. */
 
 export class ApiError extends Error {
   constructor(status, code, detail) {
@@ -9,7 +9,7 @@ export class ApiError extends Error {
   }
 }
 
-/** First readable sentence of an `error.detail` (a string, a list, or a field -> messages map). */
+/** First readable sentence of an `error.message` (a string, a list, or a field -> messages map). */
 export function detailText(detail) {
   if (typeof detail === 'string') return detail;
   if (Array.isArray(detail)) return detail.length ? detailText(detail[0]) : '';
@@ -44,7 +44,7 @@ export function createApi(baseUrl, fetchImpl = fetch) {
     if (response.status === 204) return null;
     const data = await response.json().catch(() => null);
     if (!response.ok) {
-      throw new ApiError(response.status, data?.error?.code, detailText(data?.error?.detail));
+      throw new ApiError(response.status, data?.error?.code, detailText(data?.error?.message));
     }
     return data;
   }

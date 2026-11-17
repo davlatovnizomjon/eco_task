@@ -1,33 +1,26 @@
-# Xodim profili (boss) — Test rejasi
+# Xodim profili (admin)
 
 AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga tushirilmaydi.
 
 ## 1. API Test
 
-### `TeamRepository.getUser` — GET `users/{id}`
+### `TeamRepository.getUser` — GET `users/{id}` va `TasksRepository.getTasks` — GET `tasks?who={id}`
 
-- [ ] Muvaffaqiyat: a worker id → 200, the account with `activeCount` bilan; tahlil qilingan model javobga mos keladi.
-- [ ] Auth xatosi: token yo‘q yoki muddati o‘tgan → 401 → `UnAuthorizedResponse`; sessiya tozalanadi va router kirish ekraniga qaytaradi.
-- [ ] Noma’lum id → 404 dialogda ko‘rsatiladi.
-
-### `TasksRepository.getTasks` — GET `tasks?who={id}`
-
-- [ ] Muvaffaqiyat: the employee id → 200, only tasks involving that employee bilan; tahlil qilingan model javobga mos keladi.
-- [ ] Qiymatlar: faol + tarix sonlari jamiga teng; «o‘z vaqtida» muddatdan kech bo‘lmay tugagan `done` vazifalarni hisoblaydi.
-- [ ] Keshdan oldin: ekranni qayta ochganda kesh darhol ko‘rinadi (yuklanish miltillashisiz), keyin yangi ma’lumot almashtiradi; muvaffaqiyatsiz yangilash keshni saqlaydi va xato dialogini ko‘rsatadi.
+- [ ] Muvaffaqiyat: hisob va a’zoning vazifalari yuklanadi; hisoblagichlar qaytgan vazifalar sonini holat bo‘yicha aks ettiradi.
+- [ ] Auth xatosi: 401 → `UnAuthorizedResponse`. Noma’lum id → 404 → umumiy xato dialogi.
+- [ ] Avval kesh: qayta ochganda keshdagi profil darhol, keyin yangisi ko‘rinadi.
 
 ## 2. Mobil/Web integratsiya testi
 
-- [ ] Xodimni katalogdan va vazifaning ijrochi qatoridan oching; faol/tarixni almashtiring; admin ruxsatlar tugmasini ko‘radi.
-- [ ] `AppConfig.useMockData = true` bilan haqiqiy yoki emulyator Android/iOS qurilmada, so‘ng jonli API bilan yana ishga tushiring.
+- [ ] Jamoa ro‘yxatidan va reytingdan oching; “Batafsil” to‘liq vazifalar ro‘yxatini ochadi; bugungi vazifa tafsilotini ochadi; tortib yangilang.
+- [ ] `AppConfig.useMockData = true` bilan va jonli API bilan ishga tushiring.
 
 ## 3. UI test
 
-- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida overflow yoki kesilish yo‘q; uzun ismlar va tarjima matnlari ko‘p nuqta bilan qisqaradi.
-- [ ] Yorug‘ va qorong‘i mavzular ikkalasi ham to‘g‘ri ko‘rinadi; Sozlamalarda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
-- [ ] O‘zbek lotin, o‘zbek kirill va rus tillari yetishmayotgan kalitlarsiz va maket buzilishisiz ko‘rinadi.
-- [ ] Uchta hisoblagich, pul kartasi (mukofotlar, to‘langan, tasdiqlangan xarajatlar, ko‘rib chiqilmoqda) va vazifalar ro‘yxati shu xodimning vazifa tafsilotlari bilan mos.
+- [ ] 1.22–1.22b taxtalar: markazda 96 px avatar, ism, telefon va rol belgisi; Barchasi / Bajarilgan / Bajarilmagan hisoblagichli “Vazifalar” kartasi; “Bugungi vazifalar” qatorlari yoki “Bugun vazifa yo‘q” kartasi.
+- [ ] “⋯” menyusi “Tahrirlash” (to‘ldirilgan a’zo formasi, `PATCH users/{id}` bilan saqlanadi) va “O‘chirish” (tasdiq oynasi, so‘ng `DELETE users/{id}`) ni ochadi; xabarda o‘chirildi yoki (tarixi bo‘lsa) faolsizlantirildi deyiladi va ekran yopiladi.
+- [ ] 320 px va 768 px da toshish yo‘q; yorug‘ va qorong‘i mavzular; uz, uz-Cyrl va ru yetishmayotgan kalitlarsiz.
 
 ## 4. Mantiqiy/biznes test
 
-- [ ] Menejer o‘z jamoasidan tashqari xodimlarni ko‘ra olmaydi (404).
+- [ ] Hisoblagichlar faqat shu a’zoning bajarilgan va bajarilmagan vazifalarini sanaydi; “bugun” muddat kuni bugun ekanini bildiradi.

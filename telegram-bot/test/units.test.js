@@ -38,7 +38,7 @@ test('api: sends the bearer token, parses the error envelope, maps network failu
   assert.equal(seen.url, 'http://h/api/v1/requests/?page_size=10');
   assert.equal(seen.init.headers.Authorization, 'Bearer tok');
 
-  const bad = createApi('http://h', async () => new Response('{"error":{"code":"forbidden","detail":{"title":["Required."]}}}', { status: 400 }));
+  const bad = createApi('http://h', async () => new Response('{"error":{"code":"forbidden","message":{"title":["Required."]}}}', { status: 400 }));
   await assert.rejects(bad.post('t', 'x/'), (e) => e instanceof ApiError && e.code === 'forbidden' && e.detail === 'title: Required.');
 
   const down = createApi('http://h', async () => Promise.reject(new TypeError('fetch failed')));

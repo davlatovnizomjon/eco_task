@@ -20,6 +20,15 @@ class NewAccount {
   /// Temporary password the boss hands over.
   final String password;
 
+  /// True when the new client is an organization.
+  final bool isOrg;
+
+  /// Contact person of an organization client.
+  final String contactPerson;
+
+  /// Free note about the client.
+  final String note;
+
   /// Builds the payload from its parts.
   const NewAccount({
     required this.login,
@@ -28,6 +37,9 @@ class NewAccount {
     required this.role,
     required this.team,
     required this.password,
+    this.isOrg = false,
+    this.contactPerson = '',
+    this.note = '',
   });
 
   /// Request body of `POST users`.
@@ -37,6 +49,9 @@ class NewAccount {
     'phone': phone,
     'role': role.name,
     'team': team,
+    'isOrg': isOrg,
+    'contactPerson': contactPerson,
+    'note': note,
     'password': password,
   };
 }

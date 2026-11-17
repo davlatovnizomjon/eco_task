@@ -8,6 +8,7 @@ import 'package:eco_task/domain/common/enums/task_priority.dart';
 import 'package:eco_task/domain/common/enums/task_status.dart';
 import 'package:eco_task/domain/common/enums/user_role.dart';
 import 'package:eco_task/infrastructure/dto/models/app_user.dart';
+import 'package:eco_task/infrastructure/dto/models/file_attachment.dart';
 import 'package:eco_task/infrastructure/dto/models/comment_model.dart';
 import 'package:eco_task/infrastructure/dto/models/expense_model.dart';
 import 'package:eco_task/infrastructure/dto/models/log_entry.dart';
@@ -97,6 +98,7 @@ abstract final class MockSeed {
     ),
     AppUser(
       id: 'gulzor',
+      isOrg: true,
       name: '«Gulzor» kafe',
       role: UserRole.client,
       phone: '+998975551236',
@@ -116,6 +118,11 @@ abstract final class MockSeed {
   /// Reference to the seeded account [id].
   static UserRef ref(String id) => users.firstWhere((u) => u.id == id).ref;
 
+  /// Placeholder photos of the seeded tasks (no bytes behind them: the app draws a tinted tile).
+  static List<FileAttachment> _photos(int n) => [
+    for (var i = 0; i < n; i++) FileAttachment(id: 1 + i, kind: FileKind.image, name: 'foto${i + 1}.jpg', size: 180000),
+  ];
+
   /// Log line helper.
   static LogEntry _log(LogKind kind, String userId, DateTime at, [List<String> args = const []]) =>
       LogEntry(kind: kind, user: ref(userId), at: at, args: args);
@@ -125,13 +132,18 @@ abstract final class MockSeed {
     TaskModel(
       id: 'ECO-142',
       title: '50 ta ko‘chat sotish',
+      client: 'Yashil Bog‘ MChJ',
+      clientIsOrg: true,
+      address: 'Yunusobod, Amir Temur 108',
+      createdAt: at(-3, 9, 40),
+      currency: 'uzs',
       createdBy: ref('jamshid'),
       due: at(3, 18),
       priority: TaskPriority.high,
       status: TaskStatus.prog,
       reward: 1000,
       category: 'Sotuv',
-      files: 3,
+      attachments: _photos(3),
       expected: '50 ta ko‘chat',
       description: 'Issiqxonadagi archa va qarag‘ay ko‘chatlarini sotish. Har bir sotuvni izohda qayd eting, to‘lov chekini rasmga oling.',
       assignees: [
@@ -216,7 +228,7 @@ abstract final class MockSeed {
       due: at(1, 12),
       status: TaskStatus.rev,
       reward: 300,
-      files: 3,
+      attachments: _photos(3),
       description: '20 qop tuproq va 5 qop kompleks o‘g‘it. Chekni biriktiring.',
       result: '20 qop tuproq va 5 qop o‘g‘it omborga tushirildi.',
       submittedAt: ago(15),
@@ -266,7 +278,7 @@ abstract final class MockSeed {
       due: at(-1, 12),
       status: TaskStatus.rev,
       reward: 90,
-      files: 3,
+      attachments: _photos(3),
       result: 'Buyurtma topshirildi, mijoz imzo qo‘ydi.',
       submittedAt: at(-1, 18, 20),
       assignees: [TaskAssignee(user: ref('azizbek'))],
@@ -330,6 +342,43 @@ abstract final class MockSeed {
       reward: 30,
       assignees: [TaskAssignee(user: ref('dilshod'))],
       log: [_log(LogKind.created, 'jamshid', at(0, 9))],
+    ),
+    TaskModel(
+      id: 'ECO-153',
+      title: 'Yetkazib beruvchi bilan shartnoma',
+      description:
+          '«Yashil Bog‘» MChJ bilan ko‘chat yetkazib berish shartnomasini kelishib, imzolash. Narx va muddatlarni '
+          'oldindan tekshirish. Shartnomada archa, qarag‘ay va mevali daraxt ko‘chatlari soni alohida ko‘rsatilishi '
+          'kerak. To‘lov ikki bosqichda: 50% oldindan, qolgani yetkazib berilgandan keyin. Yetkazish muddati — oktabr '
+          'oxirigacha, kechikish uchun jarima bandi kiritilsin. Imzolashdan oldin yuridik bo‘lim tasdig‘ini olish shart.',
+      createdBy: ref('jamshid'),
+      status: TaskStatus.prog,
+      due: at(0, 18),
+      remindAt: at(0, 17),
+      createdAt: at(-2, 9, 20),
+      address: 'Yunusobod, Amir Temur 108',
+      attachments: [
+        ..._photos(3),
+        FileAttachment(id: 9, kind: FileKind.document, name: 'Shartnoma_loyiha.pdf', size: 245760),
+      ],
+      assignees: [TaskAssignee(user: ref('jamshid'))],
+      comments: [
+        CommentModel(
+          user: ref('jamshid'),
+          text: 'Narxni 5% ga tushirishni so‘rash. To‘lov — 2 bosqichda.',
+          at: at(-2, 9, 25),
+        ),
+      ],
+      log: [_log(LogKind.created, 'jamshid', at(-2, 9, 20))],
+    ),
+    TaskModel(
+      id: 'ECO-155',
+      title: 'Oylik hisobotni tasdiqlash',
+      createdBy: ref('jamshid'),
+      due: at(1, 10),
+      createdAt: at(-1, 14),
+      assignees: [TaskAssignee(user: ref('jamshid'))],
+      log: [_log(LogKind.created, 'jamshid', at(-1, 14))],
     ),
   ];
 

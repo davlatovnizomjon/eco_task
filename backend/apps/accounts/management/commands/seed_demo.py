@@ -5,6 +5,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from apps.accounts.models import User
 from apps.core.policies import Role
+from apps.releases.models import AppRelease, Platform
 
 DEMO_PASSWORD = "Demo-Passphrase-2026"  # noqa: S105 (documented dev-only credential)
 ACCOUNTS = [
@@ -13,6 +14,7 @@ ACCOUNTS = [
     ("boris", "Boris Ivanov", Role.WORKER),
     ("gulnora", "Gulnora Karimova", Role.CLIENT),
 ]
+CLIENT_EXTRAS = {"gulnora": {"address": "Yunusobod, 4-mavze", "is_org": False}}
 
 
 class Command(BaseCommand):
@@ -23,10 +25,13 @@ class Command(BaseCommand):
             raise CommandError("seed_demo refuses to run with DEBUG off (it creates well-known credentials).")
         for username, full_name, role in ACCOUNTS:
             user, created = User.objects.get_or_create(
-                username=username, defaults={"full_name": full_name, "role": role.value}
+                username=username,
+                defaults={"full_name": full_name, "role": role.value, **CLIENT_EXTRAS.get(username, {})},
             )
             if created:
                 user.set_password(DEMO_PASSWORD)
                 user.save()
             self.stdout.write(f"{'created' if created else 'exists '} {username} ({role.value})")
+        for platform in Platform.values:
+            AppRelease.objects.get_or_create(platform=platform, defaults={"latest_version": "1.0.0"})
         self.stdout.write(self.style.SUCCESS(f"Demo password for new accounts: {DEMO_PASSWORD}"))

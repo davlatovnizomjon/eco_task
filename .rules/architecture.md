@@ -26,13 +26,14 @@ Project-specific decisions that refine (never weaken) the shared skills.
    `ChatConnection` (WebSocket `/ws/chat/<id>/`, token in the `bearer` subprotocol; the mock flavour is scripted).
    `ConversationBloc` sends optimistically with a `client_msg_id`, falls back to REST when the socket is down or silent,
    and de-duplicates by that id. The bottom-navigation chat badge is `ChatRepository.unread`.
-7. **Clients live in Telegram.** The `CLIENT` role has no screens in the Flutter app: the router redirects it to
-   `/telegram` (`ClientScreen` → `ClientBotScreen`, naming `AppConfig.telegramBot`). Everything a client does — service requests,
-   chat with staff, notifications — happens in `telegram-bot/` (Node.js, grammY, long polling) against the same REST API
-   with the client's own token. Service requests are the backend's `apps/client_requests` (staff manage them through
-   `PATCH /requests/{id}/`).
+7. **Clients have their own UI and the Telegram bot.** The `CLIENT` role signs in to the app like everyone else and gets
+   `ClientShell` (`pages/client/`): orders (the backend's tasks created by the client, editable and deletable only while
+   OPEN), a notifications tab, chat with the dispatcher, a 3-step order wizard and the profile. `telegram-bot/` (Node.js,
+   grammY, long polling) stays a second channel on the same REST API with the client's own token; service requests are the
+   backend's `apps/client_requests` (staff manage them through `PATCH /requests/{id}/`).
 8. **One UI folder per role.** `pages/` contains only `auth` and `admin` (OWNER), `manager` (ASSISTANT), `worker`,
-   `client`. Each role has `main/` (left drawer shell, `public/widgets/side_menu_shell.dart`; `SideMenuItem.section` =
+   `client`. Each role has `main/` (manager/worker/client: left drawer shell, `public/widgets/side_menu_shell.dart`; admin: five sections under
+   the floating bottom `FloatingTabBar`, no drawer; `SideMenuItem.section` =
    in-shell section, `.push` = pushed route), its own copy of each feature it uses (own bloc/screens/tests; profile is
    `ProfileFrame` + the role's profile screen) and `<role>_routes.dart`, the route table the router consults by role.
    Roles never import each other; the duplication is deliberate so each UI evolves independently. `homeTab` is the

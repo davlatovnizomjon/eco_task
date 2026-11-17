@@ -65,7 +65,7 @@ def client2(db):
 
 
 def api_as(user: User) -> APIClient:
-    _, raw = AuthToken.issue(user)
+    _, raw, _ = AuthToken.issue(user)
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {raw}")
     return client

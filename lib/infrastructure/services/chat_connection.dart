@@ -35,6 +35,25 @@ final class ChatMessageAcked extends ChatEvent {
 }
 
 /// `message.read` — somebody read the conversation up to [messageId].
+/// A message of the room changed: edited, deleted or its reactions moved.
+final class ChatMessageUpdated extends ChatEvent {
+  /// The message as it is now.
+  final ChatMessage message;
+
+  /// Carries the changed message.
+  const ChatMessageUpdated(this.message);
+}
+
+/// The pinned message of the room changed.
+final class ChatPinChanged extends ChatEvent {
+  /// The newly pinned message; null when the pin was cleared.
+  final ChatMessage? message;
+
+  /// Carries the pinned message.
+  const ChatPinChanged(this.message);
+}
+
+/// A person read up to a message.
 final class ChatReadReceipt extends ChatEvent {
   /// Who read.
   final String userId;
@@ -99,7 +118,7 @@ abstract class ChatConnection {
   Stream<ChatEvent> get events;
 
   /// Sends [body]; the server answers with `message.new` and `message.ack` for [clientMsgId].
-  void send(String body, String clientMsgId);
+  void send(String body, String clientMsgId, {int? replyTo, int? attachmentId});
 
   /// Tells the server the signed-in user has read up to [messageId].
   void markRead(int messageId);
@@ -191,6 +210,11 @@ class WebSocketChatConnection implements ChatConnection {
     switch (frame['type']) {
       case 'message.new':
         _emit(ChatMessageArrived(ChatMessage.fromJson((frame['message'] as Map).cast<String, dynamic>())));
+      case 'message.updated':
+        _emit(ChatMessageUpdated(ChatMessage.fromJson((frame['message'] as Map).cast<String, dynamic>())));
+      case 'conversation.pinned':
+        final pinned = frame['message'];
+        _emit(ChatPinChanged(pinned is Map ? ChatMessage.fromJson(pinned.cast<String, dynamic>()) : null));
       case 'message.ack':
         _emit(ChatMessageAcked('${frame['client_msg_id']}', (frame['id'] as num).toInt()));
       case 'message.read':
@@ -214,8 +238,13 @@ class WebSocketChatConnection implements ChatConnection {
   void _write(Map<String, dynamic> frame) => _channel?.sink.add(jsonEncode(frame));
 
   @override
-  void send(String body, String clientMsgId) =>
-      _write({'type': 'message.send', 'body': body, 'client_msg_id': clientMsgId});
+  void send(String body, String clientMsgId, {int? replyTo, int? attachmentId}) => _write({
+    'type': 'message.send',
+    'body': body,
+    'client_msg_id': clientMsgId,
+    if (replyTo != null) 'reply_to': replyTo,
+    if (attachmentId != null) 'attachment_id': attachmentId,
+  });
 
   @override
   void markRead(int messageId) => _write({'type': 'message.read', 'message_id': messageId});

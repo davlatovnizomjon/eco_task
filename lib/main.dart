@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,19 +13,29 @@ import 'infrastructure/common/dio_client.dart';
 import 'infrastructure/common/mock_dio_client.dart';
 import 'infrastructure/common/mock_json_data/mock_chat_connection.dart';
 import 'infrastructure/common/mock_json_data/mock_store.dart';
+import 'infrastructure/repository/app_update_repository.dart';
+import 'infrastructure/repository/call_repository.dart';
 import 'infrastructure/repository/chat_repository.dart';
 import 'infrastructure/repository/expenses_repository.dart';
+import 'infrastructure/repository/files_repository.dart';
 import 'infrastructure/repository/notifications_repository.dart';
 import 'infrastructure/repository/reports_repository.dart';
+import 'infrastructure/repository/legal_repository.dart';
+import 'infrastructure/repository/login_lock_repository.dart';
 import 'infrastructure/repository/session_repository.dart';
 import 'infrastructure/repository/settings_repository.dart';
+import 'infrastructure/repository/support_repository.dart';
 import 'infrastructure/repository/tasks_repository.dart';
 import 'infrastructure/repository/team_repository.dart';
+import 'infrastructure/services/call_connection.dart';
 import 'infrastructure/services/chat_connection.dart';
 import 'infrastructure/services/local_store.dart';
+import 'infrastructure/services/push_service.dart';
 import 'infrastructure/services/secure_store.dart';
 import 'infrastructure/services/telegram_service.dart';
+import 'presentation/public/update_gate/update_gate.dart';
 import 'presentation/routes/coordinator.dart';
+import 'presentation/routes/entity/routes.dart';
 
 /// Boots the app: restores the stored session and settings, wires the HTTP
 /// client to the session, then hands everything to the widget tree.
@@ -49,7 +61,7 @@ Future<void> main() async {
       ],
       fallbackLocale: const Locale('uz'),
       path: 'assets/translations',
-      child: EcoTasksApp(session: session, settings: SettingsRepository(local)),
+      child: EcoTasksApp(session: session, settings: SettingsRepository(local), loginLock: LoginLockRepository(local)),
     ),
   );
 }
@@ -64,8 +76,11 @@ class EcoTasksApp extends StatefulWidget {
   /// Device settings restored in `main`.
   final SettingsRepository settings;
 
+  /// Remembered sign-in lock restored in `main`.
+  final LoginLockRepository loginLock;
+
   /// Builds the app root.
-  const EcoTasksApp({super.key, required this.session, required this.settings});
+  const EcoTasksApp({super.key, required this.session, required this.settings, required this.loginLock});
 
   @override
   State<EcoTasksApp> createState() => _EcoTasksAppState();
@@ -91,11 +106,32 @@ class _EcoTasksAppState extends State<EcoTasksApp> with WidgetsBindingObserver {
   /// Data source of conversations, history and the live chat link.
   late final ChatRepository _chat;
 
+  /// Data source of calls and the personal live link that rings.
+  late final CallRepository _calls;
+
+  /// Source of the latest published app version.
+  late final AppUpdateRepository _updates;
+
+  /// Source of the dispatcher contacts shown on the sign-in screen.
+  late final SupportRepository _support;
+
+  /// Uploads and downloads of photos, documents and recordings.
+  late final FilesRepository _files;
+
+  /// Source of the terms of use and privacy policy shown on the sign-in screen.
+  late final LegalRepository _legal;
+
+  /// Push notifications (Firebase Cloud Messaging); null in mock mode.
+  PushService? _push;
+
   /// The app router, created once: rebuilding it would drop the navigation stack.
   late final GoRouter _router;
 
   /// Palette last applied to the global theme, to detect changes.
   bool? _dark;
+
+  /// Language last applied to the app, to detect changes.
+  Locale? _locale;
 
   @override
   void initState() {
@@ -105,15 +141,48 @@ class _EcoTasksAppState extends State<EcoTasksApp> with WidgetsBindingObserver {
     _team = TeamRepository();
     _notifications = NotificationsRepository();
     _reports = ReportsRepository();
+    _updates = AppUpdateRepository();
+    _support = SupportRepository();
+    _legal = LegalRepository();
+    _files = FilesRepository();
     _chat = ChatRepository(
       connector: AppConfig.useMockData
           ? (id) =>
                 MockChatConnection(conversationId: id, me: () => MockStore.instance.userForToken(widget.session.token)!)
           : (id) => WebSocketChatConnection(conversationId: id, token: () => widget.session.token),
     );
+    _calls = CallRepository(
+      connector: AppConfig.useMockData
+          ? IdleCallConnection.new
+          : () => WebSocketCallConnection(token: () => widget.session.token),
+    );
     _router = buildRouter(widget.session);
     _router.routerDelegate.addListener(_syncBackButton);
     WidgetsBinding.instance.addObserver(this);
+    if (!AppConfig.useMockData) {
+      _push = PushService(
+        session: widget.session,
+        language: () => DioClient.language,
+        onForeground: () => unawaited(_notifications.refreshUnread().catchError((_) {})),
+        onOpen: _openFromPush,
+      );
+      widget.session.beforeSignOut = _push!.unregister;
+      unawaited(_push!.start());
+    }
+  }
+
+  /// Opens the screen a tapped push points at: its conversation, its task, or the inbox.
+  void _openFromPush(Map<String, String> data) {
+    if (widget.session.isGuest) return;
+    final chat = data['conversation_id'];
+    final task = data['task_id'];
+    _router.push(
+      chat != null
+          ? Routes.chat.of(chat)
+          : task != null
+          ? Routes.taskDetail.of(task)
+          : Routes.notifications.path,
+    );
   }
 
   @override
@@ -123,6 +192,7 @@ class _EcoTasksAppState extends State<EcoTasksApp> with WidgetsBindingObserver {
     _tasks.dispose();
     _notifications.dispose();
     _chat.dispose();
+    _calls.dispose();
     widget.session.dispose();
     widget.settings.dispose();
     super.dispose();
@@ -152,12 +222,18 @@ class _EcoTasksAppState extends State<EcoTasksApp> with WidgetsBindingObserver {
       providers: [
         RepositoryProvider.value(value: widget.session),
         RepositoryProvider.value(value: widget.settings),
+        RepositoryProvider.value(value: widget.loginLock),
         RepositoryProvider.value(value: _tasks),
         RepositoryProvider.value(value: _expenses),
         RepositoryProvider.value(value: _team),
         RepositoryProvider.value(value: _notifications),
         RepositoryProvider.value(value: _reports),
         RepositoryProvider.value(value: _chat),
+        RepositoryProvider.value(value: _calls),
+        RepositoryProvider.value(value: _updates),
+        RepositoryProvider.value(value: _support),
+        RepositoryProvider.value(value: _legal),
+        RepositoryProvider.value(value: _files),
       ],
       child: ValueListenableBuilder<AppSettings>(
         valueListenable: widget.settings.settings,
@@ -173,20 +249,29 @@ class _EcoTasksAppState extends State<EcoTasksApp> with WidgetsBindingObserver {
           return ScreenUtilInit(
             designSize: const Size(390, 844),
             minTextAdapt: true,
-            builder: (context, _) => MaterialApp.router(
-              debugShowCheckedModeBanner: false,
-              title: TrWords.appName.tr(),
-              theme: theme.data,
-              routerConfig: _router,
-              localizationsDelegates: context.localizationDelegates,
-              supportedLocales: context.supportedLocales,
-              locale: context.locale,
-              builder: (context, child) => MediaQuery.withClampedTextScaling(
-                minScaleFactor: 1,
-                maxScaleFactor: settings.bigText ? 1.3 : 1,
-                child: child!,
-              ),
-            ),
+            builder: (context, _) {
+              DioClient.language = context.locale.toLanguageTag();
+              // Screens read texts through `.tr()`, which does not subscribe them to the language, so a language change
+              // marks every element dirty (as the theme does) and each screen re-reads its texts.
+              if (_locale != null && _locale != context.locale) {
+                WidgetsBinding.instance.addPostFrameCallback((_) => _rebuildAll());
+              }
+              _locale = context.locale;
+              return MaterialApp.router(
+                debugShowCheckedModeBanner: false,
+                title: TrWords.appName.tr(),
+                theme: theme.data,
+                routerConfig: _router,
+                localizationsDelegates: context.localizationDelegates,
+                supportedLocales: context.supportedLocales,
+                locale: context.locale,
+                builder: (context, child) => MediaQuery.withClampedTextScaling(
+                  minScaleFactor: 1,
+                  maxScaleFactor: settings.bigText ? 1.3 : 1,
+                  child: UpdateGate(child: child!),
+                ),
+              );
+            },
           );
         },
       ),

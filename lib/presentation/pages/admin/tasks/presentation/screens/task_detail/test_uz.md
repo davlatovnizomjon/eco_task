@@ -1,4 +1,4 @@
-# Vazifa tafsiloti — Test rejasi
+# Vazifa tafsiloti (admin) — Test rejasi
 
 AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga tushirilmaydi.
 
@@ -22,20 +22,20 @@ AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga
 
 ## 2. Mobil/Web integratsiya testi
 
-- [ ] Boss yo‘li: `rev` vazifani oching → tasdiqlang (ekran yopiladi) va har bir sabab bilan rad eting (varaq, uzaytirish almashtirgichi) → holat `prog`ga qaytadi.
-- [ ] Xodim yo‘li: biriktirilgan vazifani oching → progressni yangilang (stepper, natija, izoh), rasmlar bilan izoh qoldiring, xarajat qo‘shing, natijani yuboring.
-- [ ] `AppConfig.useMockData = true` bilan haqiqiy yoki emulyator Android/iOS qurilmada, so‘ng jonli API bilan yana ishga tushiring.
+- [ ] Ro‘yxatdan, dashboarddan, taqvimdan va xodim profilidan oching; «⋯» → “Tahrirlash” formani ochadi va qaytganda vazifa qayta yuklanadi; «⋯» → “O‘chirish” tasdiqlashni so‘raydi, aylanadi va ekran yopiladi; qaror kutayotgan natijani tasdiqlang / qaytaring; rasmni bosing → ko‘ruvchi shu rasmda ochiladi; “Yana N kishi” to‘liq ijrochilar oynasini ochadi.
+- [ ] Haqiqiy yoki emulyatsiya qilingan Android/iOS qurilmada `AppConfig.useMockData = true` bilan va yana jonli API bilan ishga tushiring.
 
 ## 3. UI test
 
-- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida overflow yoki kesilish yo‘q; uzun ismlar va tarjima matnlari ko‘p nuqta bilan qisqaradi.
-- [ ] Yorug‘ va qorong‘i mavzular ikkalasi ham to‘g‘ri ko‘rinadi; Sozlamalarda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
+- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida toshib ketish yoki kesilish yo‘q; uzun nomlar va tarjima qilingan matnlar ko‘p nuqta bilan qisqartiriladi.
+- [ ] Yorug‘ va qorong‘i mavzular to‘g‘ri o‘qiladi; profilda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
 - [ ] O‘zbek lotin, o‘zbek kirill va rus tillari yetishmayotgan kalitlarsiz va maket buzilishisiz ko‘rinadi.
-- [ ] Bo‘limlar faqat mazmuni bo‘lganda ko‘rinadi (natija, mukofot/xarajatlar, fayllar, faollik); boss har bir kishi progressi bilan ijrochi qatorlarini ko‘radi, xodim o‘z ulushi kartasi va faqat o‘z xarajatlarini ko‘radi.
-- [ ] Rol/holatga qarab pastki panel: tasdiqlash+rad etish (boss, `rev`), bekor qilish+tahrirlash (boss, ochiq), to‘rtta xodim amali (xodim, ochiq), yopiq vazifalar uchun yo‘q; bekor qilish avval tasdiq so‘raydi.
-- [ ] Pull-to-refresh ishlaydi; izoh maydoni yuboradi va tozalanadi; vaqt chizig‘i eng yangi jurnal qatorini belgilaydi.
+- [ ] Dizayn bu ekranning `Eco Tasks — mobile app` taxtasiga yorug‘ va qorong‘i mavzuda 1:1 mos keladi (o‘lchamlar, ranglar, radiuslar, ikonkalar).
+- [ ] 2.6 taxtalar: panelda “Vazifa tafsiloti” va «⋯» amali; keyin sarlavha va tavsif, faktlar kartasi (Holat chipi, Tashkilot nomi / Mijoz, Muddat, Manzil, vazifa valyutasidagi Narx, Yaratgan, Yaratilgan sana — ma’lumotsiz qatorlar yashirin), rasm eskizlari va rol belgili birinchi uchta ijrochi (Xodim yashil, Menejer ko‘k, Admin amber).
+- [ ] Pastki panel Rad etish / Tasdiqlash ni faqat tekshiruvdagi vazifada ko‘rsatadi; ochiq va yopilgan vazifalarda panel yo‘q (tahrirlash va o‘chirish «⋯» menyusida).
 
 ## 4. Mantiqiy/biznes test
 
-- [ ] Biriktirilmagan xodim xodim amallariga yeta olmaydi; menejer o‘z jamoasidan tashqari vazifalarni ocha olmaydi (backenddan 404).
-- [ ] Ikki marta tasdiqlash yoki bekor qilingan vazifada amal UI (tugmalar yashirin) va backend tomonidan rad etiladi.
+- [ ] Tasdiqlash yoki o‘chirish ekranni yopadi va ro‘yxatlar buni aks ettiradi; natijani qaytarish ekranni yangilangan vazifa bilan ochiq qoldiradi; o‘chirish avval tasdiqlashni talab qiladi.
+- [ ] Narx vazifaning o‘z valyutasida yoziladi (`uzs` → “so‘m”, aks holda “$”); mijozsiz vazifada mijoz qatori yashiriladi, jismoniy shaxs uchun u “Mijoz” deb nomlanadi.
+- [ ] «⋯» menyusi istalgan vazifa uchun «Tahrirlash» va «O‘chirish» ni taklif qiladi (egasi va menejer istalgan vazifani o‘chira oladi).

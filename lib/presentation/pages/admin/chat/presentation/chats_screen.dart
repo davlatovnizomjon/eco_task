@@ -5,28 +5,33 @@ import 'package:go_router/go_router.dart';
 import 'package:eco_task/constants/constants.dart';
 import 'package:eco_task/domain/common/enums/chat_kind.dart';
 import 'package:eco_task/domain/common/enums/screen_status.dart';
+import 'package:eco_task/domain/common/enums/status_tone.dart';
+import 'package:eco_task/domain/common/enums/user_role.dart';
 import 'package:eco_task/helpers/response_helper.dart';
 import 'package:eco_task/infrastructure/dto/models/conversation_model.dart';
 import 'package:eco_task/infrastructure/dto/models/user_ref.dart';
 import 'package:eco_task/infrastructure/repository/chat_repository.dart';
 import 'package:eco_task/infrastructure/repository/session_repository.dart';
 import 'package:eco_task/presentation/public/widgets/app_icon.dart';
-import 'package:eco_task/presentation/public/widgets/card_widget.dart';
+import 'package:eco_task/presentation/public/widgets/chat_row.dart';
 import 'package:eco_task/presentation/public/widgets/empty_view.dart';
+import 'package:eco_task/presentation/public/widgets/floating_tab_bar.dart';
+import 'package:eco_task/presentation/public/widgets/header_action.dart';
+import 'package:eco_task/presentation/public/widgets/large_title_header.dart';
 import 'package:eco_task/presentation/public/widgets/refresh_list.dart';
-import 'package:eco_task/presentation/public/widgets/screen_shell.dart';
+import 'package:eco_task/presentation/public/widgets/underline_tabs.dart';
 import 'package:eco_task/presentation/public/widgets/smart_loading.dart';
+import 'package:eco_task/presentation/public/widgets/tone_circle.dart';
 import 'package:eco_task/presentation/public/widgets/user_avatar.dart';
 import 'package:eco_task/presentation/routes/entity/routes.dart';
 import 'package:eco_task/utils/formatters/date_formatter.dart';
 
 import '../bloc/bloc.dart';
 
-/// Chat tab: every conversation of the signed-in user with its last message
-/// and unread badge, and a button that starts a new chat. Provides
-/// [ChatsBloc] over the app-wide [ChatRepository].
+/// Admin chat tab: large title with "new group" and "new chat" actions, a Hammasi / Guruhlar / Xodimlar / Mijozlar
+/// switch and the conversations in a "Guruhlar" and a "Shaxsiy" section. Provides [ChatsBloc].
 class ChatsScreen extends StatelessWidget {
-  /// Builds the chat tab.
+  /// Builds the tab.
   const ChatsScreen({super.key});
 
   @override
@@ -38,10 +43,34 @@ class ChatsScreen extends StatelessWidget {
   }
 }
 
-/// Renders the conversation rows.
-class _ChatsView extends StatelessWidget {
-  /// Builds the list body.
+/// Renders the header, the switch and the two sections.
+class _ChatsView extends StatefulWidget {
+  /// Builds the view.
   const _ChatsView();
+
+  @override
+  State<_ChatsView> createState() => _ChatsViewState();
+}
+
+/// Holds the selected switch segment.
+class _ChatsViewState extends State<_ChatsView> {
+  /// Selected segment: 0 all, 1 groups, 2 staff, 3 clients.
+  int _segment = 0;
+
+  /// Whether [c] is a group-like conversation (group or task chat).
+  static bool _isGroup(ConversationModel c) => c.kind != ChatKind.direct;
+
+  /// Conversations that pass the selected segment.
+  List<ConversationModel> _visible(List<ConversationModel> all, String meId) => [
+    for (final c in all)
+      if (switch (_segment) {
+        1 => _isGroup(c),
+        2 => !_isGroup(c) && c.other(meId)?.role != UserRole.client,
+        3 => !_isGroup(c) && c.other(meId)?.role == UserRole.client,
+        _ => true,
+      })
+        c,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -51,141 +80,115 @@ class _ChatsView extends StatelessWidget {
       listener: (context, state) => showScreenResponse(context, state.response!),
       builder: (context, state) {
         final bloc = context.read<ChatsBloc>();
-        return ScreenShell(
-          title: TrWords.chatTitle.tr(),
-          big: true,
-          showBack: false,
-          padding: EdgeInsets.zero,
-          actions: [
-            IconButton(
-              onPressed: () => context.push(Routes.chatNew.path).then((_) => bloc.add(const ChatsRefreshed())),
-              icon: AppIcon(AppIcons.plus, color: theme.text),
+        final items = _visible(state.items, meId);
+        void refresh(Object? _) => bloc.add(const ChatsRefreshed());
+        return Column(
+          children: [
+            LargeTitleHeader(
+              title: TrWords.chatTitle.tr(),
+              actions: [
+                HeaderAction(icon: AppIcons.chatPlus, onTap: () => context.push(Routes.chatNew.path).then(refresh)),
+              ],
+              bottom: UnderlineTabs(
+                divider: false,
+                labels: [
+                  TrWords.cAll.tr(),
+                  TrWords.chatGroups.tr(),
+                  TrWords.teamTabStaff.tr(),
+                  TrWords.teamTabClients.tr(),
+                ],
+                selected: _segment,
+                onChanged: (i) => setState(() => _segment = i),
+              ),
+            ),
+            Expanded(
+              child: state.items.isEmpty && state.status.isLoading
+                  ? const Padding(padding: EdgeInsets.all(16), child: SmartLoading())
+                  : state.items.isEmpty
+                  ? (state.status.isError
+                        ? EmptyView(
+                            title: TrWords.cLoadFailed.tr(),
+                            message: TrWords.cLoadFailedDesc.tr(),
+                            icon: AppIcons.alert,
+                            onRetry: () => bloc.add(const ChatsStarted()),
+                          )
+                        : EmptyView(
+                            title: TrWords.chatEmpty.tr(),
+                            message: TrWords.chatEmptyDesc.tr(),
+                            icon: AppIcons.msg,
+                          ))
+                  : RefreshList(
+                      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, FloatingTabBar.inset(context)),
+                      gap: 0,
+                      onRefresh: () async {
+                        bloc.add(const ChatsRefreshed());
+                        await bloc.stream.firstWhere((s) => !s.refreshing);
+                      },
+                      children: [
+                        for (final (i, c) in items.indexed) _row(context, c, meId, first: i == 0, onDone: refresh),
+                      ],
+                    ),
             ),
           ],
-          child: state.items.isEmpty && state.status.isLoading
-              ? const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: SmartLoading())
-              : state.items.isEmpty
-              ? (state.status.isError
-                    ? EmptyView(
-                        title: TrWords.cLoadFailed.tr(),
-                        message: TrWords.cLoadFailedDesc.tr(),
-                        icon: AppIcons.alert,
-                        onRetry: () => bloc.add(const ChatsStarted()),
-                      )
-                    : EmptyView(title: TrWords.chatEmpty.tr(), message: TrWords.chatEmptyDesc.tr(), icon: AppIcons.msg))
-              : RefreshList(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  gap: 10,
-                  onRefresh: () async {
-                    bloc.add(const ChatsRefreshed());
-                    await bloc.stream.firstWhere((s) => !s.refreshing);
-                  },
-                  children: [
-                    for (final c in state.items)
-                      _ConversationRow(
-                        conversation: c,
-                        meId: meId,
-                        onTap: () => context.push(Routes.chat.of(c.id)).then((_) => bloc.add(const ChatsRefreshed())),
-                      ),
-                  ],
-                ),
         );
       },
     );
   }
-}
 
-/// One row: avatar, name, last message preview, time and unread badge.
-class _ConversationRow extends StatelessWidget {
-  /// Conversation to show.
-  final ConversationModel conversation;
-
-  /// Id of the signed-in user, to pick the other person and label own previews.
-  final String meId;
-
-  /// Opens the conversation.
-  final VoidCallback onTap;
-
-  /// Builds the row.
-  const _ConversationRow({required this.conversation, required this.meId, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final last = conversation.last;
-    final name = conversation.nameFor(meId);
+  /// One conversation row for [c] viewed by [meId].
+  Widget _row(
+    BuildContext context,
+    ConversationModel c,
+    String meId, {
+    required bool first,
+    required void Function(Object?) onDone,
+  }) {
+    final last = c.last;
+    final other = c.other(meId);
+    final mine = last != null && last.sender.id == meId;
     final preview = last == null
         ? ''
-        : last.sender.id == meId
-        ? TrWords.chatYouPrefix.tr(args: [last.body])
+        : c.kind != ChatKind.direct && !mine
+        ? '${last.sender.firstName}: ${last.body}'
         : last.body;
-    return CardWidget(
-      onTap: onTap,
-      child: Row(
-        children: [
-          conversation.kind == ChatKind.direct
-              ? UserAvatar(
-                  conversation.other(meId) ?? UserRef(id: conversation.id, name: name),
-                  size: 44.w,
-                )
-              : _KindTile(kind: conversation.kind),
-          12.w.width,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.cardTitle),
-                    ),
-                    if (last != null) Text(DateFormatter.ago(last.at), style: theme.cardSubtitle),
-                  ],
-                ),
-                4.h.height,
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        preview,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.cardSubtitle.copyWith(
-                          color: conversation.unread > 0 ? theme.text : theme.grayText,
-                          fontWeight: conversation.unread > 0 ? FontWeight.w600 : FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                    if (conversation.unread > 0) ...[
-                      8.w.width,
-                      Badge(label: Text('${conversation.unread}'), backgroundColor: theme.primary),
-                    ],
-                  ],
-                ),
-              ],
+    return ChatRow(
+      first: first,
+      avatar: c.kind == ChatKind.direct
+          ? UserAvatar(
+              other ?? UserRef(id: c.id, name: c.nameFor(meId)),
+              size: 48.w,
+            )
+          : ToneCircle(
+              c.kind == ChatKind.task ? AppIcons.tasks : AppIcons.users,
+              tone: c.kind == ChatKind.task ? StatusTone.info : StatusTone.primary,
+              size: 48.w,
             ),
-          ),
-        ],
-      ),
+      name: c.nameFor(meId),
+      badge: other?.role == UserRole.client
+          ? Container(
+              height: 20.h,
+              padding: EdgeInsets.symmetric(horizontal: 8.w),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: StatusTone.neutral.bgColor, borderRadius: 10.circular),
+              child: Text(
+                TrWords.roleClient.tr(),
+                style: theme.badgeText.copyWith(fontSize: 11.sp, color: StatusTone.neutral.color),
+              ),
+            )
+          : null,
+      time: last == null ? '' : _time(last.at),
+      message: preview,
+      unread: c.unread,
+      receipt: mine ? AppIcon(AppIcons.check, size: 16.sp, color: theme.info) : null,
+      onTap: () => context.push(Routes.chat.of(c.id)).then(onDone),
     );
   }
-}
 
-/// Round tile that stands in for the avatar of a group or task chat.
-class _KindTile extends StatelessWidget {
-  /// Kind that picks the glyph.
-  final ChatKind kind;
-
-  /// Builds the tile.
-  const _KindTile({required this.kind});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 44.w,
-      height: 44.w,
-      decoration: BoxDecoration(color: theme.primaryTint, shape: BoxShape.circle),
-      alignment: Alignment.center,
-      child: AppIcon(kind == ChatKind.task ? AppIcons.tasks : AppIcons.users, color: theme.primaryDark),
-    );
+  /// `10:42` for today, `Kecha` for yesterday, otherwise a short date.
+  static String _time(DateTime at) {
+    final diff = DateFormatter.daysTo(at);
+    if (diff == 0) return DateFormatter.time(at);
+    if (diff == -1) return TrWords.cYesterday.tr();
+    return DateFormatter.dayShort(at);
   }
 }

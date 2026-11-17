@@ -1,4 +1,4 @@
-# Vazifa shakli (yaratish/tahrirlash) — Test rejasi
+# Vazifa formasi (admin) — Test rejasi
 
 AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga tushirilmaydi.
 
@@ -20,18 +20,24 @@ AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga
 
 ## 2. Mobil/Web integratsiya testi
 
-- [ ] Bir va bir nechta ijrochi uchun (kishi kvotalari bilan va kvotasiz) vazifa yarating, so‘ng tafsilot ekranidan tahrirlang; ro‘yxat va tafsilot o‘zgarishni ko‘rsatadi.
-- [ ] `AppConfig.useMockData = true` bilan haqiqiy yoki emulyator Android/iOS qurilmada, so‘ng jonli API bilan yana ishga tushiring.
+- [ ] Vazifani boshidan oxirigacha yarating: nom, ijrochilar oyna orqali (belgilash qatorlari), har bir ijrochi ulushi, muddat sanasi va vaqti oyna orqali, ikonkali muhimlik almashtirgichi, mukofot, tavsif, kutilgan natija; mavjud vazifani tafsilotdan tahrirlang.
+- [ ] Haqiqiy yoki emulyatsiya qilingan Android/iOS qurilmada `AppConfig.useMockData = true` bilan va yana jonli API bilan ishga tushiring.
 
 ## 3. UI test
 
-- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida overflow yoki kesilish yo‘q; uzun ismlar va tarjima matnlari ko‘p nuqta bilan qisqaradi.
-- [ ] Yorug‘ va qorong‘i mavzular ikkalasi ham to‘g‘ri ko‘rinadi; Sozlamalarda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
+- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida toshib ketish yoki kesilish yo‘q; uzun nomlar va tarjima qilingan matnlar ko‘p nuqta bilan qisqartiriladi.
+- [ ] Yorug‘ va qorong‘i mavzular to‘g‘ri o‘qiladi; profilda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
 - [ ] O‘zbek lotin, o‘zbek kirill va rus tillari yetishmayotgan kalitlarsiz va maket buzilishisiz ko‘rinadi.
-- [ ] Birinchi Saqlashgacha hech narsa qizil emas; bo‘sh shaklda Saqlash dialogda nom xabarini ko‘rsatadi va nom hamda ijrochilarni qizil qiladi; maydonni tuzatish xatoni tozalaydi.
-- [ ] Ijrochi varag‘i qidiriladi va bossni «o‘zimga» sifatida ko‘rsatadi; muddat varag‘ida tezkor kunlar, oylik taqvim va soat chiplari bor va bitta lahzani qaytaradi; mukofot maydoni yozayotganda mingliklarni guruhlaydi va `($)` birligini ko‘rsatadi.
+- [ ] Dizayn bu ekranning `Eco Tasks — mobile app` taxtasiga yorug‘ va qorong‘i mavzuda 1:1 mos keladi (o‘lchamlar, ranglar, radiuslar, ikonkalar).
+- [ ] Sana va vaqt maydonlari yonma-yon turadi va ikkalasi ham bir xil sana-vaqt oynasini ochadi; oynada tezkor kun chiplari, oy to‘ri (o‘tgan kunlar o‘chirilgan), vaqt chiplari va tanlangan lahzali tasdiqlash tugmasi bor.
+- [ ] Ijrochi oynasida avval «O‘zimga», keyin faol vazifa sonlari bilan xodimlar chiqadi; tanlangan qatorlarda yashil belgi ko‘rinadi; tugma tanlanganlar sonini ko‘rsatadi.
+- [ ] Yaratish rejimi besh qadamli wizard (2.3–2.3d taxtalar): 1 mijoz turi (+ tashkilot yoki shaxs nomi), 2 vazifa haqida (nom, tavsif, so‘m / $ bilan narx), 3 muddat va manzil, 4 ijrochilar, 5 tekshirish; besh bo‘lakli progress chizig‘i, qadam sarlavhasi va “Keyingi →” / “Yaratish va yuborish”; orqaga (panel yoki tizim) bir qadam orqaga qaytaradi, so‘ng chiqadi.
+- [ ] Qadam bo‘yicha tekshiruv: nomsiz tashkilot (1), bo‘sh vazifa nomi (2) va ijrochisiz (4) “Keyingi” ni umumiy xato dialogi va qizil maydon bilan to‘sadi; birinchi urinishgacha hech narsa qizil emas. Muvaffaqiyatda “Vazifa yaratildi” dialogi chiqadi va ekranni yopadi.
+- [ ] Qurilmagan: 3-qadamdagi rasm yuklash (fayl xizmati hali yo‘q); tahrirlash rejimi bir sahifali formani saqlaydi.
+- [ ] Tahrirlash rejimi (2.6 tahrirlash, 2.6 ijrochilar taxtalari): bitta sahifada mijoz turi va nomi, vazifa nomi, tavsif, so‘m / $ bilan narx, muddat va manzil (wizard maydonlari), so‘ng ijrochilar qatori (qatorlashgan avatarlar + “N ta ijrochi”) rol belgili tanlagich sheet’ini va “Tanlash” tugmasini ochadi; “Saqlash” saqlaydi. Ijrochilar chegarasi faqat muvaffaqiyatsiz saqlashdan keyin qizil bo‘ladi.
+- [ ] Mavjud vazifani ochganda mijoz, manzil va valyuta undan to‘ldiriladi; saqlashda ular qaytarib yuboriladi.
 
 ## 4. Mantiqiy/biznes test
 
-- [ ] O‘tmishdagi muddatni saqlash mumkin, lekin vazifa darhol kechikkan ko‘rinadi; 0 yoki bo‘sh kvota progress chizig‘isiz ha/yo‘q vazifani bildiradi.
-- [ ] Shakldan tizim orqaga tugmasi bilan chiqish qoralamani saqlamasdan bekor qiladi.
+- [ ] Bo‘sh nom yoki ijrochisizlik saqlashni to‘xtatadi, birinchi xato dialogda ko‘rsatiladi.
+- [ ] Saqlangandan keyin ro‘yxat va tafsilot qaytganda o‘zgarishni aks ettiradi.

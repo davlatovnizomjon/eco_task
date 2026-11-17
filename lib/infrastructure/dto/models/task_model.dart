@@ -3,6 +3,7 @@ import '../../../domain/common/enums/task_priority.dart';
 import '../../../domain/common/enums/task_status.dart';
 import 'comment_model.dart';
 import 'expense_model.dart';
+import 'file_attachment.dart';
 import 'log_entry.dart';
 import 'task_assignee.dart';
 import 'user_ref.dart';
@@ -39,8 +40,8 @@ class TaskModel {
   /// Reward promised for the whole task.
   final int reward;
 
-  /// Number of attached files/photos.
-  final int files;
+  /// Files attached to the task: photos and documents.
+  final List<FileAttachment> attachments;
 
   /// True once the reward was paid out.
   final bool isPaid;
@@ -63,6 +64,39 @@ class TaskModel {
   /// Activity log, newest first.
   final List<LogEntry> log;
 
+  /// Client the task is done for (a person's or an organization's name); empty for an internal task.
+  final String client;
+
+  /// True when [client] is an organization, false for a private person.
+  final bool clientIsOrg;
+
+  /// Place the work happens at; empty when not set.
+  final String address;
+
+  /// Moment of the deadline reminder; null when none is set.
+  final DateTime? remindAt;
+
+  /// Moment the task was created; null for records that predate the field.
+  final DateTime? createdAt;
+
+  /// Number of attached photos.
+  int get files => images.length;
+
+  /// Attached photos, in upload order.
+  List<FileAttachment> get images => [
+    for (final a in attachments)
+      if (a.kind == FileKind.image) a,
+  ];
+
+  /// The first attached document; null when there is none.
+  FileAttachment? get document => attachments.where((a) => a.kind == FileKind.document).firstOrNull;
+
+  /// File name of the attached document; empty when there is none.
+  String get docName => document?.name ?? '';
+
+  /// Currency of [reward]: `uzs` (so‘m) or `usd`.
+  final String currency;
+
   /// Builds a task from its parts.
   const TaskModel({
     required this.id,
@@ -75,7 +109,7 @@ class TaskModel {
     this.status = TaskStatus.fresh,
     this.priority = TaskPriority.medium,
     this.reward = 0,
-    this.files = 0,
+    this.attachments = const [],
     this.isPaid = false,
     this.result = '',
     this.submittedAt,
@@ -83,6 +117,12 @@ class TaskModel {
     this.expenses = const [],
     this.comments = const [],
     this.log = const [],
+    this.client = '',
+    this.clientIsOrg = false,
+    this.address = '',
+    this.remindAt,
+    this.createdAt,
+    this.currency = 'usd',
   });
 
   /// Id as shown to people: human ids such as `ECO-142` as they are, a long
@@ -101,7 +141,10 @@ class TaskModel {
     priority: TaskPriority.fromJson(json['priority']),
     due: DateTime.parse('${json['due']}'),
     reward: (json['reward'] as num?)?.toInt() ?? 0,
-    files: (json['files'] as num?)?.toInt() ?? 0,
+    attachments: [
+      for (final a in (json['attachments'] as List? ?? const []))
+        FileAttachment.fromJson((a as Map).cast<String, dynamic>()),
+    ],
     isPaid: json['isPaid'] as bool? ?? false,
     result: '${json['result'] ?? ''}',
     submittedAt: json['submittedAt'] == null ? null : DateTime.parse('${json['submittedAt']}'),
@@ -115,6 +158,12 @@ class TaskModel {
       for (final c in (json['comments'] as List? ?? const [])) CommentModel.fromJson(c as Map<String, dynamic>),
     ],
     log: [for (final l in (json['log'] as List? ?? const [])) LogEntry.fromJson(l as Map<String, dynamic>)],
+    client: '${json['client'] ?? ''}',
+    clientIsOrg: json['clientIsOrg'] as bool? ?? false,
+    address: '${json['address'] ?? ''}',
+    remindAt: json['remindAt'] == null ? null : DateTime.parse('${json['remindAt']}'),
+    createdAt: json['createdAt'] == null ? null : DateTime.parse('${json['createdAt']}'),
+    currency: '${json['currency'] ?? 'usd'}',
   );
 
   /// Serializes the task.
@@ -129,7 +178,7 @@ class TaskModel {
     'priority': priority.name,
     'due': due.toIso8601String(),
     'reward': reward,
-    'files': files,
+    'attachments': [for (final a in attachments) a.toJson()],
     'isPaid': isPaid,
     'result': result,
     'submittedAt': submittedAt?.toIso8601String(),
@@ -137,6 +186,12 @@ class TaskModel {
     'expenses': [for (final e in expenses) e.toJson()],
     'comments': [for (final c in comments) c.toJson()],
     'log': [for (final l in log) l.toJson()],
+    'client': client,
+    'clientIsOrg': clientIsOrg,
+    'address': address,
+    'remindAt': remindAt?.toIso8601String(),
+    'createdAt': createdAt?.toIso8601String(),
+    'currency': currency,
   };
 
   /// Copy with the given fields replaced.
@@ -155,11 +210,18 @@ class TaskModel {
     List<ExpenseModel>? expenses,
     List<CommentModel>? comments,
     List<LogEntry>? log,
+    List<FileAttachment>? attachments,
   }) => TaskModel(
     id: id,
     createdBy: createdBy,
     category: category,
-    files: files,
+    attachments: attachments ?? this.attachments,
+    client: client,
+    clientIsOrg: clientIsOrg,
+    address: address,
+    remindAt: remindAt,
+    createdAt: createdAt,
+    currency: currency,
     title: title ?? this.title,
     description: description ?? this.description,
     expected: expected ?? this.expected,

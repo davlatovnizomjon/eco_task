@@ -1,4 +1,4 @@
-# Team directory (boss) — Test Plan
+# Team: employees, clients, rating (admin) — Test Plan
 
 A plan for an AI to execute against; nothing here is run unless the user asks.
 
@@ -16,19 +16,18 @@ A plan for an AI to execute against; nothing here is run unless the user asks.
 
 ## 2. Mobile/Web Integration Test
 
-- [ ] Switch staff/clients, search, open an employee, open the account form from the top button.
+- [ ] Employees (from the dashboard card): search, role sheet (Hammasi / Rahbar / Menejer / Oddiy ishchi), Hammasi / Vazifali / Vazifasiz switch, “+” opens the invite form, tap a row opens the profile. Clients: search, Hammasi / Faol so‘rov / So‘rovsiz switch, “+” opens the client form. Rating: period switch, tap a row opens the profile.
 - [ ] Run on a real or emulated Android/iOS device with `AppConfig.useMockData = true` and again against the live API.
 
 ## 3. UI Test
 
 - [ ] No overflow or clipping at a small phone width (320 px) and a tablet width (768 px); long names and translated strings truncate with an ellipsis.
-- [ ] Light and dark themes both read correctly; switching the theme in Settings repaints this screen without losing its state.
+- [ ] Light and dark themes both read correctly; switching the theme in the profile repaints this screen without losing its state.
 - [ ] Uzbek Latin, Uzbek Cyrillic and Russian all render without missing keys or layout breaks.
-- [ ] Loading shows the shimmer placeholder cards (no spinner); an empty result shows the empty view; a failed first load shows the retry view and the retry button reloads.
-- [ ] Pull-to-refresh works on a full list, a short list and the empty/error view (always-scrollable); the indicator completes when the network call finishes, not on the cached emit.
-- [ ] The last row clears the system gesture bar (bottom inset is part of the scroll padding).
-- [ ] Staff are grouped by team with the lead's name; managers carry the role chip; clients show district and request count; the clients help line is visible.
+- [ ] The design matches the `Eco Tasks — mobile app` board of this screen 1:1 (sizes, colors, radii, icons) in light and dark themes.
+- [ ] Employee rows show the avatar, name, role (managers in purple) and “N vazifa” / “Bo‘sh”; client rows show the address and “N so‘rov” / “So‘rov yo‘q”; the filter button turns green while a role is chosen.
+- [ ] Boards 1.21–1.21f and 1.24–1.24e: the team list has a search field and three underline tabs (Hammasi / Xodimlar / Menejerlar); each row shows the avatar, name, phone and the task count with “vazifa” under it; the clients list has the tabs Hammasi / Jismoniy shaxs / Tashkilot and rows with phone and “N so‘rov” (or “So‘rov yo‘q”); every tab has its own empty state (tile, title, hint).
 
 ## 4. Logical/Business Test
 
-- [ ] Creating an account makes it appear in the directory on return (cache invalidated).
+- [ ] Role and switch filters apply to the loaded page locally; the search goes to the server (debounced); creating an account refreshes the list on return.

@@ -2,6 +2,7 @@ import 'package:eco_task/domain/common/enums/chat_kind.dart';
 import 'package:eco_task/domain/common/enums/user_role.dart';
 import 'package:eco_task/infrastructure/dto/models/app_user.dart';
 
+import 'mock_files.dart';
 import 'mock_seed.dart';
 import 'mock_store.dart';
 
@@ -13,29 +14,53 @@ class MockChatMessage {
   /// Author account id.
   final String sender;
 
-  /// Text.
-  final String body;
-
   /// Client id the send used, for idempotent retries.
   final String clientId;
 
   /// When it was stored.
   final DateTime at;
 
-  MockChatMessage(this.id, this.sender, this.body, this.clientId, this.at);
+  /// Body; mutable because the author may edit it and a delete wipes it.
+  String text;
+
+  /// When the author last edited the text.
+  DateTime? editedAt;
+
+  /// True after the message was deleted.
+  bool deleted = false;
+
+  /// Id of the message this one answers.
+  int? replyTo;
+
+  /// Id of the attached file in `MockFiles`.
+  int? attachmentId;
+
+  /// Reaction of each person: user id → emoji.
+  final Map<String, String> reactions = {};
+
+  MockChatMessage(this.id, this.sender, String body, this.clientId, this.at) : text = body;
 }
 
 /// One stored mock conversation.
 class _Chat {
   final String id;
   final ChatKind kind;
-  final String title;
+  String title;
   final String? taskId;
   final Set<String> members;
   final List<MockChatMessage> messages = [];
 
   /// Read marker per account id.
   final Map<String, int> read = {};
+
+  /// People who muted this chat.
+  final Set<String> muted = {};
+
+  /// Id of the pinned message, if any.
+  int? pinned;
+
+  /// Id of the group's photo in `MockFiles`.
+  int? avatarId;
 
   _Chat(this.id, this.kind, this.members, {this.title = '', this.taskId});
 }
@@ -74,10 +99,39 @@ class MockChat {
     'id': m.id,
     'conversation': chat.id,
     'sender': _brief(m.sender),
-    'body': m.body,
+    'body': m.deleted ? '' : m.text,
     'client_msg_id': m.clientId,
     'created_at': m.at.toUtc().toIso8601String(),
+    'edited_at': m.editedAt?.toUtc().toIso8601String(),
+    'deleted': m.deleted,
+    'reply_to': _quote(chat, m.replyTo),
+    'attachment': m.deleted || m.attachmentId == null ? null : MockFiles.instance.meta(m.attachmentId!)?.toJson(),
+    'reactions': [
+      for (final emoji in m.reactions.values.toSet())
+        {
+          'emoji': emoji,
+          'user_ids': [
+            for (final e in m.reactions.entries)
+              if (e.value == emoji) e.key,
+          ],
+        },
+    ],
   };
+
+  /// The small card of the quoted message [id], as the API's `reply_to`.
+  Map<String, dynamic>? _quote(_Chat chat, int? id) {
+    final parent = chat.messages.where((x) => x.id == id).firstOrNull;
+    if (parent == null) return null;
+    return {
+      'id': parent.id,
+      'sender_name': _brief(parent.sender)['full_name'],
+      'body': parent.deleted ? '' : (parent.text.length > 120 ? parent.text.substring(0, 120) : parent.text),
+      'deleted': parent.deleted,
+      'attachment_kind': parent.deleted || parent.attachmentId == null
+          ? null
+          : MockFiles.instance.meta(parent.attachmentId!)?.kind.name.toUpperCase(),
+    };
+  }
 
   /// Adds a message to [chat] and moves the author's read marker.
   MockChatMessage _add(_Chat chat, String sender, String body, {String clientId = '', DateTime? at}) {
@@ -121,7 +175,42 @@ class MockChat {
       'unread_count': chat.messages.where((m) => m.id > marker && m.sender != me.id).length,
       'last_message': last == null ? null : _json(chat, last),
       'members': chat.kind == ChatKind.task ? const [] : [for (final id in chat.members) _brief(id)],
+      'muted': chat.muted.contains(me.id),
+      'avatar': chat.avatarId == null ? null : MockFiles.instance.meta(chat.avatarId!)?.toJson(),
+      'pinned_message': chat.pinned == null ? null : _json(chat, chat.messages.firstWhere((m) => m.id == chat.pinned)),
     };
+  }
+
+  /// Calls started in this session, by id; the mock keeps them so the call actions can answer for them.
+  final Map<int, Map<String, dynamic>> _calls = {};
+
+  /// `POST conversations/{id}/calls/` — the mock has no ringing devices, so everybody invited picks up at once.
+  Map<String, dynamic> _startCall(AppUser me, _Chat chat, Map<String, dynamic> body) {
+    if (chat.kind == ChatKind.task) throw const MockFailure(400, 'Qo‘ng‘iroq faqat shaxsiy va guruh chatlarida.');
+    final others = chat.members.where((id) => id != me.id).toList();
+    if (others.isEmpty) throw const MockFailure(400, 'Qo‘ng‘iroq qilinadigan odam yo‘q.');
+    final id = _calls.length + 1;
+    final now = DateTime.now().toIso8601String();
+    return _calls[id] = {
+      'id': id,
+      'conversation': chat.id,
+      'kind': '${body['kind'] ?? 'AUDIO'}',
+      'status': 'ACTIVE',
+      'caller': _brief(me.id),
+      'created_at': now,
+      'answered_at': now,
+      'participants': [
+        for (final uid in [me.id, ...others]) {'user': _brief(uid), 'state': 'JOINED'},
+      ],
+    };
+  }
+
+  /// `GET/POST calls/{id}[/answer|decline|end|invite]` for a call of this session.
+  Map<String, dynamic> callAction(AppUser me, List<String> seg, Map<String, dynamic> body) {
+    final call = _calls[int.tryParse(seg.length > 1 ? seg[1] : '')];
+    if (call == null) throw const MockFailure(404, 'Qo‘ng‘iroq topilmadi.');
+    if (seg.length > 2 && (seg[2] == 'end' || seg[2] == 'decline')) call['status'] = 'ENDED';
+    return call;
   }
 
   /// Routes `conversations/...` for the account [me].
@@ -129,10 +218,17 @@ class MockChat {
     if (seg.length == 1) return method == 'POST' ? _open(me, body) : _list(me);
     if (seg[1] == 'contacts') return _contacts(me, '${query['q'] ?? ''}');
     final chat = _chat(me, seg[1]);
-    if (seg.length == 2) return _payload(chat, me);
+    if (seg.length == 2) return method == 'PATCH' ? _update(me, chat, body) : _payload(chat, me);
+    if (seg[2] == 'messages' && seg.length >= 4) return _messageAction(me, chat, method, seg, body);
     switch (seg[2]) {
+      case 'pin':
+        return _pin(me, chat, method == 'PUT' ? (body['message_id'] as num).toInt() : null);
+      case 'members':
+        return _members(me, chat, method, seg, body);
       case 'messages':
         return method == 'POST' ? _send(me, chat, body) : _history(chat, query);
+      case 'calls':
+        return method == 'POST' ? _startCall(me, chat, body) : const <Object>[];
       case 'read':
         return {'last_read_message_id': markRead(me, chat.id, (body['message_id'] as num).toInt())};
     }
@@ -140,6 +236,83 @@ class MockChat {
   }
 
   /// `GET conversations/`, newest activity first.
+  /// `PATCH conversations/{id}` — rename a group and/or switch the caller's mute.
+  Map<String, dynamic> _update(AppUser me, _Chat chat, Map<String, dynamic> body) {
+    if (body['title'] != null) {
+      if (chat.kind != ChatKind.group) throw const MockFailure(400, 'Faqat guruhning nomi bor.');
+      if (!me.role.isBoss) throw const MockFailure(403, 'Guruh nomini o‘zgartirish mumkin emas.');
+      final title = '${body['title']}'.trim();
+      if (title.isEmpty) throw const MockFailure(400, 'Nom bo‘sh bo‘lishi mumkin emas.');
+      chat.title = title;
+    }
+    if (body['avatar_id'] != null) {
+      if (chat.kind != ChatKind.group || !me.role.isBoss)
+        throw const MockFailure(403, 'Guruh rasmini o‘zgartirish mumkin emas.');
+      chat.avatarId = (body['avatar_id'] as num).toInt();
+    }
+    if (body['muted'] != null) body['muted'] == true ? chat.muted.add(me.id) : chat.muted.remove(me.id);
+    return _payload(chat, me);
+  }
+
+  /// `PUT/DELETE conversations/{id}/pin`.
+  Map<String, dynamic> _pin(AppUser me, _Chat chat, int? messageId) {
+    if (messageId != null &&
+        chat.messages
+            .firstWhere((m) => m.id == messageId, orElse: () => throw const MockFailure(404, 'Xabar topilmadi.'))
+            .deleted) {
+      throw const MockFailure(409, 'O‘chirilgan xabarni pin qilib bo‘lmaydi.');
+    }
+    chat.pinned = messageId;
+    return _payload(chat, me);
+  }
+
+  /// Members of a group: add (`POST`) and remove or leave (`DELETE .../{userId}`).
+  Map<String, dynamic> _members(AppUser me, _Chat chat, String method, List<String> seg, Map<String, dynamic> body) {
+    if (chat.kind != ChatKind.group) throw const MockFailure(400, 'Faqat guruhga a’zo qo‘shiladi.');
+    if (method == 'POST') {
+      if (!me.role.isBoss) throw const MockFailure(403, 'A’zo qo‘shish mumkin emas.');
+      chat.members.addAll([for (final id in (body['user_ids'] as List? ?? const [])) '$id']);
+    } else if (seg.length == 4) {
+      if (seg[3] != me.id && !me.role.isBoss) throw const MockFailure(403, 'A’zoni chiqarish mumkin emas.');
+      chat.members.remove(seg[3]);
+    }
+    return _payload(chat, me);
+  }
+
+  /// Edit, delete and react on one message.
+  Map<String, dynamic> _messageAction(
+    AppUser me,
+    _Chat chat,
+    String method,
+    List<String> seg,
+    Map<String, dynamic> body,
+  ) {
+    final message = chat.messages.firstWhere(
+      (m) => m.id == int.tryParse(seg[3]),
+      orElse: () => throw const MockFailure(404, 'Xabar topilmadi.'),
+    );
+    if (seg.length == 5 && seg[4] == 'reaction') {
+      if (message.deleted) throw const MockFailure(409, 'O‘chirilgan xabarga munosabat bildirib bo‘lmaydi.');
+      method == 'PUT' ? message.reactions[me.id] = '${body['emoji']}' : message.reactions.remove(me.id);
+    } else if (method == 'PATCH') {
+      if (message.sender != me.id) throw const MockFailure(403, 'Faqat o‘z xabaringizni tahrirlay olasiz.');
+      if (message.deleted) throw const MockFailure(409, 'O‘chirilgan xabarni tahrirlab bo‘lmaydi.');
+      final text = '${body['body']}'.trim();
+      if (text.isEmpty || text.length > 4000)
+        throw const MockFailure(400, 'Xabar 1–4000 belgidan iborat bo‘lishi kerak.');
+      message
+        ..text = text
+        ..editedAt = DateTime.now();
+    } else if (method == 'DELETE') {
+      if (message.sender != me.id && !me.role.isBoss) throw const MockFailure(403, 'Bu xabarni o‘chirib bo‘lmaydi.');
+      message
+        ..deleted = true
+        ..reactions.clear();
+      if (chat.pinned == message.id) chat.pinned = null;
+    }
+    return _json(chat, message);
+  }
+
   List<Map<String, dynamic>> _list(AppUser me) {
     final chats = _mine(me).toList()
       ..sort((a, b) => (b.messages.lastOrNull?.id ?? 0).compareTo(a.messages.lastOrNull?.id ?? 0));
@@ -204,20 +377,40 @@ class MockChat {
   }
 
   /// `POST conversations/{id}/messages/`.
-  Map<String, dynamic> _send(AppUser me, _Chat chat, Map<String, dynamic> body) =>
-      _json(chat, send(me, chat.id, '${body['body']}', '${body['client_msg_id'] ?? ''}').$1);
+  Map<String, dynamic> _send(AppUser me, _Chat chat, Map<String, dynamic> body) => _json(
+    chat,
+    send(
+      me,
+      chat.id,
+      '${body['body'] ?? ''}',
+      '${body['client_msg_id'] ?? ''}',
+      replyTo: (body['reply_to'] as num?)?.toInt(),
+      attachmentId: (body['attachment_id'] as num?)?.toInt(),
+    ).$1,
+  );
 
   /// Stores a message of [me]; returns it with `true` when new (a repeated [clientId] returns the original).
-  (MockChatMessage, bool) send(AppUser me, String chatId, String text, String clientId) {
+  (MockChatMessage, bool) send(
+    AppUser me,
+    String chatId,
+    String text,
+    String clientId, {
+    int? replyTo,
+    int? attachmentId,
+  }) {
     final chat = _chat(me, chatId);
     final body = text.trim();
-    if (body.isEmpty || body.length > 4000)
+    if ((body.isEmpty && attachmentId == null) || body.length > 4000) {
       throw const MockFailure(400, 'Xabar 1–4000 belgidan iborat bo‘lishi kerak.');
+    }
     if (clientId.isNotEmpty) {
       final dup = chat.messages.where((m) => m.sender == me.id && m.clientId == clientId).firstOrNull;
       if (dup != null) return (dup, false);
     }
-    return (_add(chat, me.id, body, clientId: clientId), true);
+    final stored = _add(chat, me.id, body, clientId: clientId)
+      ..replyTo = replyTo
+      ..attachmentId = attachmentId;
+    return (stored, true);
   }
 
   /// Moves [me]'s read marker; returns the new marker.

@@ -26,6 +26,15 @@ class TaskQuery {
   final TaskSort sort;
 
   /// Builds a query; the defaults load everything, soonest first.
+  /// Assignees to narrow to (any of them); empty means everyone. Sent instead of [who] when not empty.
+  final Set<String> people;
+
+  /// First day of a hand-picked deadline range; used with `TaskDueFilter.range`.
+  final DateTime? from;
+
+  /// Last day of a hand-picked deadline range; used with `TaskDueFilter.range`.
+  final DateTime? to;
+
   const TaskQuery({
     this.group,
     this.search = '',
@@ -34,6 +43,9 @@ class TaskQuery {
     this.who,
     this.due = TaskDueFilter.any,
     this.sort = TaskSort.due,
+    this.people = const {},
+    this.from,
+    this.to,
   });
 
   /// Copy with the given fields replaced; pass `clearWho` to drop [who].
@@ -45,6 +57,9 @@ class TaskQuery {
     bool clearWho = false,
     TaskDueFilter? due,
     TaskSort? sort,
+    Set<String>? people,
+    DateTime? from,
+    DateTime? to,
   }) => TaskQuery(
     group: group,
     search: search ?? this.search,
@@ -53,11 +68,17 @@ class TaskQuery {
     who: clearWho ? null : (who ?? this.who),
     due: due ?? this.due,
     sort: sort ?? this.sort,
+    people: people ?? this.people,
+    from: from ?? this.from,
+    to: to ?? this.to,
   );
 
   /// Number of active filters, shown as the filter button's badge.
   int get activeCount =>
-      (statuses.isEmpty ? 0 : 1) + (overdueOnly ? 1 : 0) + (who == null ? 0 : 1) + (due == TaskDueFilter.any ? 0 : 1);
+      (statuses.isEmpty ? 0 : 1) +
+      (overdueOnly ? 1 : 0) +
+      (who == null && people.isEmpty ? 0 : 1) +
+      (due == TaskDueFilter.any ? 0 : 1);
 
   /// Query parameters of the `tasks` endpoint for the given [page].
   Map<String, dynamic> toParams(int page, int pageSize) => {
@@ -67,11 +88,17 @@ class TaskQuery {
     if (search.isNotEmpty) 'q': search,
     if (statuses.isNotEmpty) 'status': statuses.map((s) => s.name).join(','),
     if (overdueOnly) 'late': '1',
-    if (who != null) 'who': who,
+    if (people.isNotEmpty) 'who': people.join(',') else if (who != null) 'who': who,
     if (due != TaskDueFilter.any) 'due': due.name,
+    if (due == TaskDueFilter.range && from != null) 'from': _day(from!),
+    if (due == TaskDueFilter.range && to != null) 'to': _day(to!),
     'sort': sort.name,
   };
 
   /// Key under which the first page of this query is cached.
+  /// `2026-10-20` — a date as the API expects it.
+  static String _day(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
   String get cacheKey => 'tasks|${toParams(1, 0)}';
 }

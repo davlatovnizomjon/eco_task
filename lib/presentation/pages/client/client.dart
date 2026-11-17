@@ -1,4 +1,4 @@
-/// Public surface of the client UI: its shell and its route table.
+/// Public surface of the client (backend CLIENT) UI: its shell and its route table.
 /// Every screen of this role lives in this folder, independent of the other roles.
 library;
 

@@ -24,6 +24,12 @@ class EmployeeState extends Equatable {
   /// True while a refresh is in flight; pull-to-refresh awaits it.
   final bool refreshing;
 
+  /// True while the account is being deleted.
+  final bool busy;
+
+  /// Set after the delete: true when removed, false when only deactivated; the screen reports it and closes.
+  final bool? removed;
+
   /// Builds the initial state.
   const EmployeeState({
     this.status = ScreenStatus.initial,
@@ -32,6 +38,8 @@ class EmployeeState extends Equatable {
     this.items = const [],
     this.tab = 0,
     this.refreshing = false,
+    this.busy = false,
+    this.removed,
   });
 
   /// Copies the state, resetting [response] unless a new one is passed so the
@@ -43,6 +51,8 @@ class EmployeeState extends Equatable {
     List<TaskModel>? items,
     int? tab,
     bool? refreshing,
+    bool? busy,
+    bool? removed,
   }) => EmployeeState(
     status: status ?? this.status,
     response: identical(response, _absent) ? null : response as ScreenResponse?,
@@ -50,8 +60,10 @@ class EmployeeState extends Equatable {
     items: items ?? this.items,
     tab: tab ?? this.tab,
     refreshing: refreshing ?? this.refreshing,
+    busy: busy ?? this.busy,
+    removed: removed,
   );
 
   @override
-  List<Object?> get props => [status, response, user, items, tab, refreshing];
+  List<Object?> get props => [status, response, user, items, tab, refreshing, busy, removed];
 }

@@ -10,7 +10,7 @@ part 'event.dart';
 part 'state.dart';
 
 /// Drives one task's details screen: loads the task (cache first) and applies
-/// every action on it — comment, progress, approve, return, cancel.
+/// every action on it — approve, return for rework, delete.
 class TaskDetailBloc extends Bloc<TaskDetailEvent, TaskDetailState> {
   /// Data source of every task request; owned by the app root.
   final TasksRepository repository;
@@ -22,16 +22,11 @@ class TaskDetailBloc extends Bloc<TaskDetailEvent, TaskDetailState> {
   TaskDetailBloc({required this.repository, required this.taskId}) : super(const TaskDetailState()) {
     on<TaskDetailStarted>((event, emit) => _load(emit, refreshing: false));
     on<TaskDetailRefreshed>((event, emit) => _load(emit, refreshing: true));
-    on<TaskDetailCommentSent>((event, emit) => _act(emit, () => repository.addComment(taskId, event.text)));
-    on<TaskDetailProgressReported>(
-      (event, emit) =>
-          _act(emit, () => repository.reportProgress(taskId, done: event.done, cant: event.cant, note: event.note)),
-    );
     on<TaskDetailApproved>((event, emit) => _act(emit, () => repository.approve(taskId), close: true));
     on<TaskDetailReturned>(
       (event, emit) => _act(emit, () => repository.returnForRework(taskId, reason: event.reason, extend: event.extend)),
     );
-    on<TaskDetailCanceled>((event, emit) => _act(emit, () => repository.cancelTask(taskId), close: true));
+    on<TaskDetailDeleted>(_onDeleted);
   }
 
   /// Emits the cached task first (if any), then the fresh one. An error keeps
@@ -55,6 +50,17 @@ class TaskDetailBloc extends Bloc<TaskDetailEvent, TaskDetailState> {
           response: e is ScreenResponse ? e : const UnExpectedErrorResponse(),
         ),
       );
+    }
+  }
+
+  /// Deletes the task for good and asks the screen to pop; a failure goes to `response`.
+  Future<void> _onDeleted(TaskDetailDeleted event, Emitter<TaskDetailState> emit) async {
+    emit(state.copyWith(busy: true));
+    try {
+      await repository.deleteTask(taskId);
+      emit(state.copyWith(busy: false, closeScreen: true));
+    } catch (e) {
+      emit(state.copyWith(busy: false, response: e is ScreenResponse ? e : const UnExpectedErrorResponse()));
     }
   }
 

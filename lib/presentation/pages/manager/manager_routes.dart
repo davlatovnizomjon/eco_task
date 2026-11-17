@@ -1,72 +1,84 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:eco_task/domain/common/enums/call_kind.dart';
+import 'package:eco_task/domain/common/enums/stats_kind.dart';
 import 'package:eco_task/presentation/routes/entity/routes.dart';
 
-import 'calendar/calendar.dart';
 import 'chat/chat.dart';
-import 'expenses/expenses.dart';
+import 'dashboard/dashboard.dart';
 import 'notifications/notifications.dart';
+import 'profile/profile.dart';
 import 'reports/reports.dart';
-import 'review/review.dart';
-import 'settings/settings.dart';
 import 'tasks/tasks.dart';
 import 'team/team.dart';
 
 /// Routes the manager UI serves; any other path is redirected home by the router.
 const managerRoutes = <Routes>{
   Routes.chatNew,
+  Routes.groupNew,
   Routes.chat,
+  Routes.chatInfo,
+  Routes.groupEdit,
   Routes.taskChat,
-  Routes.reports,
-  Routes.calendar,
+  Routes.call,
+  Routes.todayTasks,
+  Routes.rating,
+  Routes.clients,
+  Routes.profileEdit,
+  Routes.loginChange,
   Routes.taskNew,
   Routes.taskDetail,
   Routes.taskEdit,
-  Routes.review,
-  Routes.expenses,
-  Routes.expenseReview,
+  Routes.myTask,
+  Routes.stats,
+  Routes.myTaskNotes,
   Routes.team,
   Routes.memberForm,
   Routes.employee,
-  Routes.roles,
-  Routes.taskStatus,
-  Routes.teamProgress,
+  Routes.employeeTasks,
   Routes.notifications,
-  Routes.settingsLanguage,
-  Routes.settingsAppearance,
-  Routes.settingsNotifications,
-  Routes.settingsReminder,
 };
 
 /// Builds the manager UI's screen for [route] ([s] carries its path and query parameters).
 Widget managerScreen(Routes route, GoRouterState s) {
   return switch (route) {
     Routes.chatNew => const NewChatScreen(),
+    Routes.groupNew => const NewGroupScreen(),
+    Routes.chatInfo => ChatInfoScreen(conversationId: s.pathParameters['id']!),
+    Routes.groupEdit => GroupEditScreen(conversationId: s.pathParameters['id']!),
     Routes.chat => ConversationScreen(conversationId: s.pathParameters['id']!),
     Routes.taskChat => ConversationScreen(taskId: s.pathParameters['id']!),
-    Routes.reports => const ReportsScreen(pushed: true),
-    Routes.calendar => const CalendarScreen(pushed: true),
+    Routes.call => CallScreen(
+      callId: s.pathParameters['id']!,
+      conversationId: s.uri.queryParameters['conversation'] ?? '',
+      kind: CallKind.fromJson(s.uri.queryParameters['kind']),
+    ),
+    Routes.todayTasks => const TodayScreen(),
+    Routes.rating => const RatingScreen(),
+    Routes.clients => const ClientsScreen(),
+    Routes.profileEdit => const ProfileEditScreen(),
+    Routes.loginChange => const LoginChangeScreen(),
     Routes.taskNew => const TaskFormScreen(),
     Routes.taskDetail => TaskDetailScreen(taskId: s.pathParameters['id']!),
     Routes.taskEdit => TaskFormScreen(editId: s.pathParameters['id']),
-    Routes.review => const ReviewScreen(),
-    Routes.expenses => const ExpensesScreen(),
-    Routes.expenseReview => ExpenseReviewScreen(
-      taskId: s.pathParameters['taskId']!,
-      expenseId: s.pathParameters['expenseId']!,
-    ),
+    Routes.stats => StatsScreen(kind: _statsKind(s.pathParameters['kind'])),
+    Routes.myTask => MyTaskScreen(taskId: s.pathParameters['id']!),
+    Routes.myTaskNotes => TaskNotesScreen(taskId: s.pathParameters['id']!),
     Routes.team => const TeamScreen(),
-    Routes.memberForm => MemberFormScreen(client: s.uri.queryParameters['client'] == '1'),
+    Routes.memberForm => MemberFormScreen(
+      client: s.uri.queryParameters['client'] == '1',
+      editId: s.uri.queryParameters['edit'],
+    ),
     Routes.employee => EmployeeScreen(userId: s.pathParameters['id']!),
-    Routes.roles => RolesScreen(userId: s.pathParameters['id']!),
-    Routes.taskStatus => const TaskStatusScreen(),
-    Routes.teamProgress => const TeamProgressScreen(),
-    Routes.notifications => const NotificationsScreen(pushed: true),
-    Routes.settingsLanguage => const LanguageSettingsScreen(),
-    Routes.settingsAppearance => const AppearanceScreen(),
-    Routes.settingsNotifications => const NotificationSettingsScreen(),
-    Routes.settingsReminder => const ReminderScreen(),
+    Routes.employeeTasks => EmployeeTasksScreen(userId: s.pathParameters['id']!),
+    Routes.notifications => const NotificationsScreen(),
     _ => throw StateError('The manager UI has no screen for $route'),
   };
+}
+
+/// Statistics kind of a `/reports/:kind` path; the owner-only kinds (finance, managers) fall back to the task statistics.
+StatsKind _statsKind(String? name) {
+  final kind = StatsKind.fromName(name);
+  return kind == StatsKind.finance || kind == StatsKind.managers ? StatsKind.tasks : kind;
 }

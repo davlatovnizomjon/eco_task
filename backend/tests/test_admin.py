@@ -45,7 +45,14 @@ def test_admin_edit_is_audited_without_values(owner, worker):
     client, _ = login(owner.username)
     response = client.post(
         f"{ADMIN}accounts/user/{worker.pk}/change/",
-        {"username": worker.username, "full_name": "New Name", "email": "", "phone": "", "role": "WORKER", "is_active": "on"},
+        {
+            "username": worker.username,
+            "full_name": "New Name",
+            "email": "",
+            "phone": "",
+            "role": "WORKER",
+            "is_active": "on",
+        },
     )
     assert response.status_code == 302
     entry = AuditLog.objects.get(action="admin.user.changed")

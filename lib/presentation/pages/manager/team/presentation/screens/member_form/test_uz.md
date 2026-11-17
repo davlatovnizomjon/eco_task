@@ -1,4 +1,4 @@
-# Hisob shakli (xodim/mijoz) — Test rejasi
+# Hisob ochish: xodim yoki mijoz (menejer) — Test rejasi
 
 AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga tushirilmaydi.
 
@@ -15,16 +15,20 @@ AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga
 
 ## 2. Mobil/Web integratsiya testi
 
-- [ ] Xodim hisobini (xodim va menejer rollari) va mijoz hisobini oching; har biri bilan kiring.
-- [ ] `AppConfig.useMockData = true` bilan haqiqiy yoki emulyator Android/iOS qurilmada, so‘ng jonli API bilan yana ishga tushiring.
+- [ ] Xodim formasini (ism, telefon, login, yangilash tugmali vaqtinchalik parol, yagona “Xodim” rol radiosi — menejer menejer yarata olmaydi) va mijoz formasini (ism, telefon, login, parol, manzil) oching; yuboring va login hamda parol bilan topshirish dialogini o‘qing.
+- [ ] Haqiqiy yoki emulyatsiya qilingan Android/iOS qurilmada `AppConfig.useMockData = true` bilan va yana jonli API bilan ishga tushiring.
 
 ## 3. UI test
 
-- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida overflow yoki kesilish yo‘q; uzun ismlar va tarjima matnlari ko‘p nuqta bilan qisqaradi.
-- [ ] Yorug‘ va qorong‘i mavzular ikkalasi ham to‘g‘ri ko‘rinadi; Sozlamalarda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
+- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida toshib ketish yoki kesilish yo‘q; uzun nomlar va tarjima qilingan matnlar ko‘p nuqta bilan qisqartiriladi.
+- [ ] Yorug‘ va qorong‘i mavzular to‘g‘ri o‘qiladi; profilda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
 - [ ] O‘zbek lotin, o‘zbek kirill va rus tillari yetishmayotgan kalitlarsiz va maket buzilishisiz ko‘rinadi.
-- [ ] Birinchi yuborishgacha hech narsa qizil emas; muvaffaqiyatsiz yuborish birinchi xabarni dialogda ko‘rsatadi va barcha noto‘g‘ri maydonlarni belgilaydi; telefon maydoni `+998 90 123 45 67` niqoblanadi; yangilash yangi parol beradi; muvaffaqiyat dialogi login + parolni ko‘rsatadi va yopish katalogga qaytaradi.
+- [ ] Dizayn bu ekranning `Eco Tasks — mobile app` taxtasiga yorug‘ va qorong‘i mavzuda 1:1 mos keladi (o‘lchamlar, ranglar, radiuslar, ikonkalar).
+- [ ] Mahkamlangan pastki panel asosiy tugma ustida «Hisob ochilgach, login va parolni ulashasiz» maslahatini ko‘rsatadi; rol qatorlarida radio belgisi bor.
+- [ ] 1.23 / 1.25 taxtalar: xodim formasi “Xodim qo‘shish” — ism, telefon, login, parol va bir qatorli rol ro‘yxati (“Xodim”), “Saqlash” bilan saqlanadi; mijoz formasida “Jismoniy shaxs / Tashkilot” tablari bor (birinchi maydon “Tashkilot nomi” bo‘ladi), manzil va “Mijoz hisobini ochish” bilan tugaydi; tashkilot belgisi `isOrg` sifatida yuboriladi.
 
 ## 4. Mantiqiy/biznes test
 
-- [ ] Rol tanlovi faqat xodimlar uchun taklif etiladi; yangi xodim jamoasi yaratuvchining jamoasi.
+- [ ] Bo‘sh ism yoki login va noto‘g‘ri telefon yuborishni to‘xtatadi, birinchi xato dialogda; band loginni API xabar qiladi.
+- [ ] Tashkilot tabida “Mas‘ul shaxs” (`contactPerson`), har bir mijozda “Izoh” (`note`) ham bor; ikkalasi `POST users` va `PATCH users/{id}` ga yuboriladi.
+- [ ] Tahrirlash rejimi (`/team/new?edit=<id>`): hisobni yuklaydi, ism, telefon, manzil, tashkilot belgisi, mas‘ul shaxs va izohni to‘ldiradi; login, parol va rol qatorlari yashirin; saqlaganda `true` bilan yopiladi.

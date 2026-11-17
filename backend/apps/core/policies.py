@@ -24,7 +24,12 @@ class Cap(StrEnum):
     MANAGE_CONVERSATIONS = "manage_conversations"
     CREATE_REQUEST = "create_request"
     MANAGE_REQUESTS = "manage_requests"
+    DELETE_TASK = "delete_task"  # owner and assistant; others close (FAILED/CANCELED) a task instead
+    MANAGE_STAFF = "manage_staff"  # create, edit and delete WORKER and CLIENT accounts (never owners or assistants)
 
+
+# Accounts a holder of `MANAGE_STAFF` (without `MANAGE_USERS`) may create and handle: the people they supervise.
+STAFF_MANAGED_ROLES = frozenset({"WORKER", "CLIENT"})
 
 # Single source of truth. Assistants deliberately get no finance or audit capability:
 # the brief forbids implicit financial/administrative access for them.
@@ -40,6 +45,8 @@ ROLE_CAPS: dict[Role, frozenset[Cap]] = {
             Cap.VIEW_REPORTS,
             Cap.MANAGE_CONVERSATIONS,
             Cap.MANAGE_REQUESTS,
+            Cap.MANAGE_STAFF,
+            Cap.DELETE_TASK,
         }
     ),
     Role.WORKER: frozenset(),
@@ -57,6 +64,14 @@ def can(user, cap: Cap) -> bool:
         return cap in ROLE_CAPS[Role(user.role)]
     except ValueError:
         return False
+
+
+def can_manage_account_of(user, role: str) -> bool:
+    """True when `user` may create or change an account whose role is `role`: the owner any, an assistant only
+    workers and clients."""
+    if can(user, Cap.MANAGE_USERS):
+        return True
+    return can(user, Cap.MANAGE_STAFF) and str(role) in STAFF_MANAGED_ROLES
 
 
 def is_staff_role(user) -> bool:

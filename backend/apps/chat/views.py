@@ -14,10 +14,14 @@ from .models import Kind, Membership, Message
 from .serializers import (
     ConversationCreateSerializer,
     ConversationSerializer,
+    ConversationUpdateSerializer,
     MembersSerializer,
+    MessageEditSerializer,
     MessageInputSerializer,
     MessagePageSerializer,
     MessageSerializer,
+    PinSerializer,
+    ReactionSerializer,
     ReadResultSerializer,
     ReadSerializer,
     conversation_payload,
@@ -40,7 +44,8 @@ def _payload(conversation, viewer, unread=None):
     if unread is None:
         unread = services.unread_counts(viewer, [conversation.pk]).get(conversation.pk, 0)
     members = _members(conversation, viewer) if conversation.kind != Kind.TASK else []
-    return conversation_payload(conversation, unread, last, members)
+    muted = Membership.objects.filter(conversation=conversation, user=viewer, muted=True).exists()
+    return conversation_payload(conversation, unread, last, members, muted)
 
 
 class ConversationList(APIView):
@@ -76,6 +81,37 @@ class ConversationDetail(APIView):
     @extend_schema(tags=["chat"], responses=ConversationSerializer)
     def get(self, request, pk):
         return Response(_payload(services.get_conversation_for(request.user, pk), request.user))
+
+    @extend_schema(tags=["chat"], request=ConversationUpdateSerializer, responses=ConversationSerializer)
+    def patch(self, request, pk):
+        conversation = services.get_conversation_for(request.user, pk)
+        data = ConversationUpdateSerializer(data=request.data, partial=True)
+        data.is_valid(raise_exception=True)
+        v = data.validated_data
+        services.update_conversation(
+            request.user,
+            conversation,
+            title=v.get("title"),
+            muted=v.get("muted"),
+            avatar_id=v["avatar_id"] if "avatar_id" in v else services._UNSET,
+        )
+        return Response(_payload(conversation, request.user))
+
+
+class ConversationPin(APIView):
+    @extend_schema(tags=["chat"], request=PinSerializer, responses=ConversationSerializer)
+    def put(self, request, pk):
+        conversation = services.get_conversation_for(request.user, pk)
+        data = PinSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        services.set_pin(request.user, conversation, data.validated_data["message_id"])
+        return Response(_payload(conversation, request.user))
+
+    @extend_schema(tags=["chat"], responses=ConversationSerializer)
+    def delete(self, request, pk):
+        conversation = services.get_conversation_for(request.user, pk)
+        services.set_pin(request.user, conversation, None)
+        return Response(_payload(conversation, request.user))
 
 
 class ConversationMembers(APIView):
@@ -118,7 +154,12 @@ class MessageList(APIView):
             before = int(request.query_params.get("before", 0))
         except ValueError:
             raise DomainError("limit and before must be integers.", "invalid_query", 400) from None
-        qs = Message.objects.filter(conversation=conversation).select_related("sender").order_by("-id")
+        qs = (
+            Message.objects.filter(conversation=conversation)
+            .select_related("sender", "attachment", "reply_to", "reply_to__sender")
+            .prefetch_related("reactions")
+            .order_by("-id")
+        )
         if before:
             qs = qs.filter(pk__lt=before)
         rows = list(qs[: limit + 1])
@@ -132,12 +173,48 @@ class MessageList(APIView):
         conversation = services.get_conversation_for(request.user, pk)
         data = MessageInputSerializer(data=request.data)
         data.is_valid(raise_exception=True)
+        v = data.validated_data
         message, created = services.send_message(
-            request.user, conversation, data.validated_data["body"], data.validated_data.get("client_msg_id", "")
+            request.user,
+            conversation,
+            v.get("body", ""),
+            v.get("client_msg_id", ""),
+            v.get("reply_to"),
+            v.get("attachment_id"),
         )
         return Response(
             MessageSerializer(message).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
         )
+
+
+class MessageDetail(APIView):
+    @extend_schema(tags=["chat"], request=MessageEditSerializer, responses=MessageSerializer)
+    def patch(self, request, pk, message_id):
+        conversation = services.get_conversation_for(request.user, pk)
+        data = MessageEditSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        message = services.edit_message(request.user, conversation, message_id, data.validated_data["body"])
+        return Response(MessageSerializer(message).data)
+
+    @extend_schema(tags=["chat"], responses=MessageSerializer)
+    def delete(self, request, pk, message_id):
+        conversation = services.get_conversation_for(request.user, pk)
+        return Response(MessageSerializer(services.delete_message(request.user, conversation, message_id)).data)
+
+
+class MessageReactionView(APIView):
+    @extend_schema(tags=["chat"], request=ReactionSerializer, responses=MessageSerializer)
+    def put(self, request, pk, message_id):
+        conversation = services.get_conversation_for(request.user, pk)
+        data = ReactionSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        message = services.set_reaction(request.user, conversation, message_id, data.validated_data["emoji"])
+        return Response(MessageSerializer(message).data)
+
+    @extend_schema(tags=["chat"], responses=MessageSerializer)
+    def delete(self, request, pk, message_id):
+        conversation = services.get_conversation_for(request.user, pk)
+        return Response(MessageSerializer(services.set_reaction(request.user, conversation, message_id, None)).data)
 
 
 class ConversationRead(APIView):

@@ -1,10 +1,13 @@
 import 'package:dio/dio.dart';
 
+import 'package:eco_task/constants/app_config.dart';
 import 'package:eco_task/infrastructure/dto/models/app_user.dart';
 
 import 'api_links.dart';
 import 'dio_client.dart';
 import 'mock_json_data/mock_chat.dart';
+import 'mock_json_data/mock_files.dart';
+import 'mock_json_data/mock_legal.dart';
 import 'mock_json_data/mock_store.dart';
 
 /// Offline stand-in for [DioClient]. It answers from the in-memory
@@ -40,7 +43,7 @@ class MockDioClient extends DioClient {
     final body = data is Map<String, dynamic> ? data : const <String, dynamic>{};
     try {
       return Response<dynamic>(
-        data: _route(method, path, body, queryParameters ?? const {}),
+        data: data is FormData ? await _upload(data) : _route(method, path, body, queryParameters ?? const {}),
         statusCode: 200,
         requestOptions: RequestOptions(path: path),
       );
@@ -53,6 +56,27 @@ class MockDioClient extends DioClient {
   /// Throws [MockFailure] for scripted 4xx answers.
   Object? _route(String method, String path, Map<String, dynamic> body, Map<String, dynamic> query) {
     if (path == ApiLinks.authLogin) return _store.login('${body['login']}', '${body['password']}');
+    if (path == ApiLinks.authLogout) return null;
+    // The mock backend publishes a version lower than any build, so it never prompts for an update.
+    if (path == ApiLinks.appVersion) {
+      return {
+        'platform': query['platform'],
+        'latest_version': '0.0.0',
+        'force_update': false,
+        'is_maintenance': false,
+        'store_url': '',
+        'title': '',
+        'subtitle': '',
+      };
+    }
+    // The mock backend publishes the two legal texts in Uzbek.
+    if (path == ApiLinks.legalTerms || path == ApiLinks.legalPrivacy) {
+      return MockLegal.document(path == ApiLinks.legalTerms);
+    }
+    // The mock backend answers with the dispatcher contacts configured for the build.
+    if (path == ApiLinks.supportContact) {
+      return {'phone': AppConfig.supportPhone, 'telegram': AppConfig.telegramBot};
+    }
     final me = actAs?.call() ?? _store.userForToken(session.token);
     if (me == null) throw const MockFailure(401, 'Seans tugagan. Qayta kiring.');
     final seg = path.split('/');
@@ -71,13 +95,42 @@ class MockDioClient extends DioClient {
       case 'dashboard':
         return _store.dashboard(me);
       case 'reports':
+        if (seg.length > 1 && seg[1] == 'stats') return _store.stats(me, query);
+        if (seg.length > 1 && seg[1] == 'export') return const <String, dynamic>{};
         return _store.reports(me, query);
       case 'profile':
         return _store.profileSummary(me);
+      case 'account':
+        return seg.length == 1 ? _store.updateAccount(me, body) : _store.changePassword(me, body);
       case 'conversations':
         return MockChat.instance.route(me, method, seg, body, query);
+      case 'calls':
+        return MockChat.instance.callAction(me, seg, body);
     }
     throw MockFailure(404, 'Mock uchun bu endpoint yozilmagan: $path');
+  }
+
+  /// `POST files/` — keeps the uploaded bytes in the mock file store.
+  Future<Object?> _upload(FormData form) async {
+    final entry = form.files.firstWhere((e) => e.key == 'file');
+    final bytes = <int>[for (final chunk in await entry.value.finalize().toList()) ...chunk];
+    final duration = form.fields.where((f) => f.key == 'duration_ms').firstOrNull?.value;
+    return MockFiles.instance
+        .add(
+          bytes,
+          name: entry.value.filename ?? 'file',
+          contentType: entry.value.contentType?.mimeType ?? 'application/octet-stream',
+          durationMs: duration == null ? null : int.tryParse(duration),
+        )
+        .toJson();
+  }
+
+  @override
+  Future<List<int>> bytes(String path) async {
+    final id = int.tryParse(path.split('/').where((s) => s.isNotEmpty).last);
+    final data = id == null ? null : MockFiles.instance.bytes(id);
+    if (data == null) throw const MockFailure(404, 'Fayl topilmadi.');
+    return data;
   }
 
   /// Routes the `tasks/...` family.
@@ -85,12 +138,15 @@ class MockDioClient extends DioClient {
     if (seg.length == 1) return method == 'POST' ? _store.createTask(me, body) : _store.tasksPage(me, query);
     if (seg[1] == 'calendar') return _store.calendar(me, query);
     final id = seg[1];
+    if (seg.length == 2 && method == 'DELETE') return _store.deleteTask(id);
     if (seg.length == 2) return method == 'PUT' ? _store.editTask(id, body) : _store.task(id);
+    if (seg.length == 4 && seg[2] == 'comments') return _store.deleteComment(id, int.parse(seg[3]));
     if (seg.length == 5) {
       return seg[4] == 'review' ? _store.reviewExpense(id, seg[3], body) : _store.payExpense(id, seg[3]);
     }
     return switch (seg[2]) {
       'cancel' => _store.cancelTask(me, id),
+      'fail' => _store.failTask(me, id, body),
       'progress' => _store.progress(me, id, body),
       'comments' => _store.addComment(me, id, body),
       'expenses' => _store.addExpense(me, id, body),
@@ -105,6 +161,8 @@ class MockDioClient extends DioClient {
   /// Routes the `users/...` family.
   Object? _users(AppUser me, String method, List<String> seg, Map<String, dynamic> body, Map<String, dynamic> query) {
     if (seg.length == 1) return method == 'POST' ? _store.addUser(body) : _store.usersPage(me, query);
+    if (seg.length == 2 && method == 'DELETE') return _store.deleteUser(seg[1]);
+    if (seg.length == 2 && method == 'PATCH') return _store.updateUser(seg[1], body);
     if (seg.length == 2) return _store.user(seg[1]);
     return method == 'PUT' ? _store.savePermissions(seg[1], body) : _store.permissions(seg[1]);
   }

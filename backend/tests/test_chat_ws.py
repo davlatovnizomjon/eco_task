@@ -73,7 +73,12 @@ async def test_message_roundtrip_persisted_and_sender_from_connection(dm, owner,
     seen_b = await b.receive_json_from()
     got = [seen_a["message.new"]["message"], seen_b["message"]]
     assert all(m["body"] == "hello" and m["sender"] == owner.pk for m in got)  # spoofed "sender" ignored
-    assert seen_a["message.ack"] == {"type": "message.ack", "client_msg_id": "c1", "id": got[0]["id"], "duplicate": False}
+    assert seen_a["message.ack"] == {
+        "type": "message.ack",
+        "client_msg_id": "c1",
+        "id": got[0]["id"],
+        "duplicate": False,
+    }
     assert await database_sync_to_async(Message.objects.count)() == 1
     await a.disconnect()
     await b.disconnect()
@@ -166,10 +171,13 @@ async def test_stale_socket_cannot_send_after_membership_ends(owner, assistant, 
     comm, _, _ = await connect(group, worker)
     await drain_snapshot(comm)
     # revoke in DB only (push lost, e.g. Redis outage): the per-message DB check must still stop the send
-    from apps.chat.models import Membership
     from django.utils import timezone
 
-    await database_sync_to_async(Membership.objects.filter(conversation=group, user=worker).update)(left_at=timezone.now())
+    from apps.chat.models import Membership
+
+    await database_sync_to_async(Membership.objects.filter(conversation=group, user=worker).update)(
+        left_at=timezone.now()
+    )
     await comm.send_json_to({"type": "message.send", "body": "sneaky"})
     out = await comm.receive_output()
     assert out["type"] == "websocket.close" and out["code"] == 4403

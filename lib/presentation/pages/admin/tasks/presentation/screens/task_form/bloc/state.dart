@@ -49,6 +49,27 @@ class TaskFormState extends Equatable {
   final bool saved;
 
   /// Builds the initial state; [due] is the default deadline.
+  /// Wizard step shown, 0..4 (create mode only).
+  final int step;
+
+  /// True when the client is an organization.
+  final bool clientIsOrg;
+
+  /// Organization or client name; empty for an internal task.
+  final String client;
+
+  /// Address the work happens at.
+  final String address;
+
+  /// Currency of the price: `uzs` or `usd`.
+  final String currency;
+
+  /// Files already uploaded for this task (photos and documents), in upload order.
+  final List<FileAttachment> attachments;
+
+  /// True while a picked file is being uploaded.
+  final bool uploading;
+
   const TaskFormState({
     required this.due,
     this.status = ScreenStatus.initial,
@@ -64,6 +85,13 @@ class TaskFormState extends Equatable {
     this.expected = '',
     this.showErrors = false,
     this.saved = false,
+    this.step = 0,
+    this.clientIsOrg = false,
+    this.client = '',
+    this.address = '',
+    this.currency = 'uzs',
+    this.attachments = const [],
+    this.uploading = false,
   });
 
   /// Validation message for the title, independent of [showErrors].
@@ -73,6 +101,14 @@ class TaskFormState extends Equatable {
   String? get assigneesError => assignees.isEmpty ? TrWords.formNeedsWho.tr() : null;
 
   /// Title error the FIELD should display — nothing before the first submit.
+  /// Why the current wizard step cannot be left yet, or null when it can.
+  String? get stepError => switch (step) {
+    0 => clientIsOrg && client.trim().isEmpty ? TrWords.wzNeedOrg.tr() : null,
+    1 => titleError,
+    3 => assigneesError,
+    _ => null,
+  };
+
   String? get visibleTitleError => showErrors ? titleError : null;
 
   /// Assignee error the FIELD should display — nothing before the first submit.
@@ -95,6 +131,13 @@ class TaskFormState extends Equatable {
     String? expected,
     bool? showErrors,
     bool saved = false,
+    int? step,
+    bool? clientIsOrg,
+    String? client,
+    String? address,
+    String? currency,
+    List<FileAttachment>? attachments,
+    bool? uploading,
   }) => TaskFormState(
     status: status ?? this.status,
     response: identical(response, _absent) ? null : response as ScreenResponse?,
@@ -110,6 +153,13 @@ class TaskFormState extends Equatable {
     expected: expected ?? this.expected,
     showErrors: showErrors ?? this.showErrors,
     saved: saved,
+    step: step ?? this.step,
+    clientIsOrg: clientIsOrg ?? this.clientIsOrg,
+    client: client ?? this.client,
+    address: address ?? this.address,
+    currency: currency ?? this.currency,
+    attachments: attachments ?? this.attachments,
+    uploading: uploading ?? this.uploading,
   );
 
   @override
@@ -128,5 +178,12 @@ class TaskFormState extends Equatable {
     expected,
     showErrors,
     saved,
+    step,
+    clientIsOrg,
+    client,
+    address,
+    currency,
+    attachments,
+    uploading,
   ];
 }

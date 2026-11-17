@@ -8,9 +8,6 @@ enum Routes {
   /// Login and password sign-in; the entry while there is no session.
   signIn('/sign-in'),
 
-  /// Dead end for client accounts: clients use the Telegram bot, not this app.
-  clientBot('/telegram'),
-
   /// Bottom-navigation shell; its tabs depend on the account's role.
   home('/home'),
 
@@ -20,20 +17,56 @@ enum Routes {
   /// Start a chat or create a group.
   chatNew('/chat/new'),
 
+  /// Create a group chat (admin).
+  groupNew('/chat/group'),
+
   /// One conversation; `:id` is the conversation id.
   chat('/chat/:id'),
+
+  /// Info page of a conversation (profile or group info); `:id` is the conversation id.
+  chatInfo('/chat/:id/info'),
+
+  /// Edit a group chat (title, members); `:id` is the conversation id.
+  groupEdit('/chat/:id/edit'),
 
   /// Discussion of a task (opened or created on first use); `:id` is the task id.
   taskChat('/tasks/:id/chat'),
 
-  /// Reports opened from the profile (boss).
-  reports('/reports'),
+  /// Today's tasks (admin).
+  todayTasks('/today'),
+
+  /// Employee ranking by period (admin).
+  rating('/rating'),
+
+  /// Client list (admin).
+  clients('/clients'),
+
+  /// Archive of closed tasks (admin).
+  archive('/archive'),
+
+  /// Edit the signed-in person's profile (admin).
+  profileEdit('/profile/edit'),
+
+  /// Change the signed-in person's login and password (admin).
+  loginChange('/profile/login'),
+
+  /// A voice or video call; `:id` is the call id, or `new` to start one (query `conversation` and `kind`).
+  call('/call/:id'),
+
+  /// One statistics screen of the report tab (admin and manager); `:kind` is a `StatsKind` name.
+  stats('/reports/:kind'),
 
   /// Calendar opened from the profile (worker).
   calendar('/calendar'),
 
   /// Task details; `:id` is the task id.
   taskDetail('/tasks/:id'),
+
+  /// The admin's own task; `:id` is the task id.
+  myTask('/my-tasks/:id'),
+
+  /// Personal notes of the admin's own task; `:id` is the task id.
+  myTaskNotes('/my-tasks/:id/notes'),
 
   /// Edit a task (boss); `:id` is the task id.
   taskEdit('/tasks/:id/edit'),
@@ -62,14 +95,8 @@ enum Routes {
   /// Staff member profile; `:id` is the account id.
   employee('/team/:id'),
 
-  /// Role and permissions of a staff member; `:id` is the account id.
-  roles('/team/:id/roles'),
-
-  /// Task counts by status for a period (boss).
-  taskStatus('/status'),
-
-  /// Per-person results of a team (manager).
-  teamProgress('/progress'),
+  /// Every task of a staff member, with done / failed tabs; `:id` is the account id.
+  employeeTasks('/team/:id/tasks'),
 
   /// Inbox opened from a boss dashboard bell.
   notifications('/notifications'),
@@ -97,6 +124,9 @@ enum Routes {
 
   /// The concrete location with `:id` replaced by [id].
   String of(String id) => path.replaceFirst(':id', id);
+
+  /// The concrete location with `:kind` replaced by [kind].
+  String ofKind(String kind) => path.replaceFirst(':kind', kind);
 
   /// The concrete location of [expenseReview] for a task and expense.
   String ofExpense(String taskId, String expenseId) =>

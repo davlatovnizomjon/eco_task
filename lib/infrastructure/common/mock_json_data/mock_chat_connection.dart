@@ -40,9 +40,16 @@ class MockChatConnection implements ChatConnection {
   }
 
   @override
-  void send(String body, String clientMsgId) {
+  void send(String body, String clientMsgId, {int? replyTo, int? attachmentId}) {
     final chat = MockChat.instance;
-    final (message, created) = chat.send(me(), conversationId, body, clientMsgId);
+    final (message, created) = chat.send(
+      me(),
+      conversationId,
+      body,
+      clientMsgId,
+      replyTo: replyTo,
+      attachmentId: attachmentId,
+    );
     Future<void>.delayed(const Duration(milliseconds: 150), () {
       if (created) _emit(ChatMessageArrived(ChatMessage.fromJson(chat.messageJson(conversationId, message))));
       _emit(ChatMessageAcked(clientMsgId, message.id));

@@ -1,4 +1,4 @@
-# Task details — Test Plan
+# Task details (manager) — Test Plan
 
 A plan for an AI to execute against; nothing here is run unless the user asks.
 
@@ -22,20 +22,20 @@ A plan for an AI to execute against; nothing here is run unless the user asks.
 
 ## 2. Mobile/Web Integration Test
 
-- [ ] Boss path: open a `rev` task → approve (screen closes) and reject with each reason (sheet, extend switch) → status returns to `prog`.
-- [ ] Worker path: open an assigned task → update progress (stepper, outcome, note), comment with photos, add an expense, submit the result.
+- [ ] Open from the list, the dashboard, the calendar and an employee profile; “⋯” → “Tahrirlash” opens the form and the task reloads on return; “⋯” → “O‘chirish” asks for confirmation, spins and pops; approve / return a result that waits for a decision; tap a photo → the viewer opens on it; “Yana N kishi” opens the full assignee sheet.
 - [ ] Run on a real or emulated Android/iOS device with `AppConfig.useMockData = true` and again against the live API.
 
 ## 3. UI Test
 
 - [ ] No overflow or clipping at a small phone width (320 px) and a tablet width (768 px); long names and translated strings truncate with an ellipsis.
-- [ ] Light and dark themes both read correctly; switching the theme in Settings repaints this screen without losing its state.
+- [ ] Light and dark themes both read correctly; switching the theme in the profile repaints this screen without losing its state.
 - [ ] Uzbek Latin, Uzbek Cyrillic and Russian all render without missing keys or layout breaks.
-- [ ] Sections appear only when they have content (result, reward/expenses, files, activity); the boss sees assignee rows with per-person progress, the worker sees their own share card and only their own expenses.
-- [ ] Bottom bar by role/status: approve+reject (boss, `rev`), cancel+edit (boss, open), four worker actions (worker, open), none for closed tasks; destructive cancel asks for confirmation first.
-- [ ] Pull-to-refresh works; the comment field sends and clears; the timeline marks the newest log line.
+- [ ] The design matches the `Eco Tasks — mobile app` board of this screen 1:1 (sizes, colors, radii, icons) in light and dark themes.
+- [ ] Boards 2.6: the bar shows “Vazifa tafsiloti” and the “⋯” action; then the title and description, the facts card (Holat chip, Tashkilot nomi / Mijoz, Muddat, Manzil, Narx in the task's currency, Yaratgan, Yaratilgan sana — rows without data hidden), the photo thumbnails and the first three assignees with role pills (Xodim green, Menejer blue, Manager amber).
+- [ ] The bottom bar shows Rad etish / Tasdiqlash only for a task in review; open and closed tasks have no bar (edit and delete live in the “⋯” menu).
 
 ## 4. Logical/Business Test
 
-- [ ] A worker who is not assigned cannot reach the worker actions; a manager cannot open tasks outside their team (404 from the backend).
-- [ ] Approving twice or acting on a canceled task is rejected by the UI (buttons hidden) and the backend.
+- [ ] Approving or deleting closes the screen and the lists reflect it; returning a result keeps the screen open on the refreshed task; deleting needs the confirmation first.
+- [ ] The price is written in the task's own currency (`uzs` → “so‘m”, otherwise “$”); a task without a client hides the client row, one for a private person labels it “Mijoz”.
+- [ ] The "⋯" menu offers "Tahrirlash" and "O‘chirish" for any task (owner and manager may delete any task).

@@ -27,6 +27,24 @@ final class ConversationMessageSent extends ConversationEvent {
   const ConversationMessageSent(this.text);
 }
 
+/// A photo, document, voice note or video circle was picked or recorded: upload it, then send it as a message.
+final class ConversationFileSent extends ConversationEvent {
+  /// The picked or recorded file.
+  final PickedFile file;
+
+  /// Carries the file.
+  const ConversationFileSent(this.file);
+}
+
+/// "Javob berish" was chosen on [message], or the reply bar was closed (null).
+final class ConversationReplyChanged extends ConversationEvent {
+  /// The message being answered; null clears the reply bar.
+  final ChatMessage? message;
+
+  /// Carries the message.
+  const ConversationReplyChanged(this.message);
+}
+
 /// The user pressed a failed message to send it again.
 final class ConversationMessageRetried extends ConversationEvent {
   /// Client id of the failed message.
@@ -52,4 +70,46 @@ final class ConversationSendTimedOut extends ConversationEvent {
 
   /// Carries the id.
   const ConversationSendTimedOut(this.clientMsgId);
+}
+
+/// The author saved a new text for one of their messages.
+final class ConversationMessageEdited extends ConversationEvent {
+  /// Server id of the message.
+  final int id;
+
+  /// The new text.
+  final String text;
+
+  /// Carries the edit.
+  const ConversationMessageEdited(this.id, this.text);
+}
+
+/// A message was deleted (its text is wiped, the placeholder stays).
+final class ConversationMessageDeleted extends ConversationEvent {
+  /// Server id of the message.
+  final int id;
+
+  /// Carries the id.
+  const ConversationMessageDeleted(this.id);
+}
+
+/// An emoji was picked (or the same one tapped again to take it back) on a message.
+final class ConversationReacted extends ConversationEvent {
+  /// Server id of the message.
+  final int id;
+
+  /// The emoji; null removes the caller's reaction.
+  final String? emoji;
+
+  /// Carries the reaction.
+  const ConversationReacted(this.id, this.emoji);
+}
+
+/// A message was pinned, or the pin cleared.
+final class ConversationPinned extends ConversationEvent {
+  /// Server id of the message to pin; null clears the pin.
+  final int? id;
+
+  /// Carries the id.
+  const ConversationPinned(this.id);
 }

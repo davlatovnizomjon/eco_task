@@ -22,21 +22,38 @@ class FilterPill extends StatelessWidget {
   /// Custom leading widget (an avatar); wins over [icon].
   final Widget? leading;
 
+  /// True to fill a selected pill with the brand color instead of the text color (filter sheets).
+  final bool accent;
+
+  /// Optional small glyph after the label (a clear "x" on a picked value).
+  final String? trailingIcon;
+
   /// Builds the pill.
-  const FilterPill({super.key, required this.label, this.selected = false, this.onTap, this.icon, this.leading});
+  const FilterPill({
+    super.key,
+    required this.label,
+    this.selected = false,
+    this.onTap,
+    this.icon,
+    this.leading,
+    this.accent = false,
+    this.trailingIcon,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final fg = selected ? theme.background : theme.textSecondary;
+    /// Fill of a selected pill.
+    final fill = accent ? theme.primary : theme.text;
+    final fg = selected ? (accent ? theme.onPrimary : theme.background) : theme.textSecondary;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 36.h,
         padding: EdgeInsets.fromLTRB(leading != null ? 6.w : 14.w, 0, 14.w, 0),
         decoration: BoxDecoration(
-          color: selected ? theme.text : theme.cardColor,
+          color: selected ? fill : theme.cardColor,
           borderRadius: 18.circular,
-          border: Border.all(color: selected ? theme.text : theme.line),
+          border: Border.all(color: selected ? fill : theme.line),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -54,6 +71,7 @@ class FilterPill extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: theme.textStyle.copyWith(fontSize: 14.sp, color: fg),
             ),
+            if (trailingIcon != null) ...[4.w.width, AppIcon(trailingIcon!, size: 14.sp, color: fg)],
           ],
         ),
       ),

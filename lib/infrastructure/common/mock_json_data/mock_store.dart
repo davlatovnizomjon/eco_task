@@ -6,6 +6,7 @@ import 'package:eco_task/domain/common/enums/task_priority.dart';
 import 'package:eco_task/domain/common/enums/task_status.dart';
 import 'package:eco_task/domain/common/enums/user_role.dart';
 import 'package:eco_task/infrastructure/dto/models/app_user.dart';
+import 'package:eco_task/infrastructure/dto/models/file_attachment.dart';
 import 'package:eco_task/infrastructure/dto/models/comment_model.dart';
 import 'package:eco_task/infrastructure/dto/models/expense_model.dart';
 import 'package:eco_task/infrastructure/dto/models/log_entry.dart';
@@ -16,6 +17,7 @@ import 'package:eco_task/infrastructure/dto/models/request_model.dart';
 import 'package:eco_task/infrastructure/dto/models/task_assignee.dart';
 import 'package:eco_task/infrastructure/dto/models/task_model.dart';
 
+import 'mock_files.dart';
 import 'mock_seed.dart';
 
 /// A scripted failure the mock backend raises; `MockDioClient` converts it to
@@ -84,9 +86,8 @@ class MockStore {
     return _tasks[index] = change(_tasks[index]);
   }
 
-  /// Staff the boss [me] supervises: everyone for admin, own team for manager.
-  List<AppUser> _scopeWorkers(AppUser me) =>
-      _users.where((u) => u.role == UserRole.worker && (me.role == UserRole.owner || u.team == me.team)).toList();
+  /// Workers the boss [me] supervises: every worker, for the admin and the manager alike.
+  List<AppUser> _scopeWorkers(AppUser me) => _users.where((u) => u.role == UserRole.worker).toList();
 
   /// Ids of the bosses that get review/expense/request news.
   List<String> get _bossIds => [
@@ -98,14 +99,12 @@ class MockStore {
   List<TaskModel> _visible(AppUser me) {
     switch (me.role) {
       case UserRole.owner:
-        return [..._tasks];
       case UserRole.assistant:
-        final ids = _scopeWorkers(me).map((u) => u.id).toSet();
-        return _tasks.where((t) => t.assigneeIds.any(ids.contains)).toList();
+        return [..._tasks];
       case UserRole.worker:
         return _tasks.where((t) => t.involves(me.id)).toList();
       case UserRole.client:
-        return [];
+        return _tasks.where((t) => t.createdBy.id == me.id).toList();
     }
   }
 
@@ -136,6 +135,16 @@ class MockStore {
       LogEntry(kind: kind, user: me.ref, at: DateTime.now(), args: args);
 
   /// Resolves the `[{userId, share}]` list of a task body into assignees.
+  /// Files a draft names: uploads from the file store, or the task's own existing ones.
+  List<FileAttachment> _files(Map<String, dynamic> body, {List<FileAttachment> keep = const []}) => [
+    for (final id in (body['attachmentIds'] as List? ?? const []))
+      MockFiles.instance.meta((id as num).toInt()) ??
+          keep.firstWhere(
+            (a) => a.id == id,
+            orElse: () => FileAttachment(id: id.toInt(), kind: FileKind.image, name: 'foto.jpg'),
+          ),
+  ];
+
   List<TaskAssignee> _assignees(Map<String, dynamic> body) => [
     for (final a in (body['assignees'] as List))
       TaskAssignee(user: _user('${(a as Map)['userId']}').ref, share: _int(a['share'], 0)),
@@ -175,16 +184,12 @@ class MockStore {
   AppUser? accountForRole(UserRole role) => _users.where((u) => u.role == role).firstOrNull;
 
   /// Paged directory of staff (`role=staff`) or clients (`role=client`).
-  Map<String, dynamic> usersPage(AppUser me,Map<String, dynamic> query) {
+  Map<String, dynamic> usersPage(AppUser me, Map<String, dynamic> query) {
     final q = '${query['q'] ?? ''}'.toLowerCase();
     final clients = query['role'] == 'client';
     final source = clients
         ? _users.where((u) => u.role == UserRole.client)
-        : _users.where(
-            (u) =>
-                (u.role == UserRole.worker || u.role == UserRole.assistant) &&
-                (me.role == UserRole.owner || u.team == me.team),
-          );
+        : _users.where((u) => u.role == UserRole.worker || (u.role == UserRole.assistant && me.role == UserRole.owner));
     final list = source.where((u) => q.isEmpty || '${u.name} ${u.phone} ${u.team}'.toLowerCase().contains(q)).toList();
     return _page([
       for (final u in list)
@@ -204,6 +209,29 @@ class MockStore {
     return u.withActiveCount(_tasks.where((t) => t.status.isOpen && t.involves(u.id)).length).toJson();
   }
 
+  /// `PATCH users/{id}` — changes the given profile fields.
+  Map<String, dynamic> updateUser(String id, Map<String, dynamic> body) {
+    final i = _users.indexWhere((u) => u.id == id);
+    if (i < 0) throw const MockFailure(404, 'Foydalanuvchi topilmadi.');
+    _users[i] = _users[i].withProfile(
+      name: body['name'] as String?,
+      phone: body['phone'] as String?,
+      team: body['team'] as String?,
+      isOrg: body['isOrg'] as bool?,
+      contactPerson: body['contactPerson'] as String?,
+      note: body['note'] as String?,
+    );
+    return user(id);
+  }
+
+  /// `DELETE users/{id}` — removes an account without tasks, otherwise only reports it as deactivated.
+  Map<String, dynamic> deleteUser(String id) {
+    final u = _user(id);
+    if (_tasks.any((t) => t.involves(u.id))) return {'result': 'deactivated'};
+    _users.removeWhere((x) => x.id == id);
+    return {'result': 'deleted'};
+  }
+
   /// Opens a new account from `{id, name, phone, role, team, password}`.
   Map<String, dynamic> addUser(Map<String, dynamic> body) {
     final id = '${body['id']}'.trim().toLowerCase();
@@ -214,11 +242,40 @@ class MockStore {
       role: UserRole.fromJson(body['role']),
       phone: '${body['phone'] ?? ''}',
       team: '${body['team'] ?? ''}',
+      isOrg: body['isOrg'] == true,
+      contactPerson: '${body['contactPerson'] ?? ''}',
+      note: '${body['note'] ?? ''}',
       color: _users.length % 6,
     );
     _users.add(created);
     _passwords[id] = '${body['password']}';
     return created.toJson();
+  }
+
+  /// Renames the signed-in account from `{name, login}`; the mock keeps logins fixed, so a changed login is refused.
+  Map<String, dynamic> updateAccount(AppUser me, Map<String, dynamic> body) {
+    final login = '${body['login'] ?? me.id}'.trim().toLowerCase();
+    if (login != me.id) throw const MockFailure(400, 'Demo rejimida login o‘zgartirib bo‘lmaydi.');
+    final i = _users.indexWhere((u) => u.id == me.id);
+    final name = '${body['name'] ?? me.name}'.trim();
+    final updated = AppUser(
+      id: me.id,
+      name: name.isEmpty ? me.name : name,
+      role: me.role,
+      phone: me.phone,
+      team: me.team,
+      color: me.color,
+      activeCount: me.activeCount,
+    );
+    _users[i] = updated;
+    return updated.toJson();
+  }
+
+  /// Changes the password of [me] after checking the current one.
+  Map<String, dynamic> changePassword(AppUser me, Map<String, dynamic> body) {
+    if (_passwords[me.id] != '${body['oldPassword']}') throw const MockFailure(400, 'Joriy parol noto‘g‘ri.');
+    _passwords[me.id] = '${body['newPassword']}';
+    return {'token': 'mock-token-${me.id}'};
   }
 
   /// Permission switches of staff [id].
@@ -260,7 +317,7 @@ class MockStore {
       if (query['group'] == 'history' && !t.status.isClosed) return false;
       if (statuses.isNotEmpty && !statuses.contains(t.status)) return false;
       if (query['late'] == '1' && !t.isOverdue) return false;
-      if (query['who'] != null && !t.involves('${query['who']}')) return false;
+      if (query['who'] != null && !'${query['who']}'.split(',').any(t.involves)) return false;
       final days = DateTime(
         t.due.year,
         t.due.month,
@@ -268,6 +325,15 @@ class MockStore {
       ).difference(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)).inDays;
       if (query['due'] == 'today' && days != 0) return false;
       if (query['due'] == 'week' && (days < 0 || days > 7)) return false;
+      if (query['due'] == 'month' && (t.due.year != DateTime.now().year || t.due.month != DateTime.now().month)) {
+        return false;
+      }
+      if (query['due'] == 'range') {
+        /// The task's deadline as `YYYY-MM-DD`, comparable with the range bounds as text.
+        final day = t.due.toIso8601String().substring(0, 10);
+        if (query['from'] != null && day.compareTo('${query['from']}') < 0) return false;
+        if (query['to'] != null && day.compareTo('${query['to']}') > 0) return false;
+      }
       if (q.isNotEmpty &&
           !('${t.id} ${t.title} ${t.assigneeIds.map((a) => _user(a).name).join(' ')}').toLowerCase().contains(q))
         return false;
@@ -307,6 +373,12 @@ class MockStore {
       description: '${body['description'] ?? ''}',
       expected: '${body['expected'] ?? ''}',
       assignees: _assignees(body),
+      attachments: _files(body),
+      client: '${body['client'] ?? ''}',
+      clientIsOrg: body['clientIsOrg'] == true,
+      address: '${body['address'] ?? ''}',
+      currency: '${body['currency'] ?? 'usd'}',
+      createdAt: DateTime.now(),
       log: [_log(LogKind.created, me)],
     );
     _tasks.insert(0, task);
@@ -324,6 +396,7 @@ class MockStore {
       reward: _int(body['reward'], 0),
       description: '${body['description'] ?? ''}',
       expected: '${body['expected'] ?? ''}',
+      attachments: _files(body, keep: t.attachments),
       assignees: [
         for (final a in incoming) TaskAssignee(user: a.user, share: a.share, done: t.assigneeOf(a.userId)?.done ?? 0),
       ],
@@ -403,6 +476,26 @@ class MockStore {
       log: [_log(LogKind.submitted, me), ...t.log],
     );
   }).toJson();
+
+  /// Closes a task as failed, keeping the `{reason}` as its result note.
+  Map<String, dynamic> failTask(AppUser me, String id, Map<String, dynamic> body) => _update(
+    id,
+    (t) => t.copyWith(
+      status: TaskStatus.fail,
+      result: '${body['reason'] ?? ''}',
+      log: [_log(LogKind.failed, me), ...t.log],
+    ),
+  ).toJson();
+
+  /// Removes the comment at [index] of a task.
+  Map<String, dynamic> deleteComment(String id, int index) =>
+      _update(id, (t) => t.copyWith(comments: [...t.comments]..removeAt(index))).toJson();
+
+  /// Removes a task for good.
+  Map<String, dynamic> deleteTask(String id) {
+    _tasks.removeWhere((t) => t.id == id);
+    return const {};
+  }
 
   /// Approves the submitted result.
   Map<String, dynamic> approve(AppUser me, String id) => _update(id, (t) {
@@ -550,10 +643,21 @@ class MockStore {
     final endOfToday = DateTime(today.year, today.month, today.day, 23, 59);
     final due = tasks.where((t) => t.status.isOpen && !t.due.isAfter(endOfToday)).toList()
       ..sort((a, b) => a.due.compareTo(b.due));
+
+    /// Not yet started tasks: the ones waiting for approval.
+    final fresh = tasks.where((t) => t.status == TaskStatus.fresh).toList();
+
+    /// Ids of client accounts, to split the waiting tasks by who created them.
+    final clientIds = {
+      for (final u in _users)
+        if (u.role == UserRole.client) u.id,
+    };
     return {
       'inReview': tasks.where((t) => t.status == TaskStatus.rev).length,
       'overdue': tasks.where((t) => t.isOverdue).length,
       'pendingExpenses': _expenseRows(me, 'pending').length,
+      'pendingNew': fresh.where((t) => !clientIds.contains(t.createdBy.id)).length,
+      'pendingClient': fresh.where((t) => clientIds.contains(t.createdBy.id)).length,
       'dueToday': [for (final t in due.take(3)) t.toJson()],
       'team': [for (final w in _scopeWorkers(me).take(4)) _stat(w, tasks).toJson()],
     };
@@ -580,6 +684,110 @@ class MockStore {
       'expenses': tasks.fold(0, (s, t) => s + t.approvedSum),
       'paid': tasks.where((t) => t.isPaid).fold(0, (s, t) => s + t.reward),
       'people': [for (final w in _scopeWorkers(me)) _stat(w, tasks).toJson()],
+    };
+  }
+
+  /// Numbers of one statistics screen (`kind`, `period`, `offset`). Demo figures: stable for a given window, scaled
+  /// by its length, and empty three or more periods back so the empty state can be seen.
+  Map<String, dynamic> stats(AppUser me, Map<String, dynamic> query) {
+    /// Which screen is asked for.
+    final kind = '${query['kind']}';
+    if (me.role == UserRole.assistant && (kind == 'finance' || kind == 'managers')) {
+      throw MockFailure(403, 'Bu bo‘lim faqat admin uchun');
+    }
+
+    /// Window length.
+    final period = '${query['period']}';
+
+    /// Periods back from the current one (0 or negative).
+    final offset = int.tryParse('${query['offset']}') ?? 0;
+    if (offset <= -3) return const {};
+
+    /// Number of bars of the window and how much bigger than a week its totals are.
+    final (bars, scale) = switch (period) {
+      'week' => (7, 1),
+      'year' => (12, 40),
+      _ => (4, 4),
+    };
+
+    /// Slight shrink for older windows so neighbours differ.
+    final fade = 1 + offset * 0.15;
+
+    /// Deterministic bar heights of the window.
+    final chart = [for (var i = 0; i < bars; i++) ((3 + (i * 7 + bars * 2 - offset * 3) % 8) * scale * fade).round()];
+
+    /// Finished tasks of the window.
+    final done = (9 * scale * fade).round();
+
+    /// Revenue of the window.
+    final income = (2180 * scale * fade).round();
+
+    /// A person row for [u] with numbers derived from its position.
+    Map<String, dynamic> row(AppUser u, int i, {num a = 0, num b = 0, bool dated = false}) => {
+      'user': u.ref.toJson(),
+      'isOrg': u.name.contains('MChJ') || u.name.contains('XK') || i.isOdd,
+      'date': dated ? DateTime.now().subtract(Duration(days: i + 1)).toIso8601String() : null,
+      'a': a,
+      'b': b,
+    };
+
+    /// Accounts of one role.
+    List<AppUser> of(UserRole role) => _users.where((u) => u.role == role).toList();
+    return switch (kind) {
+      'finance' => {
+        'total': income,
+        'delta': 8 + bars,
+        'a': done,
+        'b': done == 0 ? 0 : (income / done).round(),
+        'bars': [for (final v in chart) v * 60],
+        'plan': (income * 1.37 / 100).round() * 100,
+        'facts': [done, income, 3 * scale ~/ 2, 640 * scale ~/ 2, 2 * scale, 460 * scale],
+      },
+      'mine' => {
+        'total': 8 * scale,
+        'delta': 11 + bars,
+        'a': 5 * scale,
+        'b': 1240 * scale,
+        'bars': chart,
+        'facts': [86, scale, 2 * scale],
+      },
+      'clients' => {
+        'total': offset == -1 ? 0 : of(UserRole.client).length.clamp(0, 3 * scale),
+        'delta': offset == -1 ? null : 40,
+        'a': 124,
+        'b': 38,
+        'people': offset == -1
+            ? const <Map<String, dynamic>>[]
+            : [for (final (i, u) in of(UserRole.client).indexed) row(u, i, dated: true)],
+        'everyone': [for (final (i, u) in of(UserRole.client).indexed) row(u, i, a: 1 + (i * 5) % 14)],
+      },
+      'staff' => {
+        'total': of(UserRole.worker).length,
+        'delta': 2,
+        'a': 78 * scale,
+        'b': 87,
+        'people': [
+          for (final (i, u) in of(UserRole.worker).indexed)
+            row(u, i, a: 94 - i * 2, b: (34 - i * 3).clamp(1, 99) * scale ~/ 4 + 1),
+        ],
+      },
+      'managers' => {
+        'total': of(UserRole.assistant).length,
+        'previous': of(UserRole.assistant).length,
+        'a': 12 * scale,
+        'b': 2460 * scale,
+        'people': [
+          for (final (i, u) in of(UserRole.assistant).indexed)
+            row(u, i, a: (14 - i * 3).clamp(1, 99), b: 2960 - i * 600),
+        ],
+      },
+      _ => {
+        'total': 12 * scale,
+        'delta': 9 + bars,
+        'split': [7 * scale, 3 * scale, scale, scale],
+        'bars': chart,
+        'facts': [86, offset == 0 ? scale : 0, 2.1],
+      },
     };
   }
 

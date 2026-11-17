@@ -1,4 +1,4 @@
-# Yangi suhbat — Test rejasi
+# Yangi suhbat va yangi guruh (admin) — Test rejasi
 
 AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga tushirilmaydi.
 
@@ -23,17 +23,18 @@ AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga
 
 ## 2. Mobil/Web integratsiya testi
 
-- [ ] Boss sifatida: odamni qidiring, bosing, (qayta ishlatilgan) suhbatga tushing; guruh tabi: nom bering, odamlarni belgilang, yarating, unga tushing. Ishchi/mijoz sifatida: faqat shaxsiy tab bor va faqat xodimlar ko‘rinadi.
-- [ ] `AppConfig.useMockData = true` bilan haqiqiy yoki emulyator Android/iOS qurilmada, so‘ng jonli backend bilan ishga tushiring.
+- [ ] Yangi suhbat: qidiruv, «Yangi guruh» ni bosish (guruh ekranini ochadi), odamni bosish (shaxsiy suhbatni ochadi yoki qayta ishlatadi). Yangi guruh: nom kiriting, a’zolarni belgilang (tepada chiplar chiqadi, olib tashlash uchun chipni bosing), «Hammasini tanlash», yarating.
+- [ ] Haqiqiy yoki emulyatsiya qilingan Android/iOS qurilmada `AppConfig.useMockData = true` bilan va yana jonli API bilan ishga tushiring.
 
 ## 3. UI test
 
-- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida overflow yoki kesilish yo‘q; uzun ismlar va tarjima matnlari ko‘p nuqta bilan qisqaradi.
-- [ ] Yorug‘ va qorong‘i mavzular ikkalasi ham to‘g‘ri ko‘rinadi; Sozlamalarda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
+- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida toshib ketish yoki kesilish yo‘q; uzun nomlar va tarjima qilingan matnlar ko‘p nuqta bilan qisqartiriladi.
+- [ ] Yorug‘ va qorong‘i mavzular to‘g‘ri o‘qiladi; profilda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
 - [ ] O‘zbek lotin, o‘zbek kirill va rus tillari yetishmayotgan kalitlarsiz va maket buzilishisiz ko‘rinadi.
-- [ ] Qidiruv kechikishsiz yoziladi, tartibsiz kelgan javoblar yangi so‘rov ro‘yxatini hech qachon bosib ketmaydi; belgilangan odamlarda to‘ldirilgan belgi; nom va kamida bitta odam tanlanmaguncha «Yaratish» o‘chiq.
-- [ ] Natija bo‘sh bo‘lsa «hech kim topilmadi» ko‘rinishi; yuklash xatosida qayta urinish ko‘rinishi.
+- [ ] Dizayn bu ekranning `Eco Tasks — mobile app` taxtasiga yorug‘ va qorong‘i mavzuda 1:1 mos keladi (o‘lchamlar, ranglar, radiuslar, ikonkalar).
+- [ ] Kontaktlar «Xodimlar» va «Mijozlar» sarlavhalariga bo‘linadi, rol qo‘shimcha matn sifatida; guruh ekrani «Xodimlar · N ta tanlandi» hisoblagichi va yumaloq belgilarni ko‘rsatadi; nom va kamida bitta a’zo bo‘lmaguncha «Yaratish» amali kulrang.
+- [ ] 3.2 / 3.3 taxtalar: yangi suhbat ro‘yxati odamlarni ism ostida rol belgisi bilan ko‘rsatadi (tepada “Yangi guruh” qatori); yangi guruh sahifasida kamera plitkasi va nom maydoni, «x» li tanlangan odamlar chiplari, dumaloq belgili qidiriladigan ro‘yxat va “Hammasini tanlash”, hamda pastga mahkamlangan “Guruh yaratish” tugmasi bor (nom va a’zo bo‘lgach faollashadi). Rasm yuklash qurilmagan.
 
-## 4. Mantiq/biznes testi
+## 4. Mantiqiy/biznes test
 
-- [ ] Odamni ikki marta tez bosish bitta suhbat ochadi, ikkita emas; ekran o‘zini suhbat bilan almashtiradi, shuning uchun «Orqaga» ro‘yxatga qaytaradi.
+- [ ] Guruh yaratish formani o‘rniga uning suhbatini ochadi; shaxsiy suhbatni ikki marta ochish bir xil suhbatni qayta ishlatadi.

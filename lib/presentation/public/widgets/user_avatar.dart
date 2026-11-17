@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:eco_task/constants/constants.dart';
 import 'package:eco_task/infrastructure/dto/models/user_ref.dart';
 
-/// Round avatar with the person's initials on a palette color.
+/// Round avatar: the person's picture when they have one, otherwise (and while it loads or fails) their initials on
+/// a palette color.
 class UserAvatar extends StatelessWidget {
   /// The person to draw.
   final UserRef user;
@@ -32,9 +33,30 @@ class UserAvatar extends StatelessWidget {
       height: diameter,
       alignment: Alignment.center,
       decoration: BoxDecoration(color: _palette[user.color % _palette.length], shape: BoxShape.circle),
-      child: Text(
-        user.initials,
-        style: theme.badgeText.copyWith(fontSize: diameter * 0.37, color: const Color(0xFFFFFFFF), letterSpacing: 0.3),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Text(
+            user.initials,
+            style: theme.badgeText.copyWith(
+              fontSize: diameter * 0.37,
+              color: const Color(0xFFFFFFFF),
+              letterSpacing: 0.3,
+            ),
+          ),
+          if (user.avatarUrl.isNotEmpty)
+            ClipOval(
+              child: Image.network(
+                user.avatarUrl,
+                width: diameter,
+                height: diameter,
+                fit: BoxFit.cover,
+                cacheWidth: (diameter * MediaQuery.devicePixelRatioOf(context)).round(),
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                frameBuilder: (_, image, frame, sync) => frame == null && !sync ? const SizedBox.shrink() : image,
+              ),
+            ),
+        ],
       ),
     );
   }

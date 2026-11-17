@@ -45,6 +45,20 @@ class TeamRepository {
     return AppUser.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Saves the editable fields of account [id]; only the given keys change.
+  Future<AppUser> updateUser(String id, Map<String, dynamic> fields) async {
+    final response = await dioClient.patch(ApiLinks.user(id), data: fields);
+    ApiCache.invalidate();
+    return AppUser.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Deletes account [id]; resolves to true when it was removed, false when it was only deactivated (it has history).
+  Future<bool> deleteUser(String id) async {
+    final response = await dioClient.delete(ApiLinks.user(id));
+    ApiCache.invalidate();
+    return (response.data as Map)['result'] == 'deleted';
+  }
+
   /// Loads the permission switches of staff member [id].
   Future<PermissionsModel> getPermissions(String id) async =>
       PermissionsModel.fromJson((await dioClient.get(ApiLinks.permissions(id))).data as Map<String, dynamic>);

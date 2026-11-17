@@ -31,6 +31,12 @@ class TasksState extends Equatable {
   /// than `status`, which flips to success on the cached emit.
   final bool refreshing;
 
+  /// Staff offered by the assignee filter; empty until it was opened once.
+  final List<AppUser> staff;
+
+  /// True while [staff] is being loaded.
+  final bool staffLoading;
+
   /// Builds the initial, empty state.
   const TasksState({
     this.status = ScreenStatus.initial,
@@ -41,6 +47,8 @@ class TasksState extends Equatable {
     this.lastPage = 1,
     this.isLoadingMore = false,
     this.refreshing = false,
+    this.staff = const [],
+    this.staffLoading = false,
   });
 
   /// Copies the state, resetting [response] unless a new one is passed so the
@@ -54,6 +62,8 @@ class TasksState extends Equatable {
     int? lastPage,
     bool? isLoadingMore,
     bool? refreshing,
+    List<AppUser>? staff,
+    bool? staffLoading,
   }) => TasksState(
     status: status ?? this.status,
     response: identical(response, _absent) ? null : response as ScreenResponse?,
@@ -63,8 +73,21 @@ class TasksState extends Equatable {
     lastPage: lastPage ?? this.lastPage,
     isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     refreshing: refreshing ?? this.refreshing,
+    staff: staff ?? this.staff,
+    staffLoading: staffLoading ?? this.staffLoading,
   );
 
   @override
-  List<Object?> get props => [status, response, query.cacheKey, items, page, lastPage, isLoadingMore, refreshing];
+  List<Object?> get props => [
+    status,
+    response,
+    query.cacheKey,
+    items,
+    page,
+    lastPage,
+    isLoadingMore,
+    refreshing,
+    staff,
+    staffLoading,
+  ];
 }

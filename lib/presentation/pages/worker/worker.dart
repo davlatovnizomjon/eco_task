@@ -1,4 +1,4 @@
-/// Public surface of the worker UI: its shell and its route table.
+/// Public surface of the worker (backend WORKER) UI: its shell and its route table.
 /// Every screen of this role lives in this folder, independent of the other roles.
 library;
 

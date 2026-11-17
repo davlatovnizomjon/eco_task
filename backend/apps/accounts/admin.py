@@ -15,14 +15,17 @@ class UserAdmin(PolicyAdmin, BaseUserAdmin):
     filter_horizontal = ()
     fieldsets = (
         (None, {"fields": ("username", "password")}),
-        ("Profile", {"fields": ("full_name", "email", "phone")}),
+        ("Profile", {"fields": ("full_name", "email", "phone", "address", "is_org", "avatar_url")}),
         ("Access", {"fields": ("role", "is_active")}),
         ("Dates", {"fields": ("last_login", "date_joined", "created_at")}),
     )
     add_fieldsets = (
         (
             None,
-            {"classes": ("wide",), "fields": ("username", "role", "full_name", "email", "phone", "password1", "password2")},
+            {
+                "classes": ("wide",),
+                "fields": ("username", "role", "full_name", "email", "phone", "password1", "password2"),
+            },
         ),
     )
     readonly_fields = ("last_login", "date_joined", "created_at")
@@ -37,7 +40,7 @@ class UserAdmin(PolicyAdmin, BaseUserAdmin):
 
 @admin.register(AuthToken)
 class AuthTokenAdmin(ReadOnlyAdmin):
-    list_display = ("id", "user", "created_at", "expires_at", "revoked_at", "last_used_at")
+    list_display = ("id", "user", "created_at", "expires_at", "refresh_expires_at", "revoked_at", "last_used_at")
     list_filter = ("revoked_at",)
     search_fields = ("user__username",)
-    exclude = ("key_hash",)  # only a digest is stored, but there is no reason to display it
+    exclude = ("key_hash", "refresh_hash")  # only digests are stored, but there is no reason to display them

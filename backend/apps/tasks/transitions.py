@@ -15,8 +15,8 @@ RULES: dict[tuple[str, str], set[str]] = {
     (S.IN_PROGRESS, S.COMPLETED): {"approver", "assignee_if_no_approval"},
     (S.REVIEW, S.COMPLETED): {"approver"},
     (S.REVIEW, S.IN_PROGRESS): {"approver"},  # returned for rework
-    (S.OPEN, S.FAILED): {"approver"},
-    (S.IN_PROGRESS, S.FAILED): {"approver"},
+    (S.OPEN, S.FAILED): {"approver", "assignee"},  # a worker may report "could not do it" with a reason
+    (S.IN_PROGRESS, S.FAILED): {"approver", "assignee"},
     (S.REVIEW, S.FAILED): {"approver"},
     (S.OPEN, S.CANCELED): {"approver", "client_creator"},
     (S.IN_PROGRESS, S.CANCELED): {"approver"},

@@ -46,19 +46,30 @@ abstract final class BackendMapper {
       'phone': u['phone'] ?? '',
       'role': u['role'],
       'color': _color(u['id']),
+      'team': u['address'] ?? '',
+      'isOrg': u['is_org'] ?? false,
+      'contactPerson': u['contact_person'] ?? '',
+      'note': u['note'] ?? '',
+      'avatarUrl': u['avatar_url'] ?? '',
     };
   }
 
   /// `User` / `UserBrief` → app `UserRef` JSON.
   static Map<String, dynamic> ref(Object? json) {
     final u = _map(json);
-    return {'id': '${u['id']}', 'name': _name(u), 'color': _color(u['id'])};
+    return {
+      'id': '${u['id']}',
+      'name': _name(u),
+      'color': _color(u['id']),
+      if (u['role'] != null) 'role': u['role'],
+      'avatarUrl': u['avatar_url'] ?? '',
+    };
   }
 
-  /// `{token, user}` of `auth/login/` → app `AuthUser` JSON.
+  /// `{token, refresh, user}` of `auth/login/` → app `AuthUser` JSON.
   static Map<String, dynamic> session(Object? json) {
     final body = _map(json);
-    return {'token': body['token'], 'user': user(body['user'])};
+    return {'token': body['token'], 'refresh': body['refresh'], 'user': user(body['user'])};
   }
 
   /// A DRF page `{count, results}` → app `PagedList` JSON, mapping every row with [item].
@@ -108,6 +119,62 @@ abstract final class BackendMapper {
           {'user': ref(_map(c)['author']), 'text': _map(c)['body'], 'at': _map(c)['created_at']},
       ],
       'log': [for (final h in rows) logEntry(h)],
+      'client': '${t['client_name'] ?? ''}'.isNotEmpty
+          ? t['client_name']
+          : (t['client'] == null ? '' : _name(_map(t['client']))),
+      'clientIsOrg': t['client_is_org'] ?? false,
+      'address': t['address'] ?? '',
+      'remindAt': t['remind_at'],
+      'createdAt': t['created_at'],
+      'currency': '${t['currency'] ?? 'USD'}'.toLowerCase(),
+      'attachments': t['attachments'] ?? const [],
+    };
+  }
+
+  /// Backend statistics answer → app `StatsReport` JSON (snake_case people rows become the app's names).
+  static Map<String, dynamic> stats(Object? json) {
+    final s = _map(json);
+    Map<String, dynamic> person(Object? p) {
+      final r = _map(p);
+      return {'user': ref(r['user']), 'isOrg': r['is_org'] ?? false, 'date': r['date'], 'a': r['a'], 'b': r['b']};
+    }
+
+    num n(Object? v) => v is num ? v : (double.tryParse('${v ?? 0}') ?? 0);
+    return {
+      'total': n(s['total']),
+      'delta': s['delta'],
+      'previous': n(s['previous']),
+      'a': n(s['a']),
+      'b': n(s['b']),
+      'split': s['split'] ?? const [],
+      'bars': [for (final v in (s['bars'] as List? ?? const [])) n(v)],
+      'plan': n(s['plan']),
+      'facts': [for (final v in (s['facts'] as List? ?? const [])) n(v)],
+      'people': [for (final p in (s['people'] as List? ?? const [])) person(p)],
+      'everyone': [for (final p in (s['everyone'] as List? ?? const [])) person(p)],
+    };
+  }
+
+  /// Backend dashboard answer plus the head counts → app `DashboardSummary` JSON.
+  static Map<String, dynamic> dashboard(Object? json) {
+    final d = _map(json);
+    return {
+      'inReview': d['in_review'],
+      'overdue': d['overdue'],
+      'pendingExpenses': 0,
+      'pendingNew': d['pending_new'],
+      'pendingClient': d['pending_client'],
+      'dueToday': [for (final t in (d['due_today'] as List? ?? const [])) task(t)],
+      'team': [
+        for (final row in (d['team'] as List? ?? const []))
+          {
+            'user': user(_map(row)['user']),
+            'done': _map(row)['done'],
+            'total': _map(row)['total'],
+            'lateDays': 0,
+            'onTime': _map(row)['done'],
+          },
+      ],
     };
   }
 

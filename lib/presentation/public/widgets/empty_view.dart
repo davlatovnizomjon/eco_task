@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:eco_task/constants/constants.dart';
+import 'package:eco_task/domain/common/enums/status_tone.dart';
 
 import 'app_icon.dart';
 import 'btn.dart';
@@ -21,8 +22,21 @@ class EmptyView extends StatelessWidget {
   /// Retry handler; the button is omitted when null.
   final VoidCallback? onRetry;
 
+  /// Color family of the glyph tile; null keeps the classic round green halo.
+  final StatusTone? tone;
+
   /// Builds the empty/error panel.
-  const EmptyView({super.key, required this.title, this.message = '', this.icon, this.onRetry});
+  const EmptyView({super.key, required this.title, this.message = '', this.icon, this.onRetry}) : tone = null;
+
+  /// Admin look of an empty list: a rounded-square tile tinted with [tone], a larger title and hint.
+  const EmptyView.tile({
+    super.key,
+    required this.title,
+    this.message = '',
+    this.icon,
+    this.onRetry,
+    StatusTone this.tone = StatusTone.primary,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,20 +47,31 @@ class EmptyView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 72.w,
-              height: 72.w,
-              decoration: BoxDecoration(color: theme.primaryTint, shape: BoxShape.circle),
-              alignment: Alignment.center,
-              child: AppIcon(icon ?? AppIcons.board, size: 30.sp, color: theme.primaryDark),
-            ),
+            if (tone == null)
+              Container(
+                width: 72.w,
+                height: 72.w,
+                decoration: BoxDecoration(color: theme.primaryTint, shape: BoxShape.circle),
+                alignment: Alignment.center,
+                child: AppIcon(icon ?? AppIcons.board, size: 30.sp, color: theme.primaryDark),
+              )
+            else
+              Container(
+                width: 64.w,
+                height: 64.w,
+                decoration: BoxDecoration(color: tone!.bgColor, borderRadius: 20.circular),
+                alignment: Alignment.center,
+                child: AppIcon(icon ?? AppIcons.board, size: 30.sp, color: tone!.color),
+              ),
             16.h.height,
             Text(
               title,
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: theme.cardTitle,
+              style: tone == null
+                  ? theme.cardTitle
+                  : theme.textStyle.copyWith(fontSize: 19.sp, height: 25 / 19, fontWeight: FontWeight.w700),
             ),
             if (message.isNotEmpty) ...[
               6.h.height,
@@ -55,7 +80,9 @@ class EmptyView extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
-                style: theme.cardSubtitle.copyWith(height: 1.4),
+                style: tone == null
+                    ? theme.cardSubtitle.copyWith(height: 1.4)
+                    : theme.cardSubtitle.copyWith(fontSize: 15.sp, height: 21 / 15),
               ),
             ],
             if (onRetry != null) ...[

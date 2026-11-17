@@ -4,26 +4,24 @@ import 'package:go_router/go_router.dart';
 
 import 'package:eco_task/constants/constants.dart';
 import 'package:eco_task/domain/common/enums/screen_status.dart';
+import 'package:eco_task/domain/common/enums/status_tone.dart';
+import 'package:eco_task/domain/common/enums/user_role.dart';
 import 'package:eco_task/helpers/response_helper.dart';
+import 'package:eco_task/infrastructure/dto/models/user_ref.dart';
 import 'package:eco_task/infrastructure/repository/chat_repository.dart';
-import 'package:eco_task/infrastructure/repository/session_repository.dart';
-import 'package:eco_task/presentation/public/widgets/app_icon.dart';
-import 'package:eco_task/presentation/public/widgets/btn.dart';
-import 'package:eco_task/presentation/public/widgets/card_widget.dart';
 import 'package:eco_task/presentation/public/widgets/empty_view.dart';
-import 'package:eco_task/presentation/public/widgets/input_box.dart';
-import 'package:eco_task/presentation/public/widgets/option_tile.dart';
-import 'package:eco_task/presentation/public/widgets/screen_shell.dart';
-import 'package:eco_task/presentation/public/widgets/segmented_tabs.dart';
+import 'package:eco_task/presentation/public/widgets/inner_bar.dart';
+import 'package:eco_task/presentation/public/widgets/list_row.dart';
+import 'package:eco_task/presentation/public/widgets/search_field.dart';
 import 'package:eco_task/presentation/public/widgets/smart_loading.dart';
-import 'package:eco_task/presentation/public/widgets/user_avatar.dart';
+import 'package:eco_task/presentation/public/widgets/tone_circle.dart';
 import 'package:eco_task/presentation/routes/entity/routes.dart';
 
 import '../bloc/bloc.dart';
+import 'widgets/person_pick_row.dart';
 
-/// Start a chat: search the people one may write to and tap one for a direct
-/// chat, or (bosses) switch to the group tab, tick people, name the group and
-/// create it. Provides [NewChatBloc] over the app-wide [ChatRepository].
+/// Pushed "new chat" screen of the admin: search, a "new group" shortcut and the contacts split into staff and
+/// clients; tapping a person opens (or reuses) the direct chat. Provides [NewChatBloc].
 class NewChatScreen extends StatelessWidget {
   /// Builds the screen.
   const NewChatScreen({super.key});
@@ -37,33 +35,28 @@ class NewChatScreen extends StatelessWidget {
   }
 }
 
-/// Renders the tabs, the search box and the people.
+/// Renders the bar, the search field and the contact sections.
 class _NewChatView extends StatefulWidget {
-  /// Builds the body.
+  /// Builds the view.
   const _NewChatView();
 
   @override
   State<_NewChatView> createState() => _NewChatViewState();
 }
 
-/// Owns the search and title controllers.
+/// Owns the search controller.
 class _NewChatViewState extends State<_NewChatView> {
-  /// Controller of the search field.
+  /// Search text controller.
   final _search = TextEditingController();
-
-  /// Controller of the group title field.
-  final _title = TextEditingController();
 
   @override
   void dispose() {
     _search.dispose();
-    _title.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isBoss = RepositoryProvider.of<SessionRepository>(context).role?.isBoss ?? false;
     return BlocConsumer<NewChatBloc, NewChatState>(
       listenWhen: (prev, cur) => cur.response != null || cur.openedId != prev.openedId,
       listener: (context, state) {
@@ -72,76 +65,51 @@ class _NewChatViewState extends State<_NewChatView> {
       },
       builder: (context, state) {
         final bloc = context.read<NewChatBloc>();
-        return ScreenShell(
-          title: TrWords.chatNew.tr(),
-          bottomBar: state.group
-              ? Btn(
-                  text: TrWords.chatCreate.tr(),
-                  isLoading: state.busy,
-                  onPressed: state.selected.isEmpty || _title.text.trim().isEmpty
-                      ? null
-                      : () => bloc.add(NewChatGroupSubmitted(_title.text)),
-                )
-              : null,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        final staff = [
+          for (final u in state.contacts)
+            if (u.role != UserRole.client) u,
+        ];
+        final clients = [
+          for (final u in state.contacts)
+            if (u.role == UserRole.client) u,
+        ];
+        return Scaffold(
+          backgroundColor: theme.background,
+          body: Column(
             children: [
-              if (isBoss) ...[
-                SegmentedTabs(
-                  labels: [TrWords.chatDirect.tr(), TrWords.chatGroup.tr()],
-                  selected: state.group ? 1 : 0,
-                  onChanged: (i) => bloc.add(NewChatTabChanged(group: i == 1)),
-                ),
-                12.h.height,
-              ],
-              if (state.group) ...[
-                InputBox(
-                  controller: _title,
-                  title: TrWords.chatGroupTitle.tr(),
-                  hint: TrWords.chatGroupTitleHint.tr(),
-                  onChanged: (_) => setState(() {}),
-                ),
-                12.h.height,
-              ],
-              InputBox(
-                controller: _search,
-                hint: TrWords.chatSearch.tr(),
-                leftIcon: AppIcons.search,
-                onChanged: (q) => bloc.add(NewChatSearched(q)),
-              ),
-              12.h.height,
+              InnerBar(title: TrWords.chatNew.tr()),
               Expanded(
-                child: state.contacts.isEmpty
-                    ? (state.status.isLoading
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h + ScreenSize.bottomInset(context)),
+                  children: [
+                    SearchField(
+                      hint: TrWords.teamSearch.tr(),
+                      onChanged: (q) => bloc.add(NewChatSearched(q)),
+                      controller: _search,
+                    ),
+                    12.h.height,
+                    ListRow(
+                      first: true,
+                      leading: ToneCircle(AppIcons.users, tone: StatusTone.primary, size: 40.w),
+                      title: TrWords.chatNewGroup.tr(),
+                      chevron: false,
+                      onTap: () => context.pushReplacement(Routes.groupNew.path),
+                    ),
+                    if (state.contacts.isEmpty)
+                      state.status.isLoading
                           ? const SmartLoading()
-                          : EmptyView(
-                              title: TrWords.chatNoContacts.tr(),
-                              icon: AppIcons.users,
-                              onRetry: state.status.isError ? () => bloc.add(const NewChatStarted()) : null,
-                            ))
-                    : SingleChildScrollView(
-                        child: CardWidget(
-                          padding: EdgeInsets.zero,
-                          child: Column(
-                            children: [
-                              for (final (i, u) in state.contacts.indexed)
-                                OptionTile(
-                                  title: u.name,
-                                  first: i == 0,
-                                  leading: UserAvatar(u, size: 36.w),
-                                  trailing: state.group
-                                      ? AppIcon(
-                                          state.selected.contains(u.id) ? AppIcons.checkc : AppIcons.plus,
-                                          color: state.selected.contains(u.id) ? theme.primary : theme.grayText,
-                                        )
-                                      : null,
-                                  onTap: () =>
-                                      bloc.add(state.group ? NewChatMemberToggled(u.id) : NewChatPersonPicked(u.id)),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
+                          : SizedBox(
+                              height: 260.h,
+                              child: EmptyView(
+                                title: TrWords.chatNoContacts.tr(),
+                                icon: AppIcons.users,
+                                onRetry: state.status.isError ? () => bloc.add(const NewChatStarted()) : null,
+                              ),
+                            ),
+                    if (staff.isNotEmpty) ..._section(TrWords.teamTabStaff.tr(), staff, bloc),
+                    if (clients.isNotEmpty) ..._section(TrWords.chatClientsTitle.tr(), clients, bloc),
+                  ],
+                ),
               ),
             ],
           ),
@@ -149,4 +117,11 @@ class _NewChatViewState extends State<_NewChatView> {
       },
     );
   }
+
+  /// A captioned run of contact rows.
+  List<Widget> _section(String title, List<UserRef> people, NewChatBloc bloc) => [
+    ListGroupTitle(title),
+    for (final (i, u) in people.indexed)
+      PersonPickRow(first: i == 0, user: u, onTap: () => bloc.add(NewChatPersonPicked(u.id))),
+  ];
 }

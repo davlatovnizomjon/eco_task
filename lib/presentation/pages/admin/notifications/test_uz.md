@@ -1,4 +1,4 @@
-# Bildirishnomalar inboxi — Test rejasi
+# Bildirishnomalar (admin) — Test rejasi
 
 AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga tushirilmaydi.
 
@@ -19,19 +19,17 @@ AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga
 
 ## 2. Mobil/Web integratsiya testi
 
-- [ ] Boshqa rol sifatida voqealar yarating (natija yuboring, izoh qoldiring, so‘rovni rejalashtiring) va mos inbox yozuvlarini ko‘ring; birini ochish uni o‘qilgan qiladi va boss review/expense yozuvlari uchun navbatga o‘tkazadi.
-- [ ] `AppConfig.useMockData = true` bilan haqiqiy yoki emulyator Android/iOS qurilmada, so‘ng jonli API bilan yana ishga tushiring.
+- [ ] Dashboard qo‘ng‘iroqchasidan oching; chiplarni almashtiring (Hammasi, O‘qilmagan N, Tekshiruv, Muddatlar, Xarajatlar), «O‘qildi» ni bosing (hammasini o‘qilgan qilish), qatorni bosing (o‘qilgan qiladi va tekshiruv → vazifalar tabi, xarajat → xarajatlar, so‘rov → mijozlar ni ochadi).
+- [ ] Haqiqiy yoki emulyatsiya qilingan Android/iOS qurilmada `AppConfig.useMockData = true` bilan va yana jonli API bilan ishga tushiring.
 
 ## 3. UI test
 
-- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida overflow yoki kesilish yo‘q; uzun ismlar va tarjima matnlari ko‘p nuqta bilan qisqaradi.
-- [ ] Yorug‘ va qorong‘i mavzular ikkalasi ham to‘g‘ri ko‘rinadi; Sozlamalarda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
+- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida toshib ketish yoki kesilish yo‘q; uzun nomlar va tarjima qilingan matnlar ko‘p nuqta bilan qisqartiriladi.
+- [ ] Yorug‘ va qorong‘i mavzular to‘g‘ri o‘qiladi; profilda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
 - [ ] O‘zbek lotin, o‘zbek kirill va rus tillari yetishmayotgan kalitlarsiz va maket buzilishisiz ko‘rinadi.
-- [ ] Yuklanish shimmer kartalarini ko‘rsatadi (spinner yo‘q); bo‘sh natija bo‘sh ko‘rinishni ko‘rsatadi; birinchi yuklash xatosi qayta urinish ko‘rinishini ko‘rsatadi va tugma qayta yuklaydi.
-- [ ] Pull-to-refresh to‘la ro‘yxatda, qisqa ro‘yxatda va bo‘sh/xato ko‘rinishda ishlaydi (doim scroll qilinadi); indikator keshli emit’da emas, tarmoq chaqiruvi tugaganda yakunlanadi.
-- [ ] Oxirgi qator tizim imo-ishora panelidan tepada qoladi (pastki inset scroll padding’ga kiradi).
-- [ ] Filtr pillalari rolga qarab farqlanadi (boss: beshta, boshqalar: hammasi/o‘qilmagan); yozuvlar Bugun / Kecha / sana bo‘yicha guruhlanadi; o‘qilmaganlar qalin va nuqtali; ruxsat o‘chiq banneri Sozlamalarga olib boradi.
+- [ ] Dizayn bu ekranning `Eco Tasks — mobile app` taxtasiga yorug‘ va qorong‘i mavzuda 1:1 mos keladi (o‘lchamlar, ranglar, radiuslar, ikonkalar).
+- [ ] 1.14–1.20 taxtalar: ikkita tab (Hammasi / O‘qilmagan); har bir yozuv uchun chegarali karta: qalin sarlavha, o‘qilmaganda yashil vaqt va nuqta hamda ikki qatorli xabar; kartani bosish uni o‘qilgan qiladi va to‘liq xabarli oynani ochadi (yozuv ekranga ishora qilsa “Ochish” bilan); hech narsa o‘qilmagan bo‘lmasa panel’dagi belgilar amali xiralashadi; bo‘sh (hammasi / o‘qilmagan) va xato holatlari mos plitka va qayta urinish bilan.
 
 ## 4. Mantiqiy/biznes test
 
-- [ ] «Hammasini o‘qilgan qilish» tab nishonini nolga tushiradi va o‘qilmaganlar filtri bo‘sh bo‘ladi.
+- [ ] Qo‘ng‘iroqcha nishoni va o‘qilmagan tab o‘qilgandan keyin sinxron qoladi; “hammasini o‘qilgan qilish” o‘qilmagan tabni darhol bo‘shatadi.

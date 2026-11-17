@@ -24,6 +24,21 @@ class TaskDraft {
   /// People with their quotas.
   final List<TaskAssignee> assignees;
 
+  /// Ids of the uploaded files the task should hold after saving (photos and documents).
+  final List<int> attachmentIds;
+
+  /// Client the task is done for; empty for an internal task.
+  final String client;
+
+  /// True when [client] is an organization.
+  final bool clientIsOrg;
+
+  /// Place the work happens at.
+  final String address;
+
+  /// Currency of [reward]: `uzs` or `usd`.
+  final String currency;
+
   /// Builds a draft from its parts.
   const TaskDraft({
     required this.title,
@@ -33,6 +48,11 @@ class TaskDraft {
     this.reward = 0,
     this.description = '',
     this.expected = '',
+    this.client = '',
+    this.clientIsOrg = false,
+    this.address = '',
+    this.currency = 'usd',
+    this.attachmentIds = const [],
   });
 
   /// Request body of `POST tasks` / `PUT tasks/{id}`.
@@ -44,5 +64,10 @@ class TaskDraft {
     'description': description,
     'expected': expected,
     'assignees': [for (final a in assignees) a.toJson()],
+    'client': client,
+    'clientIsOrg': clientIsOrg,
+    'address': address,
+    'currency': currency,
+    'attachmentIds': attachmentIds,
   };
 }

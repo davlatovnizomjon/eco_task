@@ -1,4 +1,4 @@
-# Account form (staff/client) — Test Plan
+# Open an account: employee or client (manager) — Test Plan
 
 A plan for an AI to execute against; nothing here is run unless the user asks.
 
@@ -15,16 +15,20 @@ A plan for an AI to execute against; nothing here is run unless the user asks.
 
 ## 2. Mobile/Web Integration Test
 
-- [ ] Open a staff account (worker and manager roles) and a client account; sign in as each.
+- [ ] Open the employee form (name, phone, login, temporary password with a regenerate button, a single “Xodim” role radio — a manager cannot create managers) and the client form (name, phone, login, password, address); submit and read the hand-over dialog with the login and the password.
 - [ ] Run on a real or emulated Android/iOS device with `AppConfig.useMockData = true` and again against the live API.
 
 ## 3. UI Test
 
 - [ ] No overflow or clipping at a small phone width (320 px) and a tablet width (768 px); long names and translated strings truncate with an ellipsis.
-- [ ] Light and dark themes both read correctly; switching the theme in Settings repaints this screen without losing its state.
+- [ ] Light and dark themes both read correctly; switching the theme in the profile repaints this screen without losing its state.
 - [ ] Uzbek Latin, Uzbek Cyrillic and Russian all render without missing keys or layout breaks.
-- [ ] Nothing is red before the first submit; failed submit shows the first message in the dialog and marks all invalid fields; the phone field masks as `+998 90 123 45 67`; regenerate gives a new password; success dialog shows login + password and closing returns to the directory.
+- [ ] The design matches the `Eco Tasks — mobile app` board of this screen 1:1 (sizes, colors, radii, icons) in light and dark themes.
+- [ ] The pinned bottom bar shows the hint “Hisob ochilgach, login va parolni ulashasiz” above the primary button; role rows show a radio mark.
+- [ ] Boards 1.23 / 1.25: the staff form is “Xodim qo‘shish” with name, phone, login, password and a one-row role list (“Xodim”), saved with “Saqlash”; the client form has the “Jismoniy shaxs / Tashkilot” tabs (the first field becomes “Tashkilot nomi”), address, and ends with “Mijoz hisobini ochish”; the organization flag is sent as `isOrg`.
 
 ## 4. Logical/Business Test
 
-- [ ] Role choice is offered only for staff; the team of a new staff member is the creator's team.
+- [ ] Empty name or login and an invalid phone block submitting with the first error in the dialog; a taken login is reported by the API.
+- [ ] Client organization tab also has “Mas‘ul shaxs” (`contactPerson`) and every client has “Izoh” (`note`); both reach `POST users` and `PATCH users/{id}`.
+- [ ] Edit mode (`/team/new?edit=<id>`): loads the account, prefills name, phone, address, organization flag, contact and note; login, password and role rows are hidden; saving pops with `true`.

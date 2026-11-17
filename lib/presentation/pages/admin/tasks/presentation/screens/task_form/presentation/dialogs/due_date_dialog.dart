@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:eco_task/constants/constants.dart';
 import 'package:eco_task/presentation/public/widgets/btn.dart';
 import 'package:eco_task/presentation/public/widgets/filter_pill.dart';
-import 'package:eco_task/presentation/public/widgets/month_calendar.dart';
+import 'package:eco_task/presentation/public/widgets/month_grid.dart';
 import 'package:eco_task/utils/formatters/date_formatter.dart';
 
 /// Deadline picker sheet: quick day chips, a month calendar and time chips.
@@ -55,7 +55,7 @@ class _DueDateDialogState extends State<DueDateDialog> {
           ],
         ),
         8.h.height,
-        MonthCalendar(selected: _day, firstDay: base, onSelect: (day) => setState(() => _day = day)),
+        MonthGrid(compact: true, selected: _day, firstDay: base, onSelect: (day) => setState(() => _day = day)),
         8.h.height,
         Text(TrWords.formTime.tr(), style: theme.sectionLabel),
         8.h.height,

@@ -36,6 +36,9 @@ class LocalStore {
   /// Key of the "daily overdue reminder" switch.
   static const _daily = 'daily';
 
+  /// Key of the moment (epoch milliseconds) until which sign-in is locked.
+  static const _loginLockedUntil = 'login_locked_until';
+
   /// Stored theme mode name (`system`, `light`, `dark`).
   String get theme => _prefs.getString(_theme) ?? 'system';
 
@@ -83,4 +86,14 @@ class LocalStore {
 
   /// Persists the daily-reminder switch.
   Future<void> setDaily(bool value) => _prefs.setBool(_daily, value);
+
+  /// Moment until which sign-in is locked, or null when it is not.
+  DateTime? get loginLockedUntil {
+    final millis = _prefs.getInt(_loginLockedUntil);
+    return millis == null ? null : DateTime.fromMillisecondsSinceEpoch(millis);
+  }
+
+  /// Persists the lock end; null removes it.
+  Future<void> setLoginLockedUntil(DateTime? value) =>
+      value == null ? _prefs.remove(_loginLockedUntil) : _prefs.setInt(_loginLockedUntil, value.millisecondsSinceEpoch);
 }

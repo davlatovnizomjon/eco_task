@@ -57,7 +57,7 @@ that concurrent requests can touch (status changes, assignment).
 
 ## Errors
 
-One envelope: `{"error": {"code": "...", "detail": ...}}` (`apps/core/errors.py`).
+One envelope: `{"error": {"code": "...", "message": ...}}` (`message` follows `Accept-Language`) (`apps/core/errors.py`).
 Raise `DomainError(detail, code, status)` for business-rule violations (`forbidden` 403, `not_found` 404,
 `version_conflict` 409, `invalid_transition` 409, ...). Codes are stable `snake_case` strings the Flutter app
 can switch on — don't rename an existing one. Never return raw exception text or log request bodies/passwords.

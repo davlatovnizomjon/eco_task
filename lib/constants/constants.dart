@@ -7,6 +7,7 @@ export 'package:flutter_screenutil/flutter_screenutil.dart';
 
 export '../extensions/ui.dart';
 export 'res/app_icons.dart';
+export 'res/app_images.dart';
 export 'res/screen_size.dart';
 export 'res/translate.dart';
 export 'theme/app_theme.dart';

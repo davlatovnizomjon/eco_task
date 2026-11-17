@@ -45,14 +45,27 @@ class BackendDioClient extends DioClient {
     final Object? result;
     switch (seg.first) {
       case 'auth':
-        result = await _login(body);
+        result = switch (seg.length > 1 ? seg[1] : '') {
+          'logout' => await _logout(),
+          'refresh' => await _refresh(body),
+          _ => await _login(body),
+        };
+      case 'account':
+        result = seg.length == 1 ? await _updateAccount(body) : await _changePassword(body);
       case 'tasks':
         result = await _tasks(method, seg, body, query);
       case 'users':
         result = await _users(method, seg, body, query);
       case 'notifications':
         result = await _notifications(method, seg, body, query);
-      case 'conversations':
+      case 'dashboard':
+        result = BackendMapper.dashboard(await _raw('reports/dashboard/'));
+      case 'reports' when seg.length > 1 && seg[1] == 'stats':
+        result = BackendMapper.stats(await _raw('reports/stats/', query: query));
+      case 'reports' when seg.length > 1 && seg[1] == 'export':
+        await _raw('reports/export/', method: 'POST', data: body);
+        result = const <String, dynamic>{};
+      case 'conversations' || 'app-version' || 'support' || 'legal' || 'files' || 'calls':
         return super.request(path, method: method, data: data, queryParameters: queryParameters);
       default:
         return _fallback.request(path, method: method, data: data, queryParameters: queryParameters);
@@ -70,6 +83,22 @@ class BackendDioClient extends DioClient {
 
   // ─── auth ──────────────────────────────────────────────────────────────────
 
+  /// `auth/refresh` → backend `auth/refresh/`; answers the new `{token, refresh}` pair.
+  Future<Object?> _refresh(Map<String, dynamic> body) async {
+    final data = await _raw('auth/refresh/', method: 'POST', data: {'refresh': body['refresh']}) as Map;
+    return {'token': data['token'], 'refresh': data['refresh']};
+  }
+
+  /// `auth/logout` → backend `auth/logout/`; returns null (204).
+  Future<Object?> _logout() async {
+    try {
+      await _raw('auth/logout/', method: 'POST');
+    } catch (_) {
+      // Ignore network errors — the local session is cleared regardless.
+    }
+    return null;
+  }
+
   /// `auth/login` → backend `auth/login/`.
   Future<Object?> _login(Map<String, dynamic> body) async {
     final data = await _raw(
@@ -80,6 +109,27 @@ class BackendDioClient extends DioClient {
     return BackendMapper.session(data);
   }
 
+  /// `PATCH account` → backend `PATCH users/{me}/` with `full_name` and `username`.
+  Future<Object?> _updateAccount(Map<String, dynamic> body) async {
+    final me = session.user.value!.user.id;
+    final data = await _raw(
+      'users/$me/',
+      method: 'PATCH',
+      data: {if (body['name'] != null) 'full_name': body['name'], if (body['login'] != null) 'username': body['login']},
+    );
+    return BackendMapper.user(data);
+  }
+
+  /// `POST account/password` → backend `POST auth/password/`; the backend answers with a fresh token pair.
+  Future<Object?> _changePassword(Map<String, dynamic> body) async {
+    final data = await _raw(
+      'auth/password/',
+      method: 'POST',
+      data: {'old_password': body['oldPassword'], 'new_password': body['newPassword']},
+    );
+    return {'token': '${(data as Map)['token']}', 'refresh': '${data['refresh']}'};
+  }
+
   // ─── tasks ─────────────────────────────────────────────────────────────────
 
   /// Routes the `tasks/...` family.
@@ -87,11 +137,23 @@ class BackendDioClient extends DioClient {
     if (seg.length == 1) return method == 'POST' ? _createTask(body) : _taskList(query);
     if (seg[1] == 'calendar') return _calendar(query);
     final id = seg[1];
+    if (seg.length == 2 && method == 'DELETE') {
+      await _raw('tasks/$id/', method: 'DELETE');
+      return const <String, dynamic>{};
+    }
+    if (seg.length == 4 && seg[2] == 'comments' && method == 'DELETE') {
+      // The app addresses a note by its position; the backend by its id.
+      final rows = await _raw('tasks/$id/comments/') as List;
+      await _raw('tasks/$id/comments/${(rows[int.parse(seg[3])] as Map)['id']}/', method: 'DELETE');
+      return _taskDetail(id);
+    }
     if (seg.length == 2) return method == 'PUT' ? _editTask(id, body) : _taskDetail(id);
     if (seg.length > 3 || seg[2] == 'expenses' || seg[2] == 'pay') throw _unsupported();
     switch (seg[2]) {
       case 'cancel':
         await _move(id, 'CANCELED');
+      case 'fail':
+        await _move(id, 'FAILED', reason: '${body['reason'] ?? ''}');
       case 'progress':
         await _progress(id, body);
       case 'comments':
@@ -99,6 +161,9 @@ class BackendDioClient extends DioClient {
       case 'submit':
         await _submit(id, '${body['text'] ?? ''}');
       case 'approve':
+        // A task nobody started (the admin's own) goes through "in progress" first: the machine has no OPEN → DONE.
+        final current = await _raw('tasks/$id/') as Map;
+        if (current['status'] == 'OPEN') await _move(id, 'IN_PROGRESS');
         await _move(id, 'COMPLETED');
       case 'return':
         await _move(id, 'IN_PROGRESS', reason: '${body['reason'] ?? ''}');
@@ -129,7 +194,10 @@ class BackendDioClient extends DioClient {
     }
     if (status != null) params['status'] = status;
     if ('${q['q'] ?? ''}'.isNotEmpty) params['q'] = q['q'];
-    if (q['who'] != null) params['worker'] = q['who'];
+    // The backend filters by one worker; several picked assignees narrow to the first.
+    if (q['who'] != null) params['worker'] = '${q['who']}'.split(',').first;
+    if (q['from'] != null) params['due_after'] = q['from'];
+    if (q['to'] != null) params['due_before'] = q['to'];
     switch (q['due']) {
       case 'today':
         params['due_after'] = params['due_before'] = BackendMapper.date(today);
@@ -185,13 +253,23 @@ class BackendDioClient extends DioClient {
     final expected = '${draft['expected'] ?? ''}'.trim();
     final description = '${draft['description'] ?? ''}'.trim();
     final reward = (draft['reward'] as num?)?.toInt() ?? 0;
+    final isClient = session.role == UserRole.client;
     return {
       'title': draft['title'],
       'description': expected.isEmpty ? description : '$description\n\n$expected'.trim(),
-      'priority': '${draft['priority']}'.toUpperCase(),
+      // A client may only fill the fields of an order (never priority or client details).
+      if (!isClient) 'priority': '${draft['priority']}'.toUpperCase(),
       'due_date': BackendMapper.date(DateTime.parse('${draft['due']}')),
-      // Only the owner may price a task; sending the field as an assistant would be a 403.
-      if (reward > 0 && session.role == UserRole.owner) 'agreed_value': reward,
+      // The owner prices a task and a client gives the budget of their own order; sending the field as an assistant
+      // would be a 403.
+      if (reward > 0 && (session.role == UserRole.owner || isClient)) ...{
+        'agreed_value': reward,
+        'currency': '${draft['currency'] ?? 'uzs'}'.toUpperCase(),
+      },
+      if (!isClient && '${draft['client'] ?? ''}'.isNotEmpty) 'client_name': draft['client'],
+      if (!isClient) 'client_is_org': draft['clientIsOrg'] ?? false,
+      'attachment_ids': draft['attachmentIds'] ?? const <int>[],
+      'address': draft['address'] ?? '',
     };
   }
 
@@ -209,7 +287,9 @@ class BackendDioClient extends DioClient {
   /// `PUT tasks/{id}` → patches the fields, replaces the assignees, returns the detail.
   Future<Object?> _editTask(String id, Map<String, dynamic> draft) async {
     await _raw('tasks/$id/', method: 'PATCH', data: _taskBody(draft));
-    await _raw('tasks/$id/assignees/', method: 'PUT', data: {'worker_ids': _workerIds(draft)});
+    if (session.role != UserRole.client) {
+      await _raw('tasks/$id/assignees/', method: 'PUT', data: {'worker_ids': _workerIds(draft)});
+    }
     return _taskDetail(id);
   }
 
@@ -251,6 +331,12 @@ class BackendDioClient extends DioClient {
             'phone': body['phone'],
             'role': '${body['role']}'.toUpperCase(),
             'password': body['password'],
+            if ('${body['role']}' == 'client') ...{
+              'address': body['team'] ?? '',
+              'is_org': body['isOrg'] ?? false,
+              'contact_person': body['contactPerson'] ?? '',
+              'note': body['note'] ?? '',
+            },
           },
         );
         return BackendMapper.user(created);
@@ -269,6 +355,23 @@ class BackendDioClient extends DioClient {
       return BackendMapper.page(data, page: page, pageSize: size, item: BackendMapper.user);
     }
     final id = seg[1];
+    if (seg.length == 2 && method == 'DELETE') return _raw('users/$id/', method: 'DELETE');
+    if (seg.length == 2 && method == 'PATCH') {
+      return BackendMapper.user(
+        await _raw(
+          'users/$id/',
+          method: 'PATCH',
+          data: {
+            if (body.containsKey('name')) 'full_name': body['name'],
+            if (body.containsKey('phone')) 'phone': body['phone'],
+            if (body.containsKey('team')) 'address': body['team'],
+            if (body.containsKey('isOrg')) 'is_org': body['isOrg'],
+            if (body.containsKey('contactPerson')) 'contact_person': body['contactPerson'],
+            if (body.containsKey('note')) 'note': body['note'],
+          },
+        ),
+      );
+    }
     if (seg.length == 2) return BackendMapper.user(await _raw('users/$id/'));
     // `users/{id}/permissions`: the backend has roles only, no per-switch flags.
     if (method == 'PUT') {
@@ -287,6 +390,10 @@ class BackendDioClient extends DioClient {
     Map<String, dynamic> body,
     Map<String, dynamic> q,
   ) async {
+    if (seg.length > 1 && seg[1] == 'devices') {
+      await _raw('notifications/devices/', method: method, data: body);
+      return const <String, dynamic>{};
+    }
     if (method == 'POST') {
       final id = int.tryParse('${body['id']}');
       await _raw(

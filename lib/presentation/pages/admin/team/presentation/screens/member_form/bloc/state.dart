@@ -30,6 +30,18 @@ class MemberFormState extends Equatable {
   /// Raw address text (clients).
   final String address;
 
+  /// True when the new client is an organization.
+  final bool isOrg;
+
+  /// Contact person (organization clients).
+  final String contactPerson;
+
+  /// Free note (clients).
+  final String note;
+
+  /// The account being edited, once loaded; null when opening a new one.
+  final AppUser? seed;
+
   /// Flipped on the first submit attempt; until then no field turns red.
   final bool showErrors;
 
@@ -46,6 +58,10 @@ class MemberFormState extends Equatable {
     this.login = '',
     this.role = UserRole.worker,
     this.address = '',
+    this.isOrg = false,
+    this.contactPerson = '',
+    this.note = '',
+    this.seed,
     this.showErrors = false,
     this.created,
   });
@@ -54,7 +70,7 @@ class MemberFormState extends Equatable {
   String? get nameError => name.trim().isEmpty ? TrWords.vNameRequired.tr() : null;
 
   /// Validation message for the login, independent of [showErrors].
-  String? get loginError => login.trim().isEmpty ? TrWords.vLoginRequired.tr() : null;
+  String? get loginError => seed != null || login.trim().isNotEmpty ? null : TrWords.vLoginRequired.tr();
 
   /// Validation message for the phone (optional, but valid when typed).
   String? get phoneError => phone.isEmpty || PhoneFormatter.isValid(phone) ? null : TrWords.vPhoneInvalid.tr();
@@ -79,6 +95,10 @@ class MemberFormState extends Equatable {
     String? password,
     UserRole? role,
     String? address,
+    bool? isOrg,
+    String? contactPerson,
+    String? note,
+    AppUser? seed,
     bool? showErrors,
     AppUser? created,
   }) => MemberFormState(
@@ -90,10 +110,29 @@ class MemberFormState extends Equatable {
     password: password ?? this.password,
     role: role ?? this.role,
     address: address ?? this.address,
+    isOrg: isOrg ?? this.isOrg,
+    contactPerson: contactPerson ?? this.contactPerson,
+    note: note ?? this.note,
+    seed: seed ?? this.seed,
     showErrors: showErrors ?? this.showErrors,
     created: created,
   );
 
   @override
-  List<Object?> get props => [status, response, name, phone, login, password, role, address, showErrors, created];
+  List<Object?> get props => [
+    status,
+    response,
+    name,
+    phone,
+    login,
+    password,
+    role,
+    address,
+    isOrg,
+    contactPerson,
+    note,
+    seed,
+    showErrors,
+    created,
+  ];
 }

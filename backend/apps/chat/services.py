@@ -14,11 +14,16 @@ from apps.accounts.models import User
 from apps.audit.services import record
 from apps.core.errors import DomainError
 from apps.core.policies import Cap, can, is_staff_role
+from apps.files.serializers import AttachmentSerializer
 from apps.tasks.access import can_view_task, visible_tasks
 
-from .models import Conversation, Kind, Membership, Message
+from .models import Conversation, Kind, Membership, Message, MessageReaction
+from .serializers import reaction_summary, reply_summary
 
 logger = logging.getLogger(__name__)
+
+
+_UNSET = object()  # "avatar_id not sent", distinct from None (= clear the picture)
 
 
 def group_name(conversation_id) -> str:
@@ -83,7 +88,9 @@ def create_group(actor: User, title: str, members: list[User]) -> Conversation:
 def open_task_chat(actor: User, task_id) -> Conversation:
     if not can_view_task(actor, task_id):
         raise DomainError("Task not found.", "not_found", 404)
-    conversation, _ = Conversation.objects.get_or_create(task_id=task_id, defaults={"kind": Kind.TASK, "created_by": actor})
+    conversation, _ = Conversation.objects.get_or_create(
+        task_id=task_id, defaults={"kind": Kind.TASK, "created_by": actor}
+    )
     return conversation
 
 
@@ -136,17 +143,32 @@ def revoke_task_chat(task_id, user_ids) -> None:
             transaction.on_commit(lambda uid=user_id: revoke_access(conversation_id, uid))
 
 
-def send_message(user: User, conversation: Conversation, body: str, client_msg_id: str = "") -> tuple[Message, bool]:
-    """Persist first, broadcast second. Returns (message, created); a repeated client_msg_id returns the original."""
+def send_message(
+    user: User,
+    conversation: Conversation,
+    body: str,
+    client_msg_id: str = "",
+    reply_to_id: int | None = None,
+    attachment_id: int | None = None,
+) -> tuple[Message, bool]:
+    """Persist first, broadcast second. Returns (message, created); a repeated client_msg_id returns the original.
+
+    A message carries text, an attachment (photo, document, voice note, video circle) or both, and may quote another
+    message of the same conversation."""
     body = body.strip()
-    if not body or len(body) > settings.CHAT_MAX_MESSAGE_CHARS:
+    if (not body and not attachment_id) or len(body) > settings.CHAT_MAX_MESSAGE_CHARS:
         raise DomainError("Message must be 1-%d characters." % settings.CHAT_MAX_MESSAGE_CHARS, "invalid_message", 400)
     if not can_access(user, conversation):
         raise DomainError("Conversation not found.", "not_found", 404)
     try:
         with transaction.atomic():
             message = Message.objects.create(
-                conversation=conversation, sender=user, body=body, client_msg_id=client_msg_id
+                conversation=conversation,
+                sender=user,
+                body=body,
+                client_msg_id=client_msg_id,
+                reply_to=_quoted(conversation, reply_to_id),
+                attachment=_adopt(user, attachment_id),
             )
     except IntegrityError:
         existing = Message.objects.filter(conversation=conversation, sender=user, client_msg_id=client_msg_id).first()
@@ -164,6 +186,29 @@ def send_message(user: User, conversation: Conversation, body: str, client_msg_i
     return message, True
 
 
+def _quoted(conversation: Conversation, message_id: int | None) -> Message | None:
+    if not message_id:
+        return None
+    parent = Message.objects.filter(pk=message_id, conversation=conversation).first()
+    if parent is None:
+        raise DomainError("The quoted message was not found.", "not_found", 404)
+    return parent
+
+
+def _adopt(user: User, attachment_id: int | None):
+    """The caller's own unattached upload, or an error; one attachment belongs to one message."""
+    if not attachment_id:
+        return None
+    from apps.files.models import Attachment
+
+    attachment = Attachment.objects.filter(
+        pk=attachment_id, owner=user, task__isnull=True, message__isnull=True
+    ).first()
+    if attachment is None:
+        raise DomainError("Unknown attachment.", "invalid_attachment", 400)
+    return attachment
+
+
 def ensure_membership(conversation: Conversation, user: User) -> Membership:
     return Membership.objects.get_or_create(conversation=conversation, user=user)[0]
 
@@ -173,9 +218,16 @@ def serialize_message(message: Message) -> dict:
         "id": message.pk,
         "conversation": str(message.conversation_id),
         "sender": message.sender_id,
-        "body": message.body,
+        "body": "" if message.deleted_at else message.body,
         "client_msg_id": message.client_msg_id,
         "created_at": message.created_at.isoformat(),
+        "edited_at": message.edited_at.isoformat() if message.edited_at else None,
+        "deleted": message.deleted_at is not None,
+        "reactions": reaction_summary(message),
+        "attachment": AttachmentSerializer(message.attachment).data
+        if message.attachment and not message.deleted_at
+        else None,
+        "reply_to": reply_summary(message.reply_to),
     }
 
 
@@ -187,6 +239,149 @@ def broadcast_message(message: Message) -> None:
         )
     except Exception:
         logger.exception("broadcast failed for message %s; it remains stored and in history", message.pk)
+
+
+def _push(conversation_id, event: dict) -> None:
+    """Best-effort group event; the state change is already stored, so a Redis outage only delays live updates."""
+    try:
+        async_to_sync(get_channel_layer().group_send)(group_name(conversation_id), event)
+    except Exception:
+        logger.exception("chat event %s failed for %s", event.get("type"), conversation_id)
+
+
+def _message_for(user: User, conversation: Conversation, message_id) -> Message:
+    message = Message.objects.filter(pk=message_id, conversation=conversation).select_related("sender").first()
+    if message is None or not can_access(user, conversation):
+        raise DomainError("Message not found.", "not_found", 404)
+    return message
+
+
+@transaction.atomic
+def edit_message(actor: User, conversation: Conversation, message_id, body: str) -> Message:
+    """Only the author edits, and only a live message; the room sees the new text and an "edited" mark."""
+    message = Message.objects.select_for_update().filter(pk=message_id, conversation=conversation).first()
+    if message is None or not can_access(actor, conversation):
+        raise DomainError("Message not found.", "not_found", 404)
+    if message.sender_id != actor.pk:
+        raise DomainError("You may only edit your own messages.", "forbidden", 403)
+    if message.deleted_at:
+        raise DomainError("A deleted message cannot be edited.", "message_deleted", 409)
+    body = body.strip()
+    if not body or len(body) > settings.CHAT_MAX_MESSAGE_CHARS:
+        raise DomainError(f"Message must be 1-{settings.CHAT_MAX_MESSAGE_CHARS} characters.", "invalid_message", 400)
+    message.body, message.edited_at = body, timezone.now()
+    message.save(update_fields=["body", "edited_at"])
+    record(actor, "chat.message_edited", message)
+    transaction.on_commit(
+        lambda: _push(conversation.pk, {"type": "chat.updated", "message": serialize_message(message)})
+    )
+    return message
+
+
+@transaction.atomic
+def delete_message(actor: User, conversation: Conversation, message_id) -> Message:
+    """The author, or staff who manage conversations, may delete; the row stays with an empty body."""
+    message = Message.objects.select_for_update().filter(pk=message_id, conversation=conversation).first()
+    if message is None or not can_access(actor, conversation):
+        raise DomainError("Message not found.", "not_found", 404)
+    if message.sender_id != actor.pk and not can(actor, Cap.MANAGE_CONVERSATIONS):
+        raise DomainError("You may not delete this message.", "forbidden", 403)
+    if message.deleted_at is None:
+        message.deleted_at = timezone.now()
+        message.save(update_fields=["deleted_at"])
+        message.reactions.all().delete()
+        Conversation.objects.filter(pk=conversation.pk, pinned_message=message).update(pinned_message=None)
+        record(actor, "chat.message_deleted", message)
+        transaction.on_commit(
+            lambda: _push(conversation.pk, {"type": "chat.updated", "message": serialize_message(message)})
+        )
+    return message
+
+
+@transaction.atomic
+def set_reaction(actor: User, conversation: Conversation, message_id, emoji: str | None) -> Message:
+    """Put, replace (`emoji`) or remove (`None`) the caller's reaction on a message."""
+    message = _message_for(actor, conversation, message_id)
+    if message.deleted_at:
+        raise DomainError("A deleted message cannot be reacted to.", "message_deleted", 409)
+    if emoji is None:
+        MessageReaction.objects.filter(message=message, user=actor).delete()
+    else:
+        emoji = emoji.strip()
+        if not emoji or len(emoji) > 16:
+            raise DomainError("Invalid reaction.", "invalid_reaction", 400)
+        MessageReaction.objects.update_or_create(message=message, user=actor, defaults={"emoji": emoji})
+    message = Message.objects.select_related("sender").get(pk=message.pk)
+    transaction.on_commit(
+        lambda: _push(conversation.pk, {"type": "chat.updated", "message": serialize_message(message)})
+    )
+    return message
+
+
+@transaction.atomic
+def set_pin(actor: User, conversation: Conversation, message_id: int | None) -> Conversation:
+    """Pin a live message of the room (members may), or clear the pin with `None`."""
+    if not can_access(actor, conversation):
+        raise DomainError("Conversation not found.", "not_found", 404)
+    if message_id is None:
+        pinned = None
+    else:
+        pinned = _message_for(actor, conversation, message_id)
+        if pinned.deleted_at:
+            raise DomainError("A deleted message cannot be pinned.", "message_deleted", 409)
+    Conversation.objects.filter(pk=conversation.pk).update(pinned_message=pinned)
+    conversation.pinned_message = pinned
+    record(actor, "chat.message_pinned" if pinned else "chat.message_unpinned", conversation)
+    transaction.on_commit(
+        lambda: _push(
+            conversation.pk,
+            {"type": "chat.pinned", "message": serialize_message(pinned) if pinned else None},
+        )
+    )
+    return conversation
+
+
+@transaction.atomic
+def update_conversation(
+    actor: User,
+    conversation: Conversation,
+    *,
+    title: str | None,
+    muted: bool | None,
+    avatar_id: object = _UNSET,
+):
+    """`title` renames a group (staff who manage conversations); `muted` is the caller's own notification switch."""
+    if not can_access(actor, conversation):
+        raise DomainError("Conversation not found.", "not_found", 404)
+    if title is not None:
+        if conversation.kind != Kind.GROUP:
+            raise DomainError("Only groups have a title.", "invalid_operation", 400)
+        if not can(actor, Cap.MANAGE_CONVERSATIONS):
+            raise DomainError("You may not rename this conversation.", "forbidden", 403)
+        title = title.strip()
+        if not title:
+            raise DomainError("The title cannot be empty.", "invalid_title", 400)
+        conversation.title = title
+        conversation.save(update_fields=["title"])
+        record(actor, "chat.group_renamed", conversation)
+    if avatar_id is not _UNSET:
+        if conversation.kind != Kind.GROUP or not can(actor, Cap.MANAGE_CONVERSATIONS):
+            raise DomainError("You may not change this picture.", "forbidden", 403)
+        avatar = None
+        if avatar_id is not None:
+            from apps.files.models import Attachment
+            from apps.files.models import Kind as FileKind
+
+            avatar = Attachment.objects.filter(pk=avatar_id, owner=actor, kind=FileKind.IMAGE).first()
+            if avatar is None:
+                raise DomainError("Unknown image.", "invalid_attachment", 400)
+        conversation.avatar = avatar
+        conversation.save(update_fields=["avatar"])
+        record(actor, "chat.group_avatar_changed", conversation)
+    if muted is not None:
+        ensure_membership(conversation, actor)
+        Membership.objects.filter(conversation=conversation, user=actor).update(muted=muted)
+    return conversation
 
 
 def mark_read(user: User, conversation: Conversation, message_id: int) -> int:

@@ -40,7 +40,7 @@ def test_only_clients_can_file(as_user, owner, worker):
 
 def test_validation(as_user, client_user):
     r = as_user(client_user).post(R, {"title": "x"}, format="json")
-    assert r.status_code == 400 and "address" in r.data["error"]["detail"]
+    assert r.status_code == 400 and "address" in r.data["error"]["message"]
 
 
 def test_visibility_and_idor(as_user, client_user, client2, assistant, worker):

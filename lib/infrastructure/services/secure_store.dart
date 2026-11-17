@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../dto/models/auth_user.dart';
@@ -39,24 +40,38 @@ class SecureStore {
   /// Persists [user] and updates the in-memory mirror.
   Future<void> saveUser(AuthUser user) async {
     _user = user;
-    await _storage.write(key: _userKey, value: jsonEncode(user.toJson()));
+    try {
+      await _storage.write(key: _userKey, value: jsonEncode(user.toJson()));
+    } on PlatformException {
+      // Keychain/Keystore unavailable (e.g. an unsigned simulator build): the session lives in memory only.
+    }
   }
 
   /// Drops the session from memory and from the device.
   Future<void> clear() async {
     _user = null;
-    await _storage.delete(key: _userKey);
+    try {
+      await _storage.delete(key: _userKey);
+    } on PlatformException {
+      // Nothing persisted when the secure storage is unavailable.
+    }
   }
 
   /// Reads the persisted session into [_user]; a corrupt entry is discarded
   /// rather than crashing the app at startup.
   Future<void> _restore() async {
-    final raw = await _storage.read(key: _userKey);
+    final String? raw;
+    try {
+      raw = await _storage.read(key: _userKey);
+    } on PlatformException {
+      // Secure storage is unavailable (missing keychain entitlement): start signed out instead of crashing.
+      return;
+    }
     if (raw == null || raw.isEmpty) return;
     try {
       _user = AuthUser.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (_) {
-      await _storage.delete(key: _userKey);
+      await clear();
     }
   }
 }

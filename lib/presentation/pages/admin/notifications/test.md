@@ -1,4 +1,4 @@
-# Notifications inbox — Test Plan
+# Notifications (admin) — Test Plan
 
 A plan for an AI to execute against; nothing here is run unless the user asks.
 
@@ -19,19 +19,17 @@ A plan for an AI to execute against; nothing here is run unless the user asks.
 
 ## 2. Mobile/Web Integration Test
 
-- [ ] Create events as another role (submit a result, comment, plan a request) and see the matching inbox entries; opening one marks it read and, for boss review/expense entries, navigates to the queue.
+- [ ] Open from the dashboard bell; switch the chips (Hammasi, O‘qilmagan N, Tekshiruv, Muddatlar, Xarajatlar), tap “O‘qildi” (mark all read), tap a row (marks it read and opens review → tasks tab, expense → expenses, request → clients).
 - [ ] Run on a real or emulated Android/iOS device with `AppConfig.useMockData = true` and again against the live API.
 
 ## 3. UI Test
 
 - [ ] No overflow or clipping at a small phone width (320 px) and a tablet width (768 px); long names and translated strings truncate with an ellipsis.
-- [ ] Light and dark themes both read correctly; switching the theme in Settings repaints this screen without losing its state.
+- [ ] Light and dark themes both read correctly; switching the theme in the profile repaints this screen without losing its state.
 - [ ] Uzbek Latin, Uzbek Cyrillic and Russian all render without missing keys or layout breaks.
-- [ ] Loading shows the shimmer placeholder cards (no spinner); an empty result shows the empty view; a failed first load shows the retry view and the retry button reloads.
-- [ ] Pull-to-refresh works on a full list, a short list and the empty/error view (always-scrollable); the indicator completes when the network call finishes, not on the cached emit.
-- [ ] The last row clears the system gesture bar (bottom inset is part of the scroll padding).
-- [ ] Filter pills differ by role (boss: five, others: all/unread); entries are grouped Today / Yesterday / date; unread entries are bold with a dot; the permission-off banner links to Settings.
+- [ ] The design matches the `Eco Tasks — mobile app` board of this screen 1:1 (sizes, colors, radii, icons) in light and dark themes.
+- [ ] Boards 1.14–1.20: two tabs (Hammasi / O‘qilmagan); a bordered card per entry with a bold title, green time and dot while unread and a two-line message; tapping a card marks it read and opens a sheet with the whole message (and “Ochish” when the entry points at a screen); the checks action in the bar is dimmed when nothing is unread; empty (all / unread) and error states with the matching tile and retry.
 
 ## 4. Logical/Business Test
 
-- [ ] “Mark all read” zeroes the tab badge and the unread filter becomes empty.
+- [ ] The bell badge and the unread tab stay in sync after reading; “mark all read” empties the unread tab at once.

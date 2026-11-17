@@ -12,6 +12,12 @@ class DashboardSummary {
   /// Expenses waiting for a decision.
   final int pendingExpenses;
 
+  /// New tasks waiting for the admin's approval before work starts.
+  final int pendingNew;
+
+  /// Tasks created by clients that wait for the admin's approval.
+  final int pendingClient;
+
   /// Open tasks due today or already late, soonest first.
   final List<TaskModel> dueToday;
 
@@ -23,6 +29,8 @@ class DashboardSummary {
     this.inReview = 0,
     this.overdue = 0,
     this.pendingExpenses = 0,
+    this.pendingNew = 0,
+    this.pendingClient = 0,
     this.dueToday = const [],
     this.team = const [],
   });
@@ -32,6 +40,8 @@ class DashboardSummary {
     inReview: (json['inReview'] as num?)?.toInt() ?? 0,
     overdue: (json['overdue'] as num?)?.toInt() ?? 0,
     pendingExpenses: (json['pendingExpenses'] as num?)?.toInt() ?? 0,
+    pendingNew: (json['pendingNew'] as num?)?.toInt() ?? 0,
+    pendingClient: (json['pendingClient'] as num?)?.toInt() ?? 0,
     dueToday: [for (final t in (json['dueToday'] as List? ?? const [])) TaskModel.fromJson(t as Map<String, dynamic>)],
     team: [for (final p in (json['team'] as List? ?? const [])) PersonStat.fromJson(p as Map<String, dynamic>)],
   );

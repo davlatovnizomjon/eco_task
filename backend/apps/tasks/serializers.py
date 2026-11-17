@@ -4,9 +4,10 @@ from rest_framework import serializers
 from apps.accounts.models import User
 from apps.accounts.serializers import UserBriefSerializer
 from apps.core.policies import Cap, Role, can
+from apps.files.serializers import AttachmentSerializer
 from apps.projects.models import Project
 
-from .models import Priority, Status, Task, TaskComment, TaskHistory
+from .models import Currency, Priority, Status, Task, TaskComment, TaskHistory
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -15,12 +16,14 @@ class TaskSerializer(serializers.ModelSerializer):
     creator = UserBriefSerializer(read_only=True)
     client = UserBriefSerializer(read_only=True)
     assignees = serializers.SerializerMethodField()
+    attachments = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
         fields = [
             "id", "title", "description", "creator", "client", "project", "assignees", "status", "priority",
-            "start_date", "due_date", "completed_at", "agreed_value", "failure_reason", "approved_by",
+            "start_date", "due_date", "completed_at", "agreed_value", "currency", "failure_reason",
+            "client_name", "client_is_org", "address", "remind_at", "attachments", "approved_by",
             "approved_at", "version", "created_at", "updated_at",
         ]  # fmt: skip
         read_only_fields = fields
@@ -31,12 +34,17 @@ class TaskSerializer(serializers.ModelSerializer):
             [a.worker for a in task.assignments.all() if a.unassigned_at is None], many=True
         ).data
 
+    @extend_schema_field(AttachmentSerializer(many=True))
+    def get_attachments(self, task):
+        return AttachmentSerializer(task.attachments.all(), many=True).data
+
     def to_representation(self, task):
         data = super().to_representation(task)
         user = self.context["request"].user
         sees_money = can(user, Cap.VIEW_FINANCE) or (user.role == Role.CLIENT and task.client_id == user.pk)
         if not sees_money:
             data.pop("agreed_value")
+            data.pop("currency")
         return data
 
 
@@ -53,7 +61,13 @@ class TaskCreateSerializer(serializers.Serializer):
     agreed_value = serializers.DecimalField(
         max_digits=14, decimal_places=2, min_value=0, required=False, allow_null=True
     )
+    currency = serializers.ChoiceField(choices=Currency.choices, required=False)
+    client_name = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    client_is_org = serializers.BooleanField(required=False)
+    address = serializers.CharField(max_length=300, required=False, allow_blank=True)
+    remind_at = serializers.DateTimeField(required=False, allow_null=True)
     worker_ids = serializers.ListField(child=serializers.IntegerField(), required=False, max_length=50)
+    attachment_ids = serializers.ListField(child=serializers.IntegerField(), required=False, max_length=15)
 
     def validate(self, attrs):
         start, due = attrs.get("start_date"), attrs.get("due_date")

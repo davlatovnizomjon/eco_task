@@ -1,29 +1,26 @@
-# Mijoz boti ekrani — Test rejasi
+# Mijoz UI (pastki tab paneli) — Test rejasi
 
 AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga tushirilmaydi.
 
 ## 1. API Test
 
-### `SessionRepository.login` — POST `auth/login/` mijoz sifatida
-
-- [ ] Muvaffaqiyat: CLIENT akkaunti kiradi (200, token va `role: CLIENT`); sessiya saqlanadi va router ilovani `/telegram` ga o‘tkazadi.
-- [ ] Auth xatosi: noto‘g‘ri parol → 401, kirish formasi backend xabarini ko‘rsatadi (yo‘naltirish yo‘q).
-- [ ] Mock/jonli tenglik: mock backenddagi `gulnora` va jonli API dagi CLIENT akkaunti bir xil ishlaydi.
+- [ ] O‘z endpointlari yo‘q: bo‘limlar o‘z funksiyalarining repositorylaridan foydalanadi; ularning rejalariga qarang.
+- [ ] Auth xatosi: istalgan bo‘limda muddati o‘tgan token → 401 → sessiya tozalanadi va router kirish ekraniga qaytaradi.
 
 ## 2. Mobil/Web integratsiya testi
 
-- [ ] Mijoz sifatida kiring: bot ekrani ochiladi; `/home`, `/tasks/...`, `/chat/...` ni ochishga har bir urinish (deep link yoki Orqaga) yana `/telegram` ga tushadi.
-- [ ] Saqlangan mijoz sessiyasi bilan ilovani qayta ishga tushiring: u bosh sahifada emas, shu ekranda ochiladi.
-- [ ] Chiqish kirish ekraniga qaytaradi; keyin xodim sifatida kirsangiz oddiy bosh sahifa ko‘rinadi.
-- [ ] `AppConfig.useMockData = true` bilan haqiqiy yoki emulyator Android/iOS qurilmada, so‘ng jonli API bilan ishga tushiring.
+- [ ] `jamshid` (mijoz) sifatida kiring: suzuvchi pastki panelda Asosiy, Vazifa, Chat (yumaloq yashil katak), Hisobot va Profil ko‘rinadi.
+- [ ] Haqiqiy yoki emulyatsiya qilingan Android/iOS qurilmada `AppConfig.useMockData = true` bilan va yana jonli API bilan ishga tushiring.
 
 ## 3. UI test
 
-- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida overflow yoki kesilish yo‘q.
-- [ ] Chap menyu menyu tugmasidan ochiladi va Telegram-bot xabari, Til va Ko‘rinish bandlarini ko‘rsatadi; sarlavhada hisob ko‘rinadi; Til va Ko‘rinish sozlama ekranlarini ochadi.
-- [ ] Yorug‘ va qorong‘i mavzular to‘g‘ri ko‘rinadi; o‘zbek lotin, kirill va rus tillari yetishmayotgan kalitlarsiz chiqadi.
-- [ ] Matn `--dart-define=TELEGRAM_BOT=@nom` bilan berilgan botni ataydi; «Nusxalash» aynan shu nomni clipboardga qo‘yadi va «Nusxalandi» xabarini ko‘rsatadi.
+- [ ] Panel yon tomonlardan 12 px masofada va tizim imo-ishora zonasi ustida suzadi; tanlangan tabda tuslangan kapsula (chat katagida kattaroq tuslangan aylana) bor.
+- [ ] Chat katagi o‘qilmaganlar sonini qizil nishonda ko‘rsatadi; boshqa tablar o‘z yorlig‘ini ko‘rsatadi.
+- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida toshib ketish yoki kesilish yo‘q; beshta element teng kenglikda qoladi.
+- [ ] Yorug‘ va qorong‘i mavzular to‘g‘ri o‘qiladi; o‘zbek lotin, o‘zbek kirill va rus tillari yetishmayotgan kalitlarsiz ko‘rinadi.
 
-## 4. Mantiq/biznes testi
+## 4. Mantiqiy/biznes test
 
-- [ ] Mijoz ilova orqali xodim ma’lumotiga hech qachon yeta olmaydi: rol mijoz ekan, na tab, na deep link, na pushed route ochiladi.
+- [ ] Tablar almashganda bo‘lim holati saqlanadi (`IndexedStack`); boshqa barcha ekranlar shell ustida Orqaga belgisi bilan ochiladi.
+- [ ] Istalgan ekran `homeTab` orqali tanlangan tabni almashtira oladi (0 asosiy, 1 vazifa, 2 chat, 3 hisobot, 4 profil).
+- [ ] Profildan chiqish tasdiq so‘raydi, sessiyani tozalaydi va tanlangan tabni asosiyga qaytaradi.

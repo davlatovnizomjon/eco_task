@@ -78,7 +78,7 @@ class SettingsRepository {
       settings = ValueNotifier(
         AppSettings(
           themeMode: ThemeMode.values.firstWhere((m) => m.name == local.theme, orElse: () => ThemeMode.system),
-                            permOn: local.permOn,
+          permOn: local.permOn,
           bigText: local.bigText,
           quiet: local.quiet,
           morning: local.morning,

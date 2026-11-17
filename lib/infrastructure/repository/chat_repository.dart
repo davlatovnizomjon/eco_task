@@ -68,10 +68,15 @@ class ChatRepository {
   }
 
   /// Stores a message over REST (used when the socket is down); idempotent by [clientMsgId].
-  Future<ChatMessage> sendMessage(String id, String body, String clientMsgId) async {
+  Future<ChatMessage> sendMessage(String id, String body, String clientMsgId, {int? replyTo, int? attachmentId}) async {
     final response = await dioClient.post(
       ApiLinks.conversationMessages(id),
-      data: {'body': body, 'client_msg_id': clientMsgId},
+      data: {
+        'body': body,
+        'client_msg_id': clientMsgId,
+        if (replyTo != null) 'reply_to': replyTo,
+        if (attachmentId != null) 'attachment_id': attachmentId,
+      },
     );
     return ChatMessage.fromJson((response.data as Map).cast<String, dynamic>());
   }
@@ -88,7 +93,69 @@ class ChatRepository {
     return [for (final u in response.data as List) UserRef.fromBackend((u as Map).cast<String, dynamic>())];
   }
 
+  /// Replaces the text of own message [messageId]; answers the stored message.
+  Future<ChatMessage> editMessage(String id, int messageId, String body) async {
+    final response = await dioClient.patch(ApiLinks.conversationMessage(id, messageId), data: {'body': body});
+    return ChatMessage.fromJson((response.data as Map).cast<String, dynamic>());
+  }
+
+  /// Deletes message [messageId] (the row stays, its text is wiped); answers the stored message.
+  Future<ChatMessage> deleteMessage(String id, int messageId) async {
+    final response = await dioClient.delete(ApiLinks.conversationMessage(id, messageId));
+    ApiCache.invalidate();
+    return ChatMessage.fromJson((response.data as Map).cast<String, dynamic>());
+  }
+
+  /// Sets the caller's reaction on [messageId] to [emoji], or removes it when [emoji] is null.
+  Future<ChatMessage> react(String id, int messageId, String? emoji) async {
+    final response = emoji == null
+        ? await dioClient.delete(ApiLinks.messageReaction(id, messageId))
+        : await dioClient.put(ApiLinks.messageReaction(id, messageId), data: {'emoji': emoji});
+    return ChatMessage.fromJson((response.data as Map).cast<String, dynamic>());
+  }
+
+  /// Pins [messageId] (or clears the pin when null); answers the conversation.
+  Future<ConversationModel> pin(String id, int? messageId) async {
+    final response = messageId == null
+        ? await dioClient.delete(ApiLinks.conversationPin(id))
+        : await dioClient.put(ApiLinks.conversationPin(id), data: {'message_id': messageId});
+    return ConversationModel.fromJson((response.data as Map).cast<String, dynamic>());
+  }
+
+  /// Renames a group and/or switches the caller's mute; answers the conversation.
+  Future<ConversationModel> updateConversation(String id, {String? title, bool? muted, int? avatarId}) async {
+    final response = await dioClient.patch(
+      ApiLinks.conversation(id),
+      data: {
+        if (title != null) 'title': title,
+        if (muted != null) 'muted': muted,
+        if (avatarId != null) 'avatar_id': avatarId,
+      },
+    );
+    ApiCache.invalidate();
+    return ConversationModel.fromJson((response.data as Map).cast<String, dynamic>());
+  }
+
+  /// Adds [userIds] to a group; answers the conversation.
+  Future<ConversationModel> addMembers(String id, List<String> userIds) async {
+    final response = await dioClient.post(
+      ApiLinks.conversationMembers(id),
+      data: {
+        'user_ids': [for (final u in userIds) int.tryParse(u) ?? u],
+      },
+    );
+    ApiCache.invalidate();
+    return ConversationModel.fromJson((response.data as Map).cast<String, dynamic>());
+  }
+
+  /// Removes [userId] from a group (the caller leaves when it is their own id).
+  Future<void> removeMember(String id, String userId) async {
+    await dioClient.delete(ApiLinks.conversationMember(id, userId));
+    ApiCache.invalidate();
+  }
+
   /// Opens (or reuses) the direct chat with [userId].
+
   Future<ConversationModel> openDirect(String userId) =>
       _open({'kind': ChatKind.direct.apiName, 'user': int.tryParse(userId) ?? userId});
 

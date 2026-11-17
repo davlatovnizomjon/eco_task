@@ -14,14 +14,16 @@ from .models import AuthToken, User, hash_token
 from .serializers import (
     LoginResponseSerializer,
     LoginSerializer,
+    LoginUserSerializer,
     PasswordChangeSerializer,
-    TokenSerializer,
+    RefreshSerializer,
+    TokenPairSerializer,
     UserBriefSerializer,
     UserCreateSerializer,
     UserSerializer,
     UserUpdateSerializer,
 )
-from .throttles import LoginThrottle
+from .throttles import LoginThrottle, RefreshThrottle
 
 
 class LoginView(APIView):
@@ -35,8 +37,23 @@ class LoginView(APIView):
     def post(self, request):
         data = LoginSerializer(data=request.data)
         data.is_valid(raise_exception=True)
-        user, token = services.login(**data.validated_data, ip=request.META.get("REMOTE_ADDR", ""))
-        return Response({"token": token, "user": UserSerializer(user).data})
+        user, access, refresh = services.login(**data.validated_data, ip=request.META.get("REMOTE_ADDR", ""))
+        return Response({"token": access, "refresh": refresh, "user": LoginUserSerializer(user).data})
+
+
+class RefreshView(APIView):
+    """Trade a refresh token for a new token pair. Needs no access token: that is what has expired."""
+
+    authentication_classes: list = []
+    permission_classes = [AllowAny]
+    throttle_classes = [RefreshThrottle]
+
+    @extend_schema(tags=["auth"], request=RefreshSerializer, responses={200: TokenPairSerializer}, auth=[])
+    def post(self, request):
+        data = RefreshSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        access, refresh = services.refresh_session(data.validated_data["refresh"])
+        return Response({"token": access, "refresh": refresh})
 
 
 class LogoutView(APIView):
@@ -54,18 +71,23 @@ class MeView(APIView):
 
 
 class PasswordChangeView(APIView):
-    @extend_schema(tags=["auth"], request=PasswordChangeSerializer, responses={200: TokenSerializer})
+    @extend_schema(tags=["auth"], request=PasswordChangeSerializer, responses={200: TokenPairSerializer})
     def post(self, request):
         data = PasswordChangeSerializer(data=request.data)
         data.is_valid(raise_exception=True)
-        token = services.change_password(
+        access, refresh = services.change_password(
             request.user, data.validated_data["old_password"], data.validated_data["new_password"]
         )
-        return Response({"token": token})
+        return Response({"token": access, "refresh": refresh})
+
+
+def _manages_accounts(user) -> bool:
+    """The owner (every account) or an assistant (workers and clients): the people who see full account data."""
+    return can(user, Cap.MANAGE_USERS) or can(user, Cap.MANAGE_STAFF)
 
 
 def _visible_users(user):
-    """Owner: everyone. Assistant: workers and clients only. Others: nobody (use /auth/me/)."""
+    """Owner: everyone. Assistant: active workers and clients only. Others: nobody (use /auth/me/)."""
     if can(user, Cap.MANAGE_USERS):
         return User.objects.all()
     if user.role == Role.ASSISTANT:
@@ -97,10 +119,10 @@ class UserListCreate(generics.ListCreateAPIView):
     def get_serializer_class(self):
         if self.request.method == "POST":
             return UserCreateSerializer
-        return UserSerializer if can(self.request.user, Cap.MANAGE_USERS) else UserBriefSerializer
+        return UserSerializer if _manages_accounts(self.request.user) else UserBriefSerializer
 
     def create(self, request, *args, **kwargs):
-        if not can(request.user, Cap.MANAGE_USERS):
+        if not _manages_accounts(request.user):
             raise DomainError("You may not create users.", "forbidden", 403)
         data = UserCreateSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -113,17 +135,24 @@ class UserListCreate(generics.ListCreateAPIView):
     patch=extend_schema(tags=["users"], request=UserUpdateSerializer, responses={200: UserSerializer}),
 )
 class UserDetail(generics.RetrieveUpdateAPIView):
-    http_method_names = ["get", "patch", "head", "options"]
+    http_method_names = ["get", "patch", "delete", "head", "options"]
 
     def get_queryset(self):
         return _visible_users(self.request.user)  # unknown or unauthorized ids both give 404 (no IDOR oracle)
 
     def get_serializer_class(self):
-        return UserSerializer if can(self.request.user, Cap.MANAGE_USERS) else UserBriefSerializer
+        return UserSerializer if _manages_accounts(self.request.user) else UserBriefSerializer
+
+    @extend_schema(tags=["users"], responses={200: dict})
+    def delete(self, request, *args, **kwargs):
+        target = self.get_object()
+        if not _manages_accounts(request.user):
+            raise DomainError("You may not delete users.", "forbidden", 403)
+        return Response({"result": services.delete_user(request.user, target)})
 
     def partial_update(self, request, *args, **kwargs):
         target = self.get_object()
-        if not can(request.user, Cap.MANAGE_USERS):
+        if not _manages_accounts(request.user):
             raise DomainError("You may not modify users.", "forbidden", 403)
         data = UserUpdateSerializer(data=request.data, partial=True)
         data.is_valid(raise_exception=True)

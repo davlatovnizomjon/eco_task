@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -66,5 +70,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Eco Tasks uses the camera for task photos, video circles and video calls.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Eco Tasks uses the microphone for voice messages and calls.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Eco Tasks lets you attach photos to tasks and chats.</string>
 </dict>
 </plist>

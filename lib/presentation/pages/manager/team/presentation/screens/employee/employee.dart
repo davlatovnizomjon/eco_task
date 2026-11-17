@@ -4,3 +4,5 @@ library;
 
 export 'bloc/bloc.dart';
 export 'presentation/employee_screen.dart';
+
+export 'presentation/screens/employee_tasks/employee_tasks.dart';

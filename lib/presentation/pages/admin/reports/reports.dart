@@ -1,8 +1,7 @@
-/// Public surface of the boss reports tab and its two drill-down screens
-/// (task counts by status, per-person team progress).
+/// Public surface of the admin report tab: the six-card index, the shared reports bloc (also used by the rating
+/// screen) and the statistics sub-feature.
 library;
 
 export 'bloc/bloc.dart';
 export 'presentation/reports_screen.dart';
-export 'presentation/screens/task_status/task_status.dart';
-export 'presentation/screens/team_progress/team_progress.dart';
+export 'presentation/screens/stats/stats.dart';

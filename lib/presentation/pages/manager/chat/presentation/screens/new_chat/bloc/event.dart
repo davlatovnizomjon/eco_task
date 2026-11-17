@@ -56,3 +56,9 @@ final class NewChatGroupSubmitted extends NewChatEvent {
   /// Carries the title.
   const NewChatGroupSubmitted(this.title);
 }
+
+/// "Select all" was tapped on the group member list.
+final class NewChatAllToggled extends NewChatEvent {
+  /// Selects every listed contact, or clears the selection when all are already selected.
+  const NewChatAllToggled();
+}

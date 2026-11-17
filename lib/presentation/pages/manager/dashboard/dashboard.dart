@@ -4,3 +4,4 @@ library;
 
 export 'bloc/bloc.dart';
 export 'presentation/dashboard_screen.dart';
+export 'presentation/screens/my_task/my_task.dart';

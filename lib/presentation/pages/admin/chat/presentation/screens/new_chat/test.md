@@ -1,4 +1,4 @@
-# New chat — Test Plan
+# New chat and new group (admin) — Test Plan
 
 A plan for an AI to execute against; nothing here is run unless the user asks.
 
@@ -23,17 +23,18 @@ A plan for an AI to execute against; nothing here is run unless the user asks.
 
 ## 2. Mobile/Web Integration Test
 
-- [ ] As a boss: search a person, tap, land in the (reused) chat; group tab: name it, tick people, create, land in it. As a worker/client: only the direct tab exists and only staff are listed.
-- [ ] Run on a real or emulated Android/iOS device with `AppConfig.useMockData = true` and again against the live backend.
+- [ ] New chat: search, tap “Yangi guruh” (opens the group screen), tap a person (opens or reuses the direct chat). New group: type a name, tick members (chips appear above, tap a chip to remove), “Hammasini tanlash”, create.
+- [ ] Run on a real or emulated Android/iOS device with `AppConfig.useMockData = true` and again against the live API.
 
 ## 3. UI Test
 
 - [ ] No overflow or clipping at a small phone width (320 px) and a tablet width (768 px); long names and translated strings truncate with an ellipsis.
-- [ ] Light and dark themes both read correctly; switching the theme in Settings repaints this screen without losing its state.
+- [ ] Light and dark themes both read correctly; switching the theme in the profile repaints this screen without losing its state.
 - [ ] Uzbek Latin, Uzbek Cyrillic and Russian all render without missing keys or layout breaks.
-- [ ] Search types without lag, out-of-order answers never overwrite a newer query's list; ticked people show a filled check; the create button is disabled until a title and one person are set.
-- [ ] Empty result shows the “nobody found” view; a load failure shows the retry view.
+- [ ] The design matches the `Eco Tasks — mobile app` board of this screen 1:1 (sizes, colors, radii, icons) in light and dark themes.
+- [ ] Contacts are split into “Xodimlar” and “Mijozlar” captions with the role as subtitle; the group screen shows the counter “Xodimlar · N ta tanlandi” and round check marks; the “Yaratish” action is gray until a name and at least one member exist.
+- [ ] Boards 3.2 / 3.3: the new-chat list shows people with a role pill under the name (“Yangi guruh” row on top); the new-group page has the camera tile with the name field, chosen-people chips with an “x”, a searchable list with round checks and “Hammasini tanlash”, and the “Guruh yaratish” button pinned at the bottom (enabled once a name and a member exist). Photo upload is not built.
 
 ## 4. Logical/Business Test
 
-- [ ] Double-tapping a person opens one chat, not two; the screen replaces itself with the conversation so Back returns to the list.
+- [ ] Creating a group opens its conversation in place of the form; opening a direct chat twice reuses the same conversation.

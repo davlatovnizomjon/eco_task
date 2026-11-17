@@ -1,4 +1,5 @@
-/// Public surface of the client shell: a left menu with the Telegram-bot notice and settings.
+/// Public surface of the client shell: the bottom-tab shell, the entry point of the client UI.
 library;
 
-export 'presentation/client_screen.dart';
+export 'bloc/bloc.dart';
+export 'presentation/client_shell.dart';

@@ -1,4 +1,4 @@
-# Chat (suhbatlar ro‘yxati) — Test rejasi
+# Chat (admin ro‘yxati) — Test rejasi
 
 AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga tushirilmaydi.
 
@@ -15,19 +15,17 @@ AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga
 
 ## 2. Mobil/Web integratsiya testi
 
-- [ ] Har bir rol bilan Suhbat tabini oching, suhbatni oching, xabar yuboring, orqaga qayting: qatorda «Siz: …» bilan yangi oxirgi xabar ko‘rinadi va o‘qilmagan belgisi o‘chadi.
-- [ ] Ikki qurilma/akkaunt: biridan yuborilgan xabar ikkinchisining ochiq suhbatida bir soniya ichida ko‘rinadi va yangilashdan so‘ng ro‘yxat belgisini oshiradi.
-- [ ] `AppConfig.useMockData = true` bilan haqiqiy yoki emulyator Android/iOS qurilmada, so‘ng jonli backend bilan (`--dart-define=API_HOST=...`) ishga tushiring.
+- [ ] Tabni oching, yangilash uchun torting, «yangi guruh» va «yangi suhbat» amallarini bosing, Hammasi / Guruhlar / Xodimlar / Mijozlar ni almashtiring, suhbatni oching va qayting (ro‘yxat yangilanadi).
+- [ ] Haqiqiy yoki emulyatsiya qilingan Android/iOS qurilmada `AppConfig.useMockData = true` bilan va yana jonli API bilan ishga tushiring.
 
 ## 3. UI test
 
-- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida overflow yoki kesilish yo‘q; uzun ismlar va tarjima matnlari ko‘p nuqta bilan qisqaradi.
-- [ ] Yorug‘ va qorong‘i mavzular ikkalasi ham to‘g‘ri ko‘rinadi; Sozlamalarda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
+- [ ] Kichik telefon (320 px) va planshet (768 px) kengligida toshib ketish yoki kesilish yo‘q; uzun nomlar va tarjima qilingan matnlar ko‘p nuqta bilan qisqartiriladi.
+- [ ] Yorug‘ va qorong‘i mavzular to‘g‘ri o‘qiladi; profilda mavzuni almashtirish bu ekranni holatini yo‘qotmasdan qayta chizadi.
 - [ ] O‘zbek lotin, o‘zbek kirill va rus tillari yetishmayotgan kalitlarsiz va maket buzilishisiz ko‘rinadi.
-- [ ] Qatorlar: avatar (shaxs) yoki dumaloq belgi (guruh/vazifa), nom, oxirgi xabar ko‘rinishi (o‘qilmaganda qalin), nisbiy vaqt, o‘qilmagan belgisi; sarlavhadagi «+» yangi suhbat ekranini ochadi.
-- [ ] Birinchi yuklashda shimmer; bo‘sh ro‘yxat bo‘sh ko‘rinishni ko‘rsatadi; birinchi yuklash xatosi qayta urinish ko‘rinishini ko‘rsatadi; pull-to-refresh to‘la, qisqa va bo‘sh ro‘yxatda ishlaydi.
+- [ ] Dizayn bu ekranning `Eco Tasks — mobile app` taxtasiga yorug‘ va qorong‘i mavzuda 1:1 mos keladi (o‘lchamlar, ranglar, radiuslar, ikonkalar).
+- [ ] Guruhlar va vazifa suhbatlari «Guruhlar» ostida, shaxsiy suhbatlar «Shaxsiy» ostida chiqadi; mijoz bilan suhbatda «Mijoz» chipi bor; o‘qilmagan suhbatlarda qalin nom, yashil vaqt va yashil hisoblagich; o‘z oxirgi xabarida belgi ko‘rinadi.
 
-## 4. Mantiq/biznes testi
+## 4. Mantiqiy/biznes test
 
-- [ ] Mijoz faqat xodimlar bilan suhbatlarni va o‘z vazifalarining suhbatlarini ko‘radi, boshqa mijozniki hech qachon.
-- [ ] Tab belgisi `unread_count` yig‘indisiga teng va o‘qilgan deb belgilashdan keyin manfiy bo‘lmaydi.
+- [ ] Xodimlar / Mijozlar almashtirgichi shaxsiy suhbatlarni ikkinchi a’zo roli bo‘yicha filtrlaydi; tab paneli bo‘yicha o‘qilmaganlar jami hisoblagichlar yig‘indisiga teng.

@@ -25,6 +25,22 @@ class DateFormatter {
     TrWords.m12,
   ];
 
+  /// Abbreviated month name keys, indexed by `DateTime.month - 1`.
+  static const _monthsShort = [
+    TrWords.ms1,
+    TrWords.ms2,
+    TrWords.ms3,
+    TrWords.ms4,
+    TrWords.ms5,
+    TrWords.ms6,
+    TrWords.ms7,
+    TrWords.ms8,
+    TrWords.ms9,
+    TrWords.ms10,
+    TrWords.ms11,
+    TrWords.ms12,
+  ];
+
   /// Short weekday keys, indexed by `DateTime.weekday - 1` (Monday first).
   static const _weekdays = [TrWords.wd1, TrWords.wd2, TrWords.wd3, TrWords.wd4, TrWords.wd5, TrWords.wd6, TrWords.wd7];
 
@@ -56,6 +72,32 @@ class DateFormatter {
 
   /// `Juma, 9-oktabr`.
   static String weekdayDay(DateTime date) => '${_weekdaysLong[date.weekday - 1].tr()}, ${day(date)}';
+
+  /// `Bugun, 9-oktabr` for today, otherwise `Juma, 9-oktabr` — the heading of a day's list.
+  static String dayHeading(DateTime date) =>
+      daysTo(date) == 0 ? '${TrWords.cToday.tr()}, ${day(date)}' : weekdayDay(date);
+
+  /// `Oktabr` — the month name alone.
+  static String monthName(DateTime date) {
+    final name = _months[date.month - 1].tr();
+    return name[0].toUpperCase() + name.substring(1);
+  }
+
+  /// `12-okt` — day with an abbreviated month.
+  static String dayShort(DateTime date) => '${date.day}${_isRussian ? ' ' : '-'}${_monthsShort[date.month - 1].tr()}';
+
+  /// `22-okt, 16:00` — abbreviated day with the time.
+  static String dayShortTime(DateTime date) => '${dayShort(date)}, ${time(date)}';
+
+  /// `13–19 okt` — the Monday-to-Sunday week that contains [date].
+  static String weekRange(DateTime date) {
+    final monday = date.subtract(Duration(days: date.weekday - 1));
+    final sunday = monday.add(const Duration(days: 6));
+    final end = '${sunday.day} ${_monthsShort[sunday.month - 1].tr()}';
+    return monday.month == sunday.month
+        ? '${monday.day}–$end'
+        : '${monday.day} ${_monthsShort[monday.month - 1].tr()} – $end';
+  }
 
   /// `Oktabr 2026` — month and year header.
   static String monthYear(DateTime date) => '${_months[date.month - 1].tr()} ${date.year}';

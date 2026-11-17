@@ -1,6 +1,7 @@
-/// Public surface of the admin profile: admin-specific profile screen over [ProfileFrame] (account card, settings, sign-out).
+/// Public surface of the admin profile: the profile tab plus the edit and login/password sub-screens.
 library;
 
 export 'bloc/bloc.dart';
 export 'presentation/admin_profile_screen.dart';
-export 'presentation/profile_frame.dart';
+export 'presentation/screens/login_change/login_change.dart';
+export 'presentation/screens/profile_edit/profile_edit.dart';

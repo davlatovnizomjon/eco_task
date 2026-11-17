@@ -101,3 +101,60 @@ final class TaskFormSubmitted extends TaskFormEvent {
   /// Triggers validation and, if it passes, the save request.
   const TaskFormSubmitted();
 }
+
+/// "Next" or a step jump of the wizard.
+final class TaskFormStepChanged extends TaskFormEvent {
+  /// Step to show, 0..4; moving forward is refused while the current step is invalid.
+  final int step;
+
+  /// Carries the target step.
+  const TaskFormStepChanged(this.step);
+}
+
+/// The client type or name changed.
+final class TaskFormClientChanged extends TaskFormEvent {
+  /// True when the client is an organization.
+  final bool isOrg;
+
+  /// Organization or client name.
+  final String name;
+
+  /// Carries the client.
+  const TaskFormClientChanged({required this.isOrg, required this.name});
+}
+
+/// The address changed.
+final class TaskFormAddressChanged extends TaskFormEvent {
+  /// New address text.
+  final String value;
+
+  /// Carries the address.
+  const TaskFormAddressChanged(this.value);
+}
+
+/// The price currency changed.
+final class TaskFormCurrencyChanged extends TaskFormEvent {
+  /// `uzs` or `usd`.
+  final String value;
+
+  /// Carries the currency.
+  const TaskFormCurrencyChanged(this.value);
+}
+
+/// A photo or document was picked and must be uploaded.
+final class TaskFormFilePicked extends TaskFormEvent {
+  /// The picked file.
+  final PickedFile file;
+
+  /// Carries the file.
+  const TaskFormFilePicked(this.file);
+}
+
+/// A thumbnail's "x" was tapped.
+final class TaskFormFileRemoved extends TaskFormEvent {
+  /// Id of the file taken off the task.
+  final int id;
+
+  /// Carries the id.
+  const TaskFormFileRemoved(this.id);
+}

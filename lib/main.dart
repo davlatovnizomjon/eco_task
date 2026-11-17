@@ -54,11 +54,7 @@ Future<void> main() async {
 
   runApp(
     EasyLocalization(
-      supportedLocales: [
-        const Locale('uz'),
-        Locale.fromSubtags(languageCode: 'uz', scriptCode: 'Cyrl'),
-        const Locale('ru'),
-      ],
+      supportedLocales: const [Locale('uz')],
       fallbackLocale: const Locale('uz'),
       path: 'assets/translations',
       child: EcoTasksApp(session: session, settings: SettingsRepository(local), loginLock: LoginLockRepository(local)),
@@ -129,9 +125,6 @@ class _EcoTasksAppState extends State<EcoTasksApp> with WidgetsBindingObserver {
 
   /// Palette last applied to the global theme, to detect changes.
   bool? _dark;
-
-  /// Language last applied to the app, to detect changes.
-  Locale? _locale;
 
   @override
   void initState() {
@@ -250,13 +243,6 @@ class _EcoTasksAppState extends State<EcoTasksApp> with WidgetsBindingObserver {
             designSize: const Size(390, 844),
             minTextAdapt: true,
             builder: (context, _) {
-              DioClient.language = context.locale.toLanguageTag();
-              // Screens read texts through `.tr()`, which does not subscribe them to the language, so a language change
-              // marks every element dirty (as the theme does) and each screen re-reads its texts.
-              if (_locale != null && _locale != context.locale) {
-                WidgetsBinding.instance.addPostFrameCallback((_) => _rebuildAll());
-              }
-              _locale = context.locale;
               return MaterialApp.router(
                 debugShowCheckedModeBanner: false,
                 title: TrWords.appName.tr(),

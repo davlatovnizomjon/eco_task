@@ -71,8 +71,14 @@ final class MessageErrorResponse extends ScreenResponse {
   /// the failure was raised locally rather than by the backend.
   final int? statusCode;
 
+  /// Backend `error.title` (short headline), when the response carried one.
+  final String? title;
+
+  /// Backend `error.retry_after`: seconds to wait before trying again (a locked sign-in), when given.
+  final int? retryAfter;
+
   /// Builds a message outcome from the backend's `detail`.
-  const MessageErrorResponse(this.message, {this.description, this.statusCode});
+  const MessageErrorResponse(this.message, {this.description, this.statusCode, this.title, this.retryAfter});
 }
 
 /// A completed action worth confirming to the user.

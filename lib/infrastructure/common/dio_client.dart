@@ -172,7 +172,9 @@ class DioClient {
     // A 401 from the sign-in call itself means "wrong credentials", not an
     // expired session, so the backend's wording is shown as a plain message.
     if (status == 401 && _loginPaths.contains(e.requestOptions.path)) {
-      return detail == null ? const UnExpectedErrorResponse() : MessageErrorResponse(detail, statusCode: status);
+      return detail == null
+          ? const UnExpectedErrorResponse()
+          : MessageErrorResponse(detail, statusCode: status, title: _errorTitle(e.response?.data));
     }
     if (status == 401) {
       await session.clearSession(revokeRemotely: false);
@@ -182,7 +184,28 @@ class DioClient {
     if (status >= 500) return const ServerErrorResponse();
 
     if (detail == null) return const UnExpectedErrorResponse();
-    return status == 400 ? ValidationErrorResponse(detail) : MessageErrorResponse(detail, statusCode: status);
+    return status == 400
+        ? ValidationErrorResponse(detail)
+        : MessageErrorResponse(
+            detail,
+            statusCode: status,
+            title: _errorTitle(e.response?.data),
+            retryAfter: _retryAfter(e.response?.data),
+          );
+  }
+
+  /// `error.title` of a Django error envelope, or null.
+  String? _errorTitle(Object? body) {
+    final envelope = body is Map ? body['error'] : null;
+    final title = envelope is Map ? envelope['title'] : null;
+    return title is String && title.trim().isNotEmpty ? title.trim() : null;
+  }
+
+  /// `error.retry_after` (seconds) of a Django error envelope, or null.
+  int? _retryAfter(Object? body) {
+    final envelope = body is Map ? body['error'] : null;
+    final seconds = envelope is Map ? envelope['retry_after'] : null;
+    return seconds is int && seconds > 0 ? seconds : null;
   }
 
   /// Extracts the human-readable text out of an RFC 7807 body, falling back

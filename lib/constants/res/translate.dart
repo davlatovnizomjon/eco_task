@@ -2,8 +2,14 @@
 /// `TrWords.x.tr()` — a raw `'a.b'.tr()` string literal is banned, so a
 /// renamed key breaks the build instead of silently rendering the key.
 /// GENERATED from `assets/translations/uz.json`; each constant has an entry
-/// in every translation JSON (uz, uz-Cyrl, ru).
+/// in the translation JSON (uz).
 abstract final class TrWords {
+  /// UI text slot `c.unsupported`, shown as "Bu amal serverda hali mavjud emas." in Uzbek.
+  static const cUnsupported = 'c.unsupported';
+
+  /// UI text slot `c.cant_do`, shown as "Bajarib bo‘lmaydi" in Uzbek.
+  static const cCantDo = 'c.cant_do';
+
   /// UI text slot `c.ok`, shown as "OK" in Uzbek.
   static const cOk = 'c.ok';
 
@@ -135,33 +141,6 @@ abstract final class TrWords {
 
   /// UI text slot `app.name`, shown as "eco.tasks" in Uzbek.
   static const appName = 'app.name';
-
-  /// UI text slot `lang.latin`, shown as "Lotin yozuvi" in Uzbek.
-  static const langLatin = 'lang.latin';
-
-  /// UI text slot `lang.cyrl`, shown as "Kirill yozuvi" in Uzbek.
-  static const langCyrl = 'lang.cyrl';
-
-  /// UI text slot `lang.ru`, shown as "Kirillitsa" in Uzbek.
-  static const langRu = 'lang.ru';
-
-  /// UI text slot `lang.app_lang`, shown as "Ilova tili" in Uzbek.
-  static const langAppLang = 'lang.app_lang';
-
-  /// UI text slot `lang.sample`, shown as "Namuna" in Uzbek.
-  static const langSample = 'lang.sample';
-
-  /// UI text slot `lang.date`, shown as "Sana" in Uzbek.
-  static const langDate = 'lang.date';
-
-  /// UI text slot `lang.amount`, shown as "Summa" in Uzbek.
-  static const langAmount = 'lang.amount';
-
-  /// UI text slot `lang.status`, shown as "Holat" in Uzbek.
-  static const langStatus = 'lang.status';
-
-  /// UI text slot `lang.note`, shown as "Faqat ilova matnlari o‘zgaradi. Vazifa nomlari, ismlar, m..." in Uzbek.
-  static const langNote = 'lang.note';
 
   /// UI text slot `login.title`, shown as "Kirish" in Uzbek.
   static const loginTitle = 'login.title';
@@ -1348,9 +1327,6 @@ abstract final class TrWords {
   /// UI text slot `pf.settings`, shown as "Sozlamalar" in Uzbek.
   static const pfSettings = 'pf.settings';
 
-  /// UI text slot `pf.lang`, shown as "Til" in Uzbek.
-  static const pfLang = 'pf.lang';
-
   /// UI text slot `pf.look`, shown as "Ko‘rinish" in Uzbek.
   static const pfLook = 'pf.look';
 
@@ -1947,9 +1923,6 @@ abstract final class TrWords {
 
   /// UI text slot `login.wrong_t`, shown as "Login yoki parol noto‘g‘ri" in Uzbek.
   static const loginWrongT = 'login.wrong_t';
-
-  /// UI text slot `login.wrong_b`, shown as "Yana {} ta urinish qoldi. {}-xatodan keyin hisob 1 soatga bloklanadi." in Uzbek.
-  static const loginWrongB = 'login.wrong_b';
 
   /// UI text slot `login.empty_t`, shown as "Login va parolni kiriting" in Uzbek.
   static const loginEmptyT = 'login.empty_t';

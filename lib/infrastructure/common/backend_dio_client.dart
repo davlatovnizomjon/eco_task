@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:eco_task/constants/constants.dart';
 
 import 'package:eco_task/domain/common/enums/user_role.dart';
 import 'package:eco_task/helpers/response_helper.dart';
@@ -174,7 +176,7 @@ class BackendDioClient extends DioClient {
   }
 
   /// Failure for actions the backend has no endpoint for yet.
-  ScreenResponse _unsupported() => const MessageErrorResponse('Bu amal serverda hali mavjud emas.', statusCode: 501);
+  ScreenResponse _unsupported() => MessageErrorResponse(TrWords.cUnsupported.tr(), statusCode: 501);
 
   /// Query parameters of `GET tasks/` for the app's list query.
   Map<String, dynamic> _taskParams(Map<String, dynamic> q) {
@@ -301,7 +303,7 @@ class BackendDioClient extends DioClient {
   Future<void> _progress(String id, Map<String, dynamic> body) async {
     final note = '${body['note'] ?? ''}'.trim();
     if (body['cant'] == true) {
-      await _move(id, 'FAILED', reason: note.isEmpty ? 'Bajarib bo‘lmaydi' : note);
+      await _move(id, 'FAILED', reason: note.isEmpty ? TrWords.cCantDo.tr() : note);
       return;
     }
     if (note.isNotEmpty) await _raw('tasks/$id/comments/', method: 'POST', data: {'body': note});

@@ -12,16 +12,13 @@ enum AuthToast {
   /// A field is empty (amber).
   empty,
 
-  /// Wrong login or password, with the attempts left (red).
+  /// Wrong login or password, worded by the backend (red).
   wrong,
 }
 
 /// Everything the sign-in screen renders itself from.
 class AuthState extends Equatable {
-  /// Wrong attempts allowed before the account is locked.
-  static const maxAttempts = 5;
-
-  /// How long a locked account stays locked.
+  /// Lock length assumed when the backend does not say how long sign-in stays locked.
   static const lockDuration = Duration(minutes: 5);
 
   /// Request lifecycle of the sign-in.
@@ -42,9 +39,6 @@ class AuthState extends Equatable {
   /// True after a rejected sign-in; both fields turn red until the next edit.
   final bool credentialsWrong;
 
-  /// Wrong attempts left before the lock.
-  final int attemptsLeft;
-
   /// Moment the lock ends; null while the account is not locked.
   final DateTime? lockedUntil;
 
@@ -53,6 +47,12 @@ class AuthState extends Equatable {
 
   /// Toast to show.
   final AuthToast toast;
+
+  /// Backend headline of the wrong-credentials toast; null falls back to the app's own title.
+  final String? toastTitle;
+
+  /// Backend sentence of the wrong-credentials toast.
+  final String toastMessage;
 
   /// Counts the toasts requested so far; the screen shows one each time it grows, even when [toast] repeats.
   final int toastSeq;
@@ -65,10 +65,11 @@ class AuthState extends Equatable {
     this.password = '',
     this.showErrors = false,
     this.credentialsWrong = false,
-    this.attemptsLeft = maxAttempts,
     this.lockedUntil,
     this.remaining = Duration.zero,
     this.toast = AuthToast.none,
+    this.toastTitle,
+    this.toastMessage = '',
     this.toastSeq = 0,
   });
 
@@ -96,11 +97,12 @@ class AuthState extends Equatable {
     String? password,
     bool? showErrors,
     bool? credentialsWrong,
-    int? attemptsLeft,
     DateTime? lockedUntil,
     bool unlock = false,
     Duration? remaining,
     AuthToast? toast,
+    String? toastTitle,
+    String? toastMessage,
     int? toastSeq,
   }) => AuthState(
     status: status ?? this.status,
@@ -109,10 +111,11 @@ class AuthState extends Equatable {
     password: password ?? this.password,
     showErrors: showErrors ?? this.showErrors,
     credentialsWrong: credentialsWrong ?? this.credentialsWrong,
-    attemptsLeft: attemptsLeft ?? this.attemptsLeft,
     lockedUntil: unlock ? null : (lockedUntil ?? this.lockedUntil),
     remaining: remaining ?? this.remaining,
     toast: toast ?? this.toast,
+    toastTitle: toastTitle ?? this.toastTitle,
+    toastMessage: toastMessage ?? this.toastMessage,
     toastSeq: toastSeq ?? this.toastSeq,
   );
 
@@ -124,10 +127,11 @@ class AuthState extends Equatable {
     password,
     showErrors,
     credentialsWrong,
-    attemptsLeft,
     lockedUntil,
     remaining,
     toast,
+    toastTitle,
+    toastMessage,
     toastSeq,
   ];
 }

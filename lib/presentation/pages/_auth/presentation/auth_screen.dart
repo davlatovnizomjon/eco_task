@@ -17,7 +17,6 @@ import 'package:eco_task/presentation/public/widgets/brand_mark.dart';
 import 'package:eco_task/presentation/public/widgets/filter_pill.dart';
 import 'package:eco_task/presentation/public/button/button.dart';
 import 'package:eco_task/presentation/public/toast/toast.dart';
-import 'package:eco_task/presentation/public/widgets/language_menu.dart';
 
 import '../bloc/bloc.dart';
 import 'dialogs/legal/legal_sheet.dart';
@@ -95,8 +94,8 @@ class _AuthViewState extends State<_AuthView> {
           context,
           icon: AppIcons.xc,
           tone: StatusTone.error,
-          title: TrWords.loginWrongT.tr(),
-          message: TrWords.loginWrongB.tr(args: ['${state.attemptsLeft}', '${AuthState.maxAttempts}']),
+          title: state.toastTitle ?? TrWords.loginWrongT.tr(),
+          message: state.toastMessage,
         );
     }
   }
@@ -140,8 +139,6 @@ class _AuthViewState extends State<_AuthView> {
                                   letterSpacing: -0.2,
                                 ),
                               ),
-                              const Spacer(),
-                              const LanguageMenuButton(),
                             ],
                           ),
                         ),

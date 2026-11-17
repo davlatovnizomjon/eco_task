@@ -21,13 +21,13 @@ Screens
  Screens served per role (same paths, each role's own implementation):
  ├─ Admin: '/reports/:kind' (StatsScreen, reports/…/stats) '/my-tasks/:id' (MyTaskScreen, dashboard/…/my_task) '/my-tasks/:id/notes' (TaskNotesScreen) '/chat/new' '/chat/group' '/chat/:id' '/chat/:id/info' (ChatInfoScreen) '/chat/:id/edit' (GroupEditScreen) '/call/:id' (CallScreen; `new?conversation=&kind=` starts one, an id shows a ringing/live call) '/tasks/:id/chat' '/today' '/rating' '/clients' '/profile/edit'
  │   '/profile/login' '/tasks/new' '/tasks/:id' '/tasks/:id/edit'
- │   '/team' '/team/new' '/team/:id' '/team/:id/tasks' '/notifications' — language and theme are bottom sheets of the profile tab
+ │   '/team' '/team/new' '/team/:id' '/team/:id/tasks' '/notifications' — the theme is a bottom sheet of the profile tab
  ├─ Manager: the admin's screen set without the owner-only parts — '/reports/:kind' (tasks, mine, clients, staff only) '/my-tasks/:id' '/my-tasks/:id/notes' '/chat/new' '/chat/group' '/chat/:id' '/chat/:id/info' '/chat/:id/edit' '/call/:id' '/tasks/:id/chat' '/today' '/rating' '/clients' '/profile/edit'
  │   '/profile/login' '/tasks/new' '/tasks/:id' '/tasks/:id/edit'
- │   '/team' (all / staff tabs) '/team/new' (staff role only) '/team/:id' '/team/:id/tasks' '/notifications' — language and theme are bottom sheets of the profile tab
+ │   '/team' (all / staff tabs) '/team/new' (staff role only) '/team/:id' '/team/:id/tasks' '/notifications' — the theme is a bottom sheet of the profile tab
  ├─ Worker: the admin's own-task/chat/call/notification screens only — '/tasks/:id' and '/my-tasks/:id' (both MyTaskScreen) '/my-tasks/:id/notes' '/today' '/chat/new' '/chat/group' '/chat/:id' '/chat/:id/info' '/chat/:id/edit' '/call/:id' '/tasks/:id/chat' '/profile/edit' '/profile/login' '/notifications'; the fourth tab is "Statistika" (StatsScreen, kind `mine`)
  └─ Client: '/chat/:id' '/chat/:id/info' '/call/:id' '/tasks/new' (3-step order wizard) '/tasks/:id' (order details) '/tasks/:id/edit' '/profile/edit' '/profile/login' '/notifications' (also the second tab)
 
 Sheets and dialogs are not routes: `TasksFilterDialog`, `AssigneeFilterDialog`, `TaskAssigneesDialog`, `DueDateDialog`, `RoleFilterSheet`,
-`LanguageSheet`, `ThemeSheet`, `TaskFailSheet`, `MapsSheet`, `MessageActionsSheet`, `MemberPickerSheet`, `SupportSheet` (admin and manager, feature-local); `TaskProgressDialog`, `TaskCommentDialog` (worker, feature-local);
+`ThemeSheet`, `TaskFailSheet`, `MapsSheet`, `MessageActionsSheet`, `MemberPickerSheet`, `SupportSheet` (admin and manager, feature-local); `TaskProgressDialog`, `TaskCommentDialog` (worker, feature-local);
 `RejectDialog`, `PublicDialog`, `ConfirmDialog`, `ActionMenu`, `PhotoViewer`, `DocumentViewer`, `DateRangeDialog` (`public/dialogs/`).

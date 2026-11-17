@@ -2,7 +2,7 @@
 
 Workforce and task coordination app for the Eco ecosystem (Flutter). Four roles — admin, manager, worker, client — with
 tasks, review/approval, expenses and payouts, a calendar, reports, client requests and a notifications inbox. Languages:
-Uzbek (Latin), Uzbek (Cyrillic), Russian; light and dark themes.
+Uzbek (Latin) only; light and dark themes.
 
 The app talks to the Django backend in `backend/` (API docs: `http://localhost:8000/api/docs/`). Run it with
 `flutter run --dart-define=API_HOST=http://localhost:8000`, or fully offline on the built-in mock backend with

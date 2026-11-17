@@ -1,5 +1,7 @@
 {
  "c": {
+  "unsupported": "Bu amal serverda hali mavjud emas.",
+  "cant_do": "Bajarib bo‘lmaydi",
   "ok": "OK",
   "cancel": "Bekor qilish",
   "save": "Saqlash",
@@ -47,17 +49,6 @@
  "app": {
   "name": "eco.tasks"
  },
- "lang": {
-  "latin": "Lotin yozuvi",
-  "cyrl": "Kirill yozuvi",
-  "ru": "Kirillitsa",
-  "app_lang": "Ilova tili",
-  "sample": "Namuna",
-  "date": "Sana",
-  "amount": "Summa",
-  "status": "Holat",
-  "note": "Faqat ilova matnlari o‘zgaradi. Vazifa nomlari, ismlar, manzillar va izohlar qanday yozilgan bo‘lsa, shunday qoladi."
- },
  "login": {
   "title": "Kirish",
   "hint": "Sizga berilgan login va parolni kiriting",
@@ -74,7 +65,6 @@
   "empty_t": "Login va parolni kiriting",
   "empty_b": "Kirish uchun ikkala maydonni to‘ldiring.",
   "wrong_t": "Login yoki parol noto‘g‘ri",
-  "wrong_b": "Yana {} ta urinish qoldi. {}-xatodan keyin hisob 5 daqiqaga bloklanadi.",
   "locked_b": "Siz vaqtincha bloklangansiz. {} dan keyin qayta urinib ko‘ring.",
   "agree_pre": "Kirish orqali siz ",
   "terms": "Foydalanish shartlari",
@@ -617,7 +607,6 @@
   "expenses": "Xarajatlar va to‘lovlar",
   "roles": "Rollar va ruxsatlar",
   "settings": "Sozlamalar",
-  "lang": "Til",
   "look": "Ko‘rinish",
   "notifs": "Bildirishnomalar",
   "reminder": "Muddat eslatmasi",

@@ -1,4 +1,4 @@
-# Sozlama oynalari: til va ko‘rinish (menejer) — Test rejasi
+# Sozlama oynalari: ko‘rinish (menejer) — Test rejasi
 
 AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga tushirilmaydi.
 
@@ -8,7 +8,7 @@ AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga
 
 ## 2. Mobil/Web integratsiya testi
 
-- [ ] Tanlov `LocalStore` orqali saqlanadi va ilova qayta ochilganda tiklanadi: mavzu rejimi va bildirishnoma tugmasi; tilni `easy_localization` eslab qoladi.
+- [ ] Tanlov `LocalStore` orqali saqlanadi va ilova qayta ochilganda tiklanadi: mavzu rejimi va bildirishnoma tugmasi.
 - [ ] Haqiqiy yoki emulyatsiya qilingan Android/iOS qurilmada `AppConfig.useMockData = true` bilan va yana jonli API bilan ishga tushiring.
 
 ## 3. UI test
@@ -22,4 +22,3 @@ AI bajarishi uchun reja; foydalanuvchi so‘ramaguncha bu yerda hech narsa ishga
 
 ## 4. Mantiqiy/biznes test
 
-- [ ] Tilni almashtirish ilova bo‘ylab qayta ishga tushirishsiz qo‘llanadi; xuddi shu tanlov kirish ekranidan hisobga kirmasdan ham mavjud.

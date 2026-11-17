@@ -22,8 +22,8 @@ Design handoff: HTML boards with tokens in light/dark; the Flutter theme maps 1:
 
 - Icons: SVG in `assets/icons/`, constants in `lib/constants/res/app_icons.dart`, drawn with `AppIcon`.
 - Fonts: Onest and Unbounded (variable TTF) in `assets/fonts/`; brand mark in `assets/images/`.
-- Translations: `assets/translations/{uz,uz-Cyrl,ru}.json`; `TrWords` (`lib/constants/res/translate.dart`) is generated
-  from `uz.json` — add a key to ALL three JSON files, then regenerate/extend `TrWords`.
+- Translations: the app is Uzbek-only (Latin) — one file, `assets/translations/uz.json`; `TrWords` (`lib/constants/res/translate.dart`)
+  is generated from it — add a key to `uz.json`, then extend `TrWords`. There is no language switcher.
 - Backend: Django API in `backend/` (Swagger UI at `/api/docs/`, schema at `/api/schema/`). The app talks to it through
   `lib/infrastructure/common/backend_dio_client.dart` (`flutter run --dart-define=API_HOST=http://localhost:8000`;
   Android emulator: `http://10.0.2.2:8000`).

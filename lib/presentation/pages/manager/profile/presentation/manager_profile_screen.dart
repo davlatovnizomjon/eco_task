@@ -170,13 +170,6 @@ class _ProfileView extends StatelessWidget {
                         children: [
                           SettingRow(
                             first: true,
-                            icon: AppIcons.globe,
-                            title: TrWords.pfLang.tr(),
-                            subtitle: LanguageSheet.nameOf(context.locale),
-                            onTap: () =>
-                                showBottomDialog(const LanguageSheet(), context, title: TrWords.langAppLang.tr()),
-                          ),
-                          SettingRow(
                             icon: AppIcons.system,
                             title: TrWords.pfLook.tr(),
                             subtitle: ThemeSheet.labelOf(s.themeMode),

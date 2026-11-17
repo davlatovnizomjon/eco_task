@@ -2,5 +2,4 @@
 /// reactive — they call the app-wide `SettingsRepository` and the localization context; the feature has no bloc.
 library;
 
-export 'presentation/language_sheet.dart';
 export 'presentation/theme_sheet.dart';

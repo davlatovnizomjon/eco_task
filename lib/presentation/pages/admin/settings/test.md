@@ -1,4 +1,4 @@
-# Settings sheets: language and appearance (admin) — Test Plan
+# Settings sheets: appearance (admin) — Test Plan
 
 A plan for an AI to execute against; nothing here is run unless the user asks.
 
@@ -8,7 +8,7 @@ A plan for an AI to execute against; nothing here is run unless the user asks.
 
 ## 2. Mobile/Web Integration Test
 
-- [ ] The choice persists through `LocalStore` and is restored after an app restart: theme mode and notification switch; the language is remembered by `easy_localization`.
+- [ ] The choice persists through `LocalStore` and is restored after an app restart: theme mode and notification switch.
 - [ ] Run on a real or emulated Android/iOS device with `AppConfig.useMockData = true` and again against the live API.
 
 ## 3. UI Test
@@ -22,4 +22,3 @@ A plan for an AI to execute against; nothing here is run unless the user asks.
 
 ## 4. Logical/Business Test
 
-- [ ] Changing the language applies app-wide without a restart; the same choice is available while signed out from the sign-in screen.

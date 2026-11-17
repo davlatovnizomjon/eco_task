@@ -11,8 +11,9 @@ import 'package:eco_task/infrastructure/repository/session_repository.dart';
 part 'event.dart';
 part 'state.dart';
 
-/// Drives the sign-in screen: validates the fields, signs in, counts wrong attempts and locks the account for 5 minutes
-/// after the last one, ticking the countdown every second. The end of the lock is remembered on the device, so a lock
+/// Drives the sign-in screen: validates the fields and signs in. Wrong credentials and the lock come from the backend
+/// (its own title/message, and `retry_after` for how long the lock lasts); the app counts nothing itself. While locked
+/// the countdown ticks every second. The end of the lock is remembered on the device, so a lock
 /// that has not run out is still there (with the time that is left) when the app is closed and opened again.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   /// Owner of the session; owned by the app root.
@@ -37,12 +38,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   static AuthState _initial(LoginLockRepository lock) {
     final until = lock.lockedUntil;
     if (until == null) return const AuthState();
-    return AuthState(lockedUntil: until, remaining: until.difference(DateTime.now()), attemptsLeft: 0);
+    return AuthState(lockedUntil: until, remaining: until.difference(DateTime.now()));
   }
 
   /// Signs in. A locked account is ignored (the screen shows the lock banner and a disabled button) and an empty field
-  /// is answered with an amber toast, both without a request; a 401 (or 429) counts as a wrong attempt, and the last
-  /// allowed one locks the account.
+  /// is answered with an amber toast, both without a request; a 401 shows the backend's wording in a red toast and a
+  /// 429 locks sign-in for the time the backend names.
   Future<void> _onSubmitted(AuthSubmitted event, Emitter<AuthState> emit) async {
     if (state.locked) return;
     if (state.loginEmpty || state.passwordEmpty) {
@@ -54,24 +55,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await repository.login(login: state.login.trim(), password: state.password);
       emit(state.copyWith(status: ScreenStatus.success));
     } catch (e) {
-      final code = e is MessageErrorResponse ? e.statusCode : null;
-      if (code == 429) {
-        _lock(emit);
-      } else if (code == 401) {
-        final left = (state.attemptsLeft - 1).clamp(0, AuthState.maxAttempts);
-        if (left == 0) {
-          _lock(emit);
-        } else {
-          emit(
-            state.copyWith(
-              status: ScreenStatus.initial,
-              credentialsWrong: true,
-              attemptsLeft: left,
-              toast: AuthToast.wrong,
-              toastSeq: state.toastSeq + 1,
-            ),
-          );
-        }
+      final failure = e is MessageErrorResponse ? e : null;
+      if (failure?.statusCode == 429) {
+        _lock(emit, Duration(seconds: failure!.retryAfter ?? AuthState.lockDuration.inSeconds));
+      } else if (failure?.statusCode == 401) {
+        emit(
+          state.copyWith(
+            status: ScreenStatus.initial,
+            credentialsWrong: true,
+            toast: AuthToast.wrong,
+            toastTitle: failure!.title,
+            toastMessage: failure.message,
+            toastSeq: state.toastSeq + 1,
+          ),
+        );
       } else {
         emit(
           state.copyWith(
@@ -84,17 +81,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  /// Locks the account for [AuthState.lockDuration] and starts the countdown.
-  void _lock(Emitter<AuthState> emit) {
-    final until = DateTime.now().add(AuthState.lockDuration);
+  /// Locks sign-in for [duration] and starts the countdown.
+  void _lock(Emitter<AuthState> emit, Duration duration) {
+    final until = DateTime.now().add(duration);
     lockRepository.save(until);
     emit(
       state.copyWith(
         status: ScreenStatus.initial,
         credentialsWrong: false,
-        attemptsLeft: 0,
         lockedUntil: until,
-        remaining: AuthState.lockDuration,
+        remaining: duration,
         toast: AuthToast.none,
       ),
     );
@@ -121,7 +117,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
     _ticker?.cancel();
     lockRepository.save(null);
-    emit(state.copyWith(unlock: true, remaining: Duration.zero, attemptsLeft: AuthState.maxAttempts));
+    emit(state.copyWith(unlock: true, remaining: Duration.zero));
   }
 
   @override
